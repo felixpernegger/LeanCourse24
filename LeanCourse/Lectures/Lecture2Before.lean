@@ -15,7 +15,7 @@ noncomputable section
 * The first assignment due 22.10.2023. Upload it to eCampus.
 
 **Two optional activities**
-* There is a weekly Lean hacking session 18 - 20 c.t. in seminar room 0.011.
+* There is a weekly Lean hacking session wednesday 18 - 20 c.t. in seminar room 0.011.
 * There is a Lean seminar Fri 14 - 16 c.t. in N0.003.
   In the next few weeks (starting this Friday) we will explain
   monadic programming and metaprogramming in Lean.

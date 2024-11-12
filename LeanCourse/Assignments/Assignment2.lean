@@ -20,22 +20,36 @@ open Real
 /-! # Exercises to practice. -/
 
 example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 := by {
-  sorry
+  calc
+    a=(1/3)*((a+2*b)+2*(a-b)) := by ring
+    _=(1/3)*(4+2*(a-b)) := by rw[h1]
+        _=(1/3)*(4+2*1) := by rw[h2]
+      _=2 := by ring
   }
 
 example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 := by {
-  sorry
+  rw[← h1]
+  ring
   }
 
 example (a b c x y : ℝ) (h : a ≤ b) (h2 : b < c) (h3 : x ≤ y) :
     a + exp x ≤ c + exp (y + 2) := by {
-  sorry
+  apply add_le_add
+  calc
+    a ≤ b := by exact h
+    _≤ c := by exact le_of_lt h2
+  apply exp_le_exp.2
+  linarith
   }
 
 /-- Prove the following using `linarith`.
 Note that `linarith` cannot deal with implication or if and only if statements. -/
 example (a b c : ℝ) : a + b ≤ c ↔ a ≤ c - b := by {
-  sorry
+  constructor
+  intro h
+  linarith
+  intro h
+  linarith
   }
 
 /- Note: for purely numerical problems, you can use `norm_num`
@@ -76,16 +90,27 @@ example (x : ℝ) (hx : x = 3) : x ^ 2 + 3 * x - 5 = 13 := by
   norm_num
 
 example {m n : ℤ} : n - m ^ 2 ≤ n + 3 := by {
-  sorry
+  have h:-3 ≤ m^2 := by
+    calc
+      -3 ≤ 0 := by linarith
+      _≤ m^2 := by exact sq_nonneg m
+  apply add_le_add
+  rfl
+  linarith
   }
 
 example {a : ℝ} (h : ∀ b : ℝ, a ≥ -3 + 4 * b - b ^ 2) : a ≥ 1 := by {
-  sorry
+  specialize h 2
+  linarith
   }
 
 example {a₁ a₂ a₃ b₁ b₂ b₃ : ℝ} (h₁₂ : a₁ + a₂ + 1 ≤ b₁ + b₂) (h₃ : a₃ + 2 ≤ b₃) :
   exp (a₁ + a₂) + a₃ + 1 ≤ exp (b₁ + b₂) + b₃ + 1 := by {
-  sorry
+  gcongr ?_ +1
+  apply add_le_add
+  apply exp_le_exp.2
+  linarith
+  linarith
   }
 
 
@@ -94,7 +119,10 @@ which can be written using `\|`. -/
 
 /-- Prove this using calc. -/
 lemma exercise_division (n m k l : ℕ) (h₁ : n ∣ m) (h₂ : m = k) (h₃ : k ∣ l) : n ∣ l := by {
-  sorry
+  calc
+    n ∣ m := by exact h₁
+      _∣ k := by rw[h₂]
+      _∣ l := by exact h₃
   }
 
 
@@ -121,7 +149,17 @@ example : x > y ↔ y < x := by rfl
 
 
 example (hxy : x ≤ y) (hyz : y ≤ z) (hzx : z ≤ x) : x = y ∧ y = z ∧ x = z := by {
-  sorry
+  constructor
+  apply le_antisymm
+  exact hxy
+  apply le_trans hyz hzx
+  constructor
+  apply le_antisymm
+  exact hyz
+  apply le_trans hzx hxy
+  apply le_antisymm
+  exact le_trans hxy hyz
+  exact hzx
   }
 
 
@@ -132,7 +170,21 @@ end PartialOrder
 
 /- Prove this using a calculation. -/
 lemma exercise_calc_real {t : ℝ} (ht : t ≥ 10) : t ^ 2 - 3 * t - 17 ≥ 5 := by {
-  sorry
+  calc
+    t ^ 2 - 3 * t - 17 = (t-5)^2 + (7*t - 42) := by ring
+    _≥ 0 + (7*t -42) := by{
+      apply add_le_add_right
+      apply sq_nonneg}
+    _= 7*t + -42 := by ring
+    _≥ 7*10 + -42 := by{
+      apply add_le_add_right
+      apply mul_le_mul
+      apply le_refl
+      exact ht
+      linarith
+      linarith
+    }
+    _≥ 5 := by linarith
   }
 
 /- Prove this using a calculation.
@@ -141,12 +193,26 @@ The arguments `{R : Type*} [CommRing R] {t : R}` mean
 lemma exercise_calc_ring {R : Type*} [CommRing R] {t : R}
     (ht : t ^ 2 - 4 = 0) :
     t ^ 4 + 3 * t ^ 3 - 3 * t ^ 2 - 2 * t - 2 = 10 * t + 2 := by {
-  sorry
+  calc
+    t ^ 4 + 3 * t ^ 3 - 3 * t ^ 2 - 2 * t - 2 = (t^2-4 + 4)*(t^2 - 4 + 4)+3*t*(t^2-4+4)-3*(t^2-4+4)-2*t-2 := by ring
+    _=(0+4)*(0+4)+3*t*(0+4)-3*(0+4)-2*t-2 := by rw[ht]
+    _=10*t+2 := by ring
+
   }
 
 /-- Prove this using a calculation. -/
 lemma exercise_square {m n k : ℤ} (h : m ^ 2 + n ≤ 2) : n + 1 ≤ 3 + k ^ 2 := by {
-  sorry
+  calc
+    n+1 = (m^2 + n) + (1  + -m^2) := by ring
+      _≤ 2+(1 + -m^2) := by apply add_le_add_right h (1 + -m^2)
+      _=3 + -m^2 + 0:= by ring
+      _≤ 3 + -m^2 + m^2 := by
+        apply add_le_add_left
+        apply sq_nonneg
+      _=3 + 0 := by ring
+      _≤ 3 + k^2 := by
+        apply add_le_add_left
+        apply sq_nonneg
   }
 
 
@@ -163,11 +229,35 @@ Don't use other lemmas about `min` from Mathlib! -/
 #check (le_min : c ≤ a → c ≤ b → c ≤ min a b)
 
 lemma exercise_min_comm : min a b = min b a := by {
-  sorry
+  apply le_antisymm
+  repeat
+    apply le_min
+    apply min_le_right
+    apply min_le_left
   }
 
 lemma exercise_min_assoc : min a (min b c) = min (min a b) c := by {
-  sorry
+  apply le_antisymm
+  apply le_min
+  apply le_min
+  apply min_le_left
+  calc
+    min a (min b c) ≤ min b c := by apply min_le_right
+    _≤ b := by apply min_le_left
+  calc
+    min a (min b c) ≤ min b c := by apply min_le_right
+    _≤ c := by apply min_le_right
+
+  apply le_min
+  calc
+    min (min a b) c ≤ min a b := by apply min_le_left
+    _≤ a := by apply min_le_left
+
+  apply le_min
+  calc
+    min (min a b) c ≤ min a b := by apply min_le_left
+    _≤ b := by apply min_le_right
+  apply min_le_right
   }
 
 end Min
@@ -177,12 +267,47 @@ You can use `Continuous.div` as the first step,
 and use the search techniques to find other relevant lemmas.
 `ne_of_lt`/`ne_of_gt` will be useful to prove the inequality. -/
 lemma exercise_continuity : Continuous (fun x ↦ (sin (x ^ 5) * cos x) / (x ^ 2 + 1)) := by {
-  sorry
+  apply Continuous.div
+  apply Continuous.mul
+  refine Continuous.comp' ?hf.hf.hg ?hf.hf.hf
+  exact continuous_sin
+  exact continuous_pow 5
+
+  exact continuous_cos
+  apply Continuous.add
+  apply continuous_pow 2
+  apply continuous_const
+  intro x
+  have h: 0 < x^2 +1 := by
+    calc
+      0 < 0+1:= by linarith
+      _≤ x^2+1 := by
+        apply add_le_add
+        apply sq_nonneg
+        apply le_refl
+  apply ne_of_gt
+  assumption
   }
 
 /- Prove this only using `intro`/`constructor`/`obtain`/`exact` -/
 lemma exercise_and_comm : ∀ (p q : Prop), p ∧ q ↔ q ∧ p := by {
-  sorry
+  intro p q
+  constructor
+
+  intro h
+  obtain ⟨hp, hq⟩ := h
+  constructor
+
+  exact hq
+  exact hp
+
+  intro h
+  obtain ⟨hq, hp⟩ := h
+  constructor
+
+  exact hp
+  exact hq
+
   }
 
 
@@ -191,7 +316,11 @@ def Nondecreasing (f : ℝ → ℝ) : Prop := ∀ x₁ x₂ : ℝ, x₁ ≤ x₂
 
 lemma exercise_nondecreasing_comp (f g : ℝ → ℝ) (hg : Nondecreasing g) (hf : Nondecreasing f) :
     Nondecreasing (g ∘ f) := by {
-  sorry
+  unfold Nondecreasing
+  intro x y h
+  apply hg
+  apply hf
+  exact h
   }
 
 
@@ -199,7 +328,14 @@ lemma exercise_nondecreasing_comp (f g : ℝ → ℝ) (hg : Nondecreasing g) (hf
   `simp` can simplify `(f + g) x` to `f x + g x`. -/
 lemma exercise_nondecreasing_add (f g : ℝ → ℝ) (hf : Nondecreasing f) (hg : Nondecreasing g) :
     Nondecreasing (f + g) := by {
-  sorry
+  unfold Nondecreasing
+  intro x y h
+  simp
+  apply add_le_add
+  apply hf
+  exact h
+  apply hg
+  exact h
   }
 
 
@@ -210,5 +346,20 @@ def EvenFunction (f : ℝ → ℝ) : Prop :=
 
 lemma exercise_even_iff (f g : ℝ → ℝ) (hf : EvenFunction f) :
     EvenFunction (f + g) ↔ EvenFunction g := by {
-  sorry
+  constructor
+  unfold EvenFunction
+  simp
+  intro h y
+  specialize hf y
+  specialize h y
+  rw[hf] at h
+  rw[add_left_cancel h]
+
+  unfold EvenFunction
+  intro h y
+  simp
+  specialize hf y
+  rw[hf]
+  specialize h y
+  rw[h]
   }
