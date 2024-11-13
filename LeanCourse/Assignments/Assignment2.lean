@@ -318,6 +318,7 @@ lemma exercise_nondecreasing_comp (f g : ℝ → ℝ) (hg : Nondecreasing g) (hf
     Nondecreasing (g ∘ f) := by {
   unfold Nondecreasing
   intro x y h
+  simp
   apply hg
   apply hf
   exact h

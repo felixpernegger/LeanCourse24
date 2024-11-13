@@ -44,7 +44,20 @@ example : s ∩ (t ∪ u) ⊆ s ∩ t ∪ s ∩ u := by
   · right; exact ⟨xs, xu⟩
 
 example : s ∩ t ∪ s ∩ u ⊆ s ∩ (t ∪ u) := by
-  sorry
+  rintro x xh
+  obtain xh1|xh2 := xh
+  obtain ⟨xs,xt⟩ := xh1
+  constructor
+  exact xs
+  left
+  exact xt
+
+  obtain ⟨xs,xu⟩ := xh2
+  constructor
+  exact xs
+  right
+  exact xu
+
 example : (s \ t) \ u ⊆ s \ (t ∪ u) := by
   intro x xstu
   have xs : x ∈ s := xstu.1.1
@@ -64,7 +77,19 @@ example : (s \ t) \ u ⊆ s \ (t ∪ u) := by
   rintro (xt | xu) <;> contradiction
 
 example : s \ (t ∪ u) ⊆ (s \ t) \ u := by
-  sorry
+  intro x xh
+  have xs: x∈ s := xh.1
+  have xntu: x ∉ t ∪ u := xh.2
+  constructor
+  constructor
+  exact xs
+  intro xt
+  have : x∈ t ∪ u := by exact mem_union_left u xt
+  contradiction
+  intro xu
+  have : x∈ t∪ u := by exact mem_union_right t xu
+  contradiction
+
 example : s ∩ t = t ∩ s := by
   ext x
   simp only [mem_inter_iff]
@@ -83,18 +108,88 @@ example : s ∩ t = t ∩ s := by
   · rintro x ⟨xt, xs⟩; exact ⟨xs, xt⟩
 
 example : s ∩ t = t ∩ s :=
-    Subset.antisymm sorry sorry
+    Subset.antisymm (fun x ⟨xs,xt⟩ ↦ ⟨xt,xs⟩) (fun x ⟨xt,xs⟩ ↦ ⟨xs,xt⟩)
 example : s ∩ (s ∪ t) = s := by
-  sorry
+  apply subset_antisymm
+  exact inter_subset_left
+
+  apply subset_inter_iff.2
+  constructor
+  apply subset_refl
+  exact subset_union_left
 
 example : s ∪ s ∩ t = s := by
-  sorry
+  apply subset_antisymm
+  apply union_subset_iff.2
+  constructor
+  rfl
+  apply inter_subset_left
+
+  apply subset_union_left
 
 example : s \ t ∪ t = s ∪ t := by
-  sorry
+  ext x
+  simp only [mem_union]
+  constructor
+  intro h
+  obtain h1|h2 := h
+  left
+  exact h1.1
+  right
+  exact h2
+
+  intro h
+  obtain h1|h2 := h
+  by_cases p: x∈ t
+  right
+  exact p
+  left
+  exact ⟨h1,p⟩
+
+  right
+  exact h2
+
+
 
 example : s \ t ∪ t \ s = (s ∪ t) \ (s ∩ t) := by
-  sorry
+  ext x
+  simp only [mem_diff, mem_union, mem_inter]
+  constructor
+  intro h
+  obtain h1|h2 := h
+  constructor
+  left
+  exact h1.1
+  intro h0
+  have : x∈ t := by exact mem_of_mem_inter_right h0
+  obtain ⟨a1,a2⟩ := h1
+  contradiction
+
+  constructor
+  right
+  exact h2.1
+  intro h0
+  have : x∈s := by exact mem_of_mem_inter_left h0
+  obtain ⟨a1,a2⟩ := h2
+  contradiction
+
+  intro h
+  by_cases p: x ∈ s
+  left
+  constructor
+  exact p
+  obtain ⟨h1,h2⟩ := h
+  intro h0
+  have : x∈ s ∩ t := by exact mem_inter p h0
+  contradiction
+
+  right
+  constructor
+  obtain ⟨h1,h2⟩ := h
+  obtain a1|a2 := h1
+  contradiction
+  exact a2
+  exact p
 
 def evens : Set ℕ :=
   { n | Even n }
@@ -115,7 +210,17 @@ example (x : ℕ) : x ∈ (univ : Set ℕ) :=
   trivial
 
 example : { n | Nat.Prime n } ∩ { n | n > 2 } ⊆ { n | ¬Even n } := by
-  sorry
+  intro n
+  simp
+  intro np
+  intro n2
+  apply Nat.Prime.eq_two_or_odd at np
+  obtain h1|h2 := np
+  · exfalso
+    linarith
+  · apply Nat.odd_iff.2
+    exact h2
+
 
 #print Prime
 
@@ -151,10 +256,16 @@ section
 variable (ssubt : s ⊆ t)
 
 example (h₀ : ∀ x ∈ t, ¬Even x) (h₁ : ∀ x ∈ t, Prime x) : ∀ x ∈ s, ¬Even x ∧ Prime x := by
-  sorry
+  intro x xs
+  have: x ∈ t := by exact ssubt xs
+  constructor
+  exact h₀ x this
+  exact h₁ x this
 
 example (h : ∃ x ∈ s, ¬Even x ∧ Prime x) : ∃ x ∈ t, Prime x := by
-  sorry
+  obtain ⟨x,xs,_,xp⟩ := h
+  have: x ∈ t := by exact ssubt xs
+  use x
 
 end
 
@@ -193,7 +304,31 @@ example : (⋂ i, A i ∩ B i) = (⋂ i, A i) ∩ ⋂ i, B i := by
 
 
 example : (s ∪ ⋂ i, A i) = ⋂ i, A i ∪ s := by
-  sorry
+  ext x
+  simp only [mem_union, mem_iInter]
+  constructor
+  intro h
+  obtain h|h := h
+  · intro i
+    right
+    exact h
+  intro i
+  left
+  exact h i
+
+  intro h
+  by_cases p: x ∈ s
+  left
+  exact p
+  right
+  intro i
+  specialize h i
+  obtain h|h := h
+  · exact h
+  contradiction
+
+
+
 
 def primes : Set ℕ :=
   { x | Nat.Prime x }
@@ -214,7 +349,12 @@ example : (⋂ p ∈ primes, { x | ¬p ∣ x }) ⊆ { x | x = 1 } := by
   apply Nat.exists_prime_and_dvd
 
 example : (⋃ p ∈ primes, { x | x ≤ p }) = univ := by
-  sorry
+  apply eq_univ_of_forall
+  intro x
+  obtain ⟨p,hp⟩ := Nat.exists_infinite_primes x
+  simp
+  use p
+  exact And.symm hp
 
 end
 
