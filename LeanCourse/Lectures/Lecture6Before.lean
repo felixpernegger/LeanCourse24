@@ -162,20 +162,48 @@ and generally it's easier to reformulate a statement without using subtypes. -/
 
 /- Codomain is a subtype (usually not recommended). -/
 example (f : ℝ → PosReal) (hf : Monotone f) :
-    Monotone (fun x ↦ log (f x)) := sorry
+    Monotone (fun x ↦ log (f x)) := by {
+    intro x y xy
+    simp
+    refine (log_le_log_iff ?h ?h₁).mpr (hf xy)
+    exact (f x).2
+    exact (f y).2}
 
 /- Specify that the range is a subset of a given set (recommended). -/
 example (f : ℝ → ℝ) (hf : range f ⊆ {x | x > 0}) (h2f : Monotone f) :
-  Monotone (log ∘ f) := sorry
+  Monotone (log ∘ f) := by
+    intro x y xy
+    simp
+    unfold Monotone at h2f
+    specialize h2f xy
+    unfold range at hf
+    simp at hf
+    refine (log_le_log_iff ?h ?h₁).mpr h2f
+    exact hf x
+    exact hf y
 
 /- Domain is a subtype (not recommended). -/
 example (f : PosReal → ℝ) (hf : Monotone f) :
-    Monotone (fun x ↦ f ⟨exp x, exp_pos x⟩) := sorry
+    Monotone (fun x ↦ f ⟨exp x, exp_pos x⟩) := by
+    intro x y xy
+    simp
+    apply hf
+    simp
+    assumption
 
 /- Only specify that a function is well-behaved
 on a subset of its domain (recommended). -/
 example (f : ℝ → ℝ) (hf : MonotoneOn f {x | x > 0}) :
-    Monotone (fun x ↦ f (exp x)) := sorry
+    Monotone (fun x ↦ f (exp x)) := by
+      intro x y xy
+      simp
+      apply hf
+      simp
+      exact exp_pos x
+      simp
+      exact exp_pos y
+      exact exp_le_exp.mpr xy
+
 
 
 
@@ -308,7 +336,7 @@ This type is automatically coerced to morphisms and functions.
 -/
 
 example {G H : Type*} [Group G] [Group H] (f : G ≃* H) :
-    f.trans f.symm = MulEquiv.refl G := by exact?
+    f.trans f.symm = MulEquiv.refl G := by exact MulEquiv.self_trans_symm f
 
 
 
