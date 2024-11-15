@@ -307,14 +307,18 @@ and use `Equiv.ofBijective` to get an equivalence.
 (Note that we are coercing `orbitOf G x` to a (sub)type in the right-hand side) -/
 
 def orbit_stabilizer_theorem (x : X) : G ⧸ stabilizerOf G x ≃ orbitOf G x := by {
-  let f := fun (g:G)↦ (g • x : X)
-  have : range f ⊆ orbitOf G x := by
-    intro a ah
-    simp at *
-    unfold orbitOf
-    simp
-    unfold f at *
-    assumption
+  --let f := fun (g : G) ↦ (g • x : X)
+  --have h : range f ⊆ orbitOf G x := by
+    --intro a ha
+    --simp [orbitOf] at ha
+    --exact ha
+
+  let f : G → orbitOf G x := λ g => ⟨g • x, by {
+  simp [orbitOf]
+}⟩
+  let g : G ⧸ stabilizerOf G x → orbitOf G x := Quotient.lift f
+
+
 
 
   --letI := myEquivalenceRelation X; x ≈ y ↔ x = y := by rfl
