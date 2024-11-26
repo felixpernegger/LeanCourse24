@@ -36,11 +36,42 @@ open Classical -- In order to take intersections and stuff
 
 /- It will be convinient to multiply and add Points-/
 
+/-Sometimes we might want to use the negatives of point (for vectors)-/
+
+def pneg : Point → Point :=
+  fun a ↦ Point.mk (-a.x)
+
 def pmul : Point → Point → Point :=
   fun a b ↦ Point.mk (a.x * b.x)
 
 def padd : Point → Point → Point :=
   fun a b ↦ Point.mk (a.x+b.x)
+
+/-Adding zero stays constant-/
+lemma padd_zero (a : Point) : padd a (Point.mk 0) = a := by{
+  unfold padd
+  simp
+}
+/-Adding is commutative:-/
+lemma padd_comm (a b : Point) : padd a b = padd b a := by{
+  unfold padd
+  ring
+}
+
+/-And associative:-/
+
+lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
+  unfold padd
+  ring
+}
+
+/-So we have an abelina group:-/
+
+lemma padd_neg (a : Point): padd a (pneg a) = Point.mk 0 := by{
+  unfold pneg
+  unfold padd
+  simp
+}
 
 /-Also midpoints are neat-/
 def pmidpoint : Point → Point → Point :=
@@ -60,6 +91,13 @@ lemma conj_add (x:ℂ) (y:ℂ) : conj (x+y) = conj x + conj y := by{
 lemma conj_mul' (x:ℂ) (y:ℂ) : conj (x*y) = (conj x) * (conj y) := by{
   unfold conj
   exact RingHom.map_mul (starRingEnd ℂ) x y
+}
+
+/-conjugating twice is self:-/
+
+lemma conj_twice (x : ℂ) : conj (conj x) = x := by{
+  unfold conj
+  simp
 }
 
 /- Here we introduce the distance between two complex numbers and show the axioms of a metric-/
@@ -101,6 +139,14 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
 
 def pconj : Point → Point :=
   fun a ↦ Point.mk (conj a.x)
+
+/-Mirroring twice gives original:-/
+
+lemma pconj_twice (a : Point) : pconj (pconj a) = a := by{
+  unfold pconj
+  simp
+  rw[conj_twice]
+}
 
 def det : Point → Point → Point → ℝ :=
   fun a b c ↦ (a.x * (conj b.x) + c.x * (conj a.x) + b.x * (conj c.x) - a.x * (conj c.x) - c.x * (conj b.x) - b.x * (conj a.x)).im
@@ -145,6 +191,25 @@ lemma det_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): det a b c = 0 := by{
     unfold det
     ring
     rfl
+}
+
+/-det stay constantt under shifting-/
+lemma det_shift (a b c p : Point): det (padd a p) (padd b p) (padd c p) = det a b c := by{
+  unfold det
+  unfold padd
+  unfold conj
+  simp
+  ring
+}
+
+/- We can also conjugate / mirror point:-/
+lemma det_conj (a b c : Point): det (pconj a) (pconj b) (pconj c) = - det a b c := by{
+  unfold pconj
+  unfold det
+  simp
+  repeat
+    rw[conj_twice]
+  ring
 }
 
 def colinear (a b c : Point) : Prop :=
@@ -431,6 +496,39 @@ lemma colinear_add(a b c : Point): colinear a b c ↔ colinear a b (Point.mk (c.
   linarith
 }
 
+/- We can shift colinear points-/
+
+lemma colinear_shift {a b c : Point} (p: Point)(h : colinear a b c): colinear (padd a p) (padd b p) (padd c p) := by{
+  unfold colinear at *
+  rw[← h]
+  exact det_shift a b c p
+}
+
+/-Mirroring colinear points stay colinear:-/
+
+lemma colinear_conj {a b c : Point}(h: colinear a b c): colinear (pconj a) (pconj b) (pconj c) := by{
+  unfold colinear at *
+  rw[det_conj]
+  linarith
+}
+
+/-Similarly if they are not colinear:-/
+lemma noncolinear_shift {a b c : Point} (p: Point)(h : noncolinear a b c): noncolinear (padd a p) (padd b p) (padd c p) := by{
+  unfold noncolinear at *
+  unfold colinear at *
+  rw[det_shift a b c p]
+  assumption
+}
+
+lemma noncolinear_conj {a b c : Point}(h: noncolinear a b c): noncolinear (pconj a) (pconj b) (pconj c) := by{
+  unfold noncolinear at *
+  unfold colinear at *
+  rw[det_conj] at *
+  contrapose h
+  simp at *
+  assumption
+}
+
 /- Now we feel confident enough to define Lines:-/
 
 @[ext] structure Line where
@@ -663,7 +761,43 @@ lemma parallel_symm (L R : Line)(h : Parallel L R) : Parallel R L := by{
 
 lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Parallel L S := by{
   by_contra p
+  unfold Parallel at *
+  push_neg at p
+  obtain LR|LR := LR
+  swap
+  have : L = R := by{
+    ext x
+    rw[LR]
+  }
+  rw[this] at p
+  clear LR
+  clear this
+  obtain ⟨p1,p2⟩ := p
+  obtain RS|RS := RS
+  rw[RS] at p1
+  obtain ⟨a,ah⟩ := p1
+  contradiction
+  contradiction
+
+  obtain RS|RS := RS
+  obtain ⟨p1,p2⟩ := p
+
+
+  swap
+  have : R=S := by{
+    ext
+    rw[RS]
+  }
+  rw[this] at LR
+  obtain ⟨p1,p2⟩ := p
+  rw[LR] at p1
+  obtain ⟨a,ah⟩ := p1
+  contradiction
+
+  obtain ⟨s,sh⟩ := p1
   sorry
+
+
 }
 
 /-Note: I should probably redo this section a bit, define parallel_through first and then use it
@@ -917,9 +1051,42 @@ def tri_bc: Triangle → ℝ :=
 def tri_ca: Triangle → ℝ :=
   fun T ↦ (point_abs T.c T.a)
 
-/- It will be useful to quickly access the triangle mirrored across the real line.-/
+/-We can shift and scale Triangles:-/
+lemma tri_shift_lemma (T : Triangle)(p : Point): noncolinear (padd T.a p) (padd T.b p) (padd T.c p) := by{
+  exact noncolinear_shift p T.notline
+}
 
-/-sorry-/
+def tri_shift : Triangle → Point → Triangle :=
+  fun T p ↦ Triangle.mk (padd T.a p) (padd T.b p) (padd T.c p) (tri_shift_lemma T p)
+
+/-shifting by zero stays constant:-/
+
+lemma tri_shift_zero (T : Triangle) : tri_shift T (Point.mk 0) = T := by{
+  unfold tri_shift
+  simp [padd_zero]
+}
+
+lemma tri_shift_padd (T : Triangle) (p q : Point) : tri_shift T (padd p q) = tri_shift (tri_shift T p) q := by{
+  unfold tri_shift
+  simp [padd_assoc]
+}
+
+--to do : scale
+
+/-Similarly we can mirror/conjugate Triangles:-/
+lemma tri_conj_lemma (T : Triangle) : noncolinear (pconj T.a) (pconj T.b) (pconj T.c) := by{
+  exact noncolinear_conj T.notline
+}
+
+def tri_conj : Triangle → Triangle :=
+  fun T ↦ Triangle.mk (pconj T.a) (pconj T.b) (pconj T.c) (tri_conj_lemma T)
+
+/-Mirroring twice gives the same-/
+
+lemma tri_conj_twice (T : Triangle) : tri_conj (tri_conj T) = T := by{
+  unfold tri_conj
+  simp [pconj_twice]
+}
 
 /- We now introduce Area, first for points in general, then for our triangle structure-/
 def area_points : Point → Point → Point → ℝ :=
@@ -1053,12 +1220,12 @@ lemma in_between_imp_colinear {a b x : Point} (h: in_between a b x) : colinear a
 /- A crucial definition in planar geometry are similar triangles:-/
 /- Similar means same rotation as here well! This helps us deal better with area. "Antisimilarity" will be introduced after-/
 
-def Similar (T Q : Triangle) : Prop :=
-  sorry
+/- I want to redo oldSimilar with scaling-/
 
 def oldSimilar (T Q : Triangle) : Prop :=
   ∃z : ℂ, (z* T.a.x = Q.a.x) ∧ (z* T.b.x = Q.b.x) ∧ (z* T.c.x = Q.c.x)
 
+/-For more general cases, see Similar and direct Similar.-/
 /-Note that the scaling factor cant be 0:-/
 lemma oldsimilar_neq_zero {T Q : Triangle}(z : ℂ)(zh : (z* T.a.x = Q.a.x) ∧ (z* T.b.x = Q.b.x) ∧ (z* T.c.x = Q.c.x)) : z≠ 0 := by{
   by_contra p
@@ -1078,7 +1245,7 @@ lemma oldsimilar_neq_zero {T Q : Triangle}(z : ℂ)(zh : (z* T.a.x = Q.a.x) ∧ 
 
 /-Lets show being oldsimilar is an equivalence relation:-/
 
-lemma oldsimilar_self (T : Triangle) : oldSimilar T T := by{
+lemma oldsimilar_refl (T : Triangle) : oldSimilar T T := by{
   use 1
   simp
 }
@@ -1158,6 +1325,122 @@ lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (tri_ab T) = (scale_factor 
   calc
     Complex.abs (z * Q.a.x - z * Q.b.x) = Complex.abs (z * (Q.a.x - Q.b.x)) := by ring
       _= (Complex.abs z) * Complex.abs (Q.a.x -Q.b.x) := by exact AbsoluteValue.map_mul Complex.abs z (Q.a.x - Q.b.x)
+  sorry
+}
+
+/-The version of Similar triangles actually useable are the following:-/
+
+/-direct similar means, we cannont mirror (this preserves directed area and angles)-/
+
+def directSimilar (T Q : Triangle) : Prop :=
+  ∃p : Point, oldSimilar (tri_shift T p) (tri_shift Q p)
+
+/-directSimilar is weaker than oldSimilar:-/
+
+lemma oldsimilar_imp_directsimilar {T Q : Triangle} (h: oldSimilar T Q) : directSimilar T Q := by{
+  use Point.mk 0
+  rw[tri_shift_zero,tri_shift_zero]
+  assumption
+}
+
+/-This again is a equivalence relation:-/
+
+lemma directsimilar_refl (T : Triangle) : directSimilar T T :=  by{
+  use Point.mk 0
+  rw[tri_shift_zero]
+  exact oldsimilar_refl T
+}
+
+lemma directsimilar_symm {T Q : Triangle} (h: directSimilar T Q) : directSimilar Q T := by{
+  sorry
+}
+
+lemma directsimilar_trans{T Q R : Triangle}(TQ : directSimilar T Q)(QR: directSimilar Q R) : directSimilar T R := by{
+  sorry
+}
+/-Mirrorring is cool:-/
+lemma directsimilar_conj (T Q : Triangle) : directSimilar T Q ↔ directSimilar (tri_conj T) (tri_conj Q) := by{
+  sorry
+}
+
+/-Antisimilar is now define as being similar to the mirrored:-/
+
+def antiSimilar (T Q : Triangle) : Prop :=
+  directSimilar T (tri_conj Q)
+
+/-AntiSimilar is a bit more awkward:-/
+lemma antisimilar_pseudo_refl (T: Triangle) : antiSimilar T (tri_conj T) := by{
+  unfold antiSimilar
+  rw[tri_conj_twice]
+  exact directsimilar_refl T
+}
+
+lemma antisimilar_symm {T Q : Triangle}(h : antiSimilar T Q) : antiSimilar Q T := by{
+  unfold antiSimilar at *
+  apply directsimilar_symm
+  apply (directsimilar_conj (tri_conj T) Q).2
+  rw[tri_conj_twice]
+  assumption
+}
+
+lemma antisimilar_pseudo_trans {T Q R : Triangle}(TQ: antiSimilar T Q)(QR : antiSimilar Q R) : directSimilar T R := by{
+  unfold antiSimilar at *
+  have : directSimilar (tri_conj Q) R := by{
+    rw[← tri_conj_twice R]
+    exact (directsimilar_conj Q (tri_conj R)).1 QR
+  }
+  exact directsimilar_trans TQ this
+}
+
+/-the usual definition of Similar is the following:-/
+
+def Similar (T Q : Triangle) : Prop :=
+  directSimilar T Q ∨ antiSimilar T Q
+
+/- Similar is weaker than antiSimilar, directSimilar and oldSimilar:-/
+
+lemma antisimilar_imp_similar {T Q : Triangle}(h: antiSimilar T Q) : Similar T Q := by{
+  right
+  assumption
+}
+
+lemma directsimilar_imp_similar {T Q : Triangle}(h: directSimilar T Q) : Similar T Q := by{
+  left
+  assumption
+}
+
+lemma oldsimilar_imp_similar {T Q : Triangle}(h: oldSimilar T Q) : Similar T Q := by{
+  apply directsimilar_imp_similar
+  exact oldsimilar_imp_directsimilar h
+}
+
+/-once again being Similar is an equivalence relation:-/
+
+/-first following may be useful:-/
+lemma similar_conj {T Q : Triangle} (h: Similar T Q) : Similar T (tri_conj Q) := by{
+  unfold Similar at *
+  obtain h|h := h
+  right
+  unfold antiSimilar
+  rw[tri_conj_twice]
+  assumption
+  unfold antiSimilar at h
+  left
+  assumption
+}
+
+lemma similar_refl (T : Triangle) : Similar T T := by{
+  unfold Similar
+  left
+  exact directsimilar_refl T
+}
+
+lemma similar_symm {T Q : Triangle}(h : Similar T Q) : Similar Q T := by{
+  sorry
+}
+
+lemma similar_trans {T Q R : Triangle}(TQ : Similar T Q)(QR : Similar Q R) : Similar T R := by{
+  sorry
 }
 
 

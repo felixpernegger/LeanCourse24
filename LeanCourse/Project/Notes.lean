@@ -18,8 +18,9 @@ Stretch:
 --Namely:
 
 
---Intersections
---Laying a parallel through a point
---Parallel Postuale
+--new main goal is to prove parallel_trans and the stuff missing for parallel_postulate
+--Laying a parallel through a point, fix the order etc.
+--Introduce scaling. Redo oldSimilar with scaling (not much should change). And rename oldSimilar to verysimilar or something
+
 
 --NOT EVEN COPUNCTAL YET!
