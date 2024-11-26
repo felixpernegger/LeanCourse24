@@ -176,7 +176,8 @@ example (n m : ℤ) : span {n} ⊔ span {m} = span {gcd n m} := by
 
 
 /- Exercise: use Loogle to find relevant lemmas. -/
-example (n m : ℤ) : span {n} ⊓ span {m} = span {lcm n m} := by sorry
+example (n m : ℤ) : span {n} ⊓ span {m} = span {lcm n m} := by
+  sorry
 
 
 example (n m : ℤ) : span {n} * span {m} = span {n * m} := by
