@@ -795,6 +795,10 @@ lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Para
   contradiction
 
   obtain ⟨s,sh⟩ := p1
+  --obtain ⟨⟨u,v⟩,vh,uv,hL⟩ := L
+  simp at *
+
+
   sorry
 
 
