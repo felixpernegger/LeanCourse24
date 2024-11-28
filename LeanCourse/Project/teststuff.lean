@@ -11,3 +11,15 @@ noncomputable section
 /- Now write definitions and theorems. -/
 
 #check Injective
+
+example (a b: ℂ)(h: a = 0) : a/b = 0 := by{
+  by_cases p: b=0
+  swap
+  rw[h]
+  field_simp
+
+  rw[h]
+  field_simp
+}
+
+--yay

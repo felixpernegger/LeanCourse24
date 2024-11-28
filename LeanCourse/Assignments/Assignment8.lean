@@ -33,7 +33,30 @@ example {ι : Type*} {L : Filter ι} {f g : ι → ℝ} (h1 : ∀ᶠ i in L, f i
 
 example {ι : Type*} {L : Filter ι} {a b : ι → ℤ} (h1 : ∀ᶠ i in L, a i ≤ b i + 1)
     (h2 : ∀ᶠ i in L, b i ≤ a i + 1) (h3 : ∀ᶠ i in L, b i ≠ a i) : ∀ᶠ i in L, |a i - b i| = 1 := by {
-  sorry
+  filter_upwards [h1,h2,h3]
+  intro u uh1 uh2 uh3
+  by_cases h0: 2 ≤ abs (a u - b u)
+  apply le_abs.1 at h0
+  exfalso
+  obtain h0|h0 := h0
+  linarith
+  linarith
+  have : abs (a u - b u) < 2 := by linarith
+  clear h0
+  have g: 0 ≤ abs (a u - b u) := by exact abs_nonneg (a u - b u)
+  have h: abs (a u - b u) = 1 ∨ abs (a u - b u) = 0 := by{
+    by_cases p: 1 ≤ abs (a u - b u)
+    left
+    linarith
+    right
+    linarith
+  }
+  obtain h|h := h
+  assumption
+  exfalso
+  have : a u - b u = 0 := by exact abs_eq_zero.mp h
+  have : b u = a u := by linarith
+  contradiction
   }
 
 /- The goal of the following exercise is to prove that
@@ -86,18 +109,99 @@ If you know category theory, this is an *adjunction* between orders
 -/
 @[simps]
 def cl (U : RegularOpens X) : Closeds X :=
-  ⟨closure U, sorry⟩
+  ⟨closure U, by{ exact isClosed_closure}⟩
 
 /- The interior of a closed set. You will have to prove yourself that it is regular open. -/
 @[simps]
 def _root_.TopologicalSpace.Closeds.int (C : Closeds X) : RegularOpens X :=
-  ⟨interior C, sorry, sorry⟩
+  ⟨interior C, by{
+    exact isOpen_interior
+  }, by{
+    ext x
+    constructor
+    intro xh
+    rw[mem_interior] at *
+    obtain ⟨t,th1,th2,th3⟩ := xh
+    use t
+    constructor
+    swap
+    constructor
+    assumption
+    assumption
+
+    have : closure (interior ↑C) ⊆ (↑C : Set X) := by{
+      intro x xh
+      clear th1 U V t th2 th3
+      unfold closure at xh
+      simp at xh
+      exact xh C C.2 interior_subset
+    }
+    exact fun ⦃a⦄ a_1 ↦ this (th1 a_1)
+    intro h
+    rw[mem_interior]
+    use interior ↑C
+    constructor
+    exact subset_closure
+    constructor
+    simp
+    assumption
+  }⟩
 
 /- Now let's show the relation between these two operations. -/
 lemma cl_le_iff {U : RegularOpens X} {C : Closeds X} :
-    U.cl ≤ C ↔ U ≤ C.int := by sorry
+    U.cl ≤ C ↔ U ≤ C.int := by{
+      have uwu: interior (closure (↑U : Set X)) = (↑U : Set X) := by simp
+      have s1: (↑C.int : Set X) = interior ↑C := rfl
+      have s2: (↑U.cl : Set X) = closure ↑U := rfl
+      constructor
+      intro h
+      rw[le_def]
+      have t1: (↑U.cl : Set X) ⊆ ↑C := by{
+        rw[s2]
+        assumption
+      }
+      rw[s1]
+      rw[s2] at t1
+      have go: interior (closure (↑U : Set X)) ⊆ interior (↑C : Set X) := by exact interior_mono h
+      rw[uwu] at go
+      assumption
 
-@[simp] lemma cl_int : U.cl.int = U := by sorry
+      intro h
+      have : ↑U.cl ⊆ (↑C : Set X) := by{
+        rw[le_def] at h
+        rw[s1] at h
+        rw[s2]
+        have my: closure ↑U ⊆ closure (interior (↑C : Set X)) := by exact closure_mono h
+        have yay: closure (interior ↑C) ⊆ (↑C : Set X) := by{
+          intro x xh
+          unfold closure at xh
+          have : IsClosed (↑C : Set X) ∧ interior (↑C : Set X) ⊆ ↑C := by{
+            constructor
+            exact Closeds.closed C
+            exact interior_subset
+          }
+          exact xh C this
+        }
+        exact fun ⦃a⦄ a_1 ↦ yay (my a_1)
+      }
+      exact this
+    }
+
+@[simp] lemma cl_int : U.cl.int = U := by{
+  have s1: interior U.cl = (↑U.cl.int : Set X):= rfl
+  have s2: U.cl = closure (↑U : Set X) := rfl
+  ext x
+  constructor
+  intro h
+  rw[←  s1] at h
+  rw[s2] at h
+  simp at h
+  assumption
+  intro h
+  rw[← s1,s2]
+  simp
+  assumption
+  }
 
 /- This gives us a GaloisCoinsertion. -/
 
@@ -160,16 +264,103 @@ instance : HasCompl (RegularOpens X) := sorry
 
 
 @[simp]
-lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := by sorry
-
+lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := by{
+  ext x
+  constructor
+  intro xh
+  rw[mem_interior]
+  sorry
+  intro xh
+  contrapose xh
+  simp at *
+  have : x ∈ U := by{
+    contrapose xh
+    simp at *
+    sorry
+    }
+  apply subset_closure
+  assumption
+}
 
 instance : CompleteBooleanAlgebra (RegularOpens X) :=
   { inferInstanceAs (CompleteDistribLattice (RegularOpens X)) with
-    inf_compl_le_bot := by sorry
-    top_le_sup_compl := by sorry
-    le_sup_inf := by sorry
-    sdiff_eq := by sorry
-    himp_eq := by sorry }
+    inf_compl_le_bot := by simp
+    top_le_sup_compl := by{
+      simp
+      intro U
+      ext x
+      rw[coe_sup]
+      rw[coe_top]
+      constructor
+      intro
+      trivial
+      intro xh
+      --somehow i cannot type complement correctly
+      have : (↑U ∪ (↑(@compl (RegularOpens X) Order.Frame.toHasCompl U : RegularOpens X) : Set X)) = univ := by{
+        ext x
+        constructor
+        intro
+        trivial
+        intro xh
+        simp
+        by_cases p: x ∈ (↑U : Set X)
+        left
+        assumption
+
+        right
+        sorry
+      }
+      rw[this]
+      rw[mem_interior]
+      use univ
+      constructor
+      swap
+      constructor
+      simp
+      trivial
+      intro y yh
+      unfold closure
+      simp
+      intro C cC Cuniv
+      rw[Cuniv]
+      trivial
+    }
+    le_sup_inf := by{
+      clear U V
+      intro U V R
+      rw[le_def]
+      simp
+      intro x xh
+      sorry
+    }
+    sdiff_eq := by{
+      clear U V
+      intro U V
+      ext x
+      simp
+      constructor
+      intro xh
+      obtain ⟨T,⟨Th1,Th2⟩,Th3⟩ := xh
+      simp at *
+      have ll: ∀ (i : RegularOpens X), U ≤ V ⊔ i → x ∈ closure ↑i := by exact fun i a ↦ Th2 i a Th3
+      clear T Th3 Th1 Th2
+      simp at ll
+      sorry
+
+      intro xh
+      sorry
+    }
+    himp_eq := by{
+      clear U V
+      intro U V
+      ext x
+      simp
+      constructor
+      intro xh
+      obtain ⟨A,hA⟩ := xh
+      simp at hA
+      sorry
+    }}
 
 
 

@@ -65,7 +65,7 @@ lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
   ring
 }
 
-/-So we have an abelina group:-/
+/-So we have an abelian group:-/
 
 lemma padd_neg (a : Point): padd a (pneg a) = Point.mk 0 := by{
   unfold pneg
@@ -99,6 +99,16 @@ lemma conj_twice (x : ℂ) : conj (conj x) = x := by{
   unfold conj
   simp
 }
+
+/-A small lemma about complex numbers we will occasionally use is the following:-/
+lemma complex_real_mul {x y : ℂ}(hx: x.im = 0)(hy: y.im = 0) : (x*y).im = 0 := by{
+  obtain ⟨a,b⟩ := x
+  obtain ⟨c,d⟩ := y
+  simp at *
+  rw[hx,hy]
+  ring
+}
+
 
 /- Here we introduce the distance between two complex numbers and show the axioms of a metric-/
 def point_abs : Point → Point → ℝ :=
@@ -218,6 +228,10 @@ def colinear (a b c : Point) : Prop :=
 def noncolinear (a b c : Point) : Prop :=
   ¬colinear a b c
 
+/-An alternative very useful notion will be given shorty -/
+
+/-
+
 /- This notion of colinearity is the same as the usual one:-/
 
 /-I know this is a bit assymetric and could probably could use better notation, but we won't ever
@@ -258,11 +272,176 @@ lemma colinear_ex {a b c : Point}(h: colinear a b c) : ∃ u v : ℝ, ¬(u=0 ∧
 
 /-Above is wrong lol maybe-/
 
---lemma colinear_alt (a:Point)(b: Point)(c:Point)(h: a≠ b ∧ b≠ c ∧ c≠ a): colinear a b c ⇔ (a.x-b.x)/()
+--lemma colinear_alt (a:Point)(b: Point)(c:Point): colinear a b c ⇔ (a.x-b.x)/()
+
+-/
+
+lemma colinear_perm12 (a b c : Point)(h: colinear a b c) : colinear b a c := by{
+  unfold colinear at *
+  rw[detperm1,h]
+  ring
+}
+
+lemma colinear_perm13 (a b c : Point)(h: colinear a b c) : colinear c b a := by{
+  unfold colinear at *
+  rw[detperm2,h]
+  ring
+}
+
+lemma colinear_perm23 (a b c : Point)(h : colinear a b c) : colinear a c b := by{
+  apply colinear_perm13
+  apply colinear_perm12
+  apply colinear_perm13
+  assumption
+}
+
+lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by{
+  unfold colinear
+  exact det_self a b c h
+}
+
+/-The alternative (nonsymmetric) notion of colinear is now the following:-/
+/-Dont use fucking cyclyic rotation you weirdo-/
+lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
+  by_cases p : b=c
+  rw[p]
+  simp
+  apply colinear_self
+  right
+  left
+  rfl
+
+  have : b.x-c.x ≠ 0 := by{
+    by_contra h0
+    have : b = c := by{
+      ext
+      calc
+        b.x = b.x - 0 := by ring
+          _= b.x -(b.x-c.x) := by rw[h0]
+          _=c.x := by ring
+    }
+    contradiction
+  }
+  unfold colinear det conj
+  obtain ⟨x,y⟩ := a
+  obtain ⟨u, v⟩ := b
+  obtain ⟨r,s⟩ := c
+  simp at *
+  constructor
+  intro h
+  have maybe:  ({ re := u, im := v } - { re := r, im := s }) ≠ (0:ℂ) := by{
+    by_contra h0
+    have : { re := u, im := v } = ({ re := r, im := s }:ℂ) := by{
+      calc
+        ({ re := u, im := v }:ℂ ) =  ({ re := u, im := v }:ℂ ) - 0 := by ring
+          _= ({ re := u, im := v }:ℂ ) - (({ re := u, im := v } - { re := r, im := s })) := by rw[h0]
+          _= ({ re := r, im := s } : ℂ) := by ring
+    }
+    have : u=r ∧ v = s:= by{
+      simp at this
+      assumption
+    }
+    tauto
+  }
+  have s1: { re := x, im := y } - ({ re := u, im := v }:ℂ) = {re := (x - u), im := (y-v) } := rfl
+  have s2: ({ re := u, im := v }:ℂ) - ({ re := r, im := s}:ℂ) = { re := (u-v), im := (r-s)} := rfl
+  rw[s1,s2]
+  rw[s2] at maybe
+  clear s1 s2
+  have pls: ({ re := x - u, im := y - v } :ℂ) / ({ re := u - v, im := r - s }:ℂ) = ({ re := x - u, im := y - v } :ℂ) * ((1:ℂ)/({ re := u - v, im := r - s }:ℂ)) := by{field_simp}
+  rw[pls]
+  clear pls
+  have pls2: ((1:ℂ) / ({ re := u - v, im := r - s }:ℂ)) = ({ re := (u-v)/((u-v)^2+(r-s)^2), im := -(r-s)/((u-v)^2+(r-s)^2)}:ℂ) := by{
+    have : (u-v)^2+(r-s)^2 ≠ 0 := by{
+      sorry
+    }
+    sorry
+  }
+  rw[pls2]
+  clear pls2
+  simp
+  repeat
+    ring
+    field_simp
+  sorry
+  sorry
+}
+
+/-Going along a vector stays colinear:-/
+
+lemma colinear_add(a b c : Point): colinear a b c ↔ colinear a b (Point.mk (c.x + a.x -b.x)) := by{
+  obtain ⟨x,y⟩ := a
+  obtain ⟨z,v⟩ := b
+  obtain ⟨r,t⟩ := c
+  unfold colinear at *
+  unfold det at *
+  unfold conj at *
+  simp at *
+  constructor
+  intro h
+  linarith
+  intro h
+  linarith
+}
+
+/- We can shift colinear points-/
+
+lemma colinear_shift {a b c : Point} (p: Point)(h : colinear a b c): colinear (padd a p) (padd b p) (padd c p) := by{
+  unfold colinear at *
+  rw[← h]
+  exact det_shift a b c p
+}
+
+lemma colinear_shift_bw (a b c p : Point)(h : colinear (padd a p) (padd b p) (padd c p)): colinear a b c := by{
+  unfold colinear at *
+  rw[← h]
+  unfold padd det conj
+  simp
+  ring
+}
+
+/-Mirroring colinear points stay colinear:-/
+
+lemma colinear_conj {a b c : Point}(h: colinear a b c): colinear (pconj a) (pconj b) (pconj c) := by{
+  unfold colinear at *
+  rw[det_conj]
+  linarith
+}
+
+/-Similarly if they are not colinear:-/
+lemma noncolinear_shift {a b c : Point} (p: Point)(h : noncolinear a b c): noncolinear (padd a p) (padd b p) (padd c p) := by{
+  unfold noncolinear at *
+  unfold colinear at *
+  rw[det_shift a b c p]
+  assumption
+}
+
+lemma noncolinear_conj {a b c : Point}(h: noncolinear a b c): noncolinear (pconj a) (pconj b) (pconj c) := by{
+  unfold noncolinear at *
+  unfold colinear at *
+  rw[det_conj] at *
+  contrapose h
+  simp at *
+  assumption
+}
 
 
 /-The following took me over a week (!) to formalise. It is extremely gruesome and mostly brute force calculations with determinants
 However it is central for everything else. Maybe one can simplify the proof significantly, i do not know -/
+
+lemma colinear_trans_alt (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(nab: a ≠ b):  colinear b c d := by{
+  by_cases cd: c=d
+  apply colinear_self
+  right
+  left
+  assumption
+  apply colinear_perm13 at h
+  apply (colinear_alt c b a).1 at h
+  apply colinear_perm12 a b d at h'
+  apply (colinear_alt b a d).1 at h'
+  apply colinear_perm12
+  apply (colinear_alt b c d).2
+}
 
 lemma colinear_trans (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(nab: a ≠ b):  colinear b c d := by{
   unfold colinear at *
@@ -455,79 +634,6 @@ lemma colinear_trans (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(n
   linarith
   }
 
-lemma colinear_perm12 (a b c : Point)(h: colinear a b c) : colinear b a c := by{
-  unfold colinear at *
-  rw[detperm1,h]
-  ring
-}
-
-lemma colinear_perm13 (a b c : Point)(h: colinear a b c) : colinear c b a := by{
-  unfold colinear at *
-  rw[detperm2,h]
-  ring
-}
-
-lemma colinear_perm23 (a b c : Point)(h : colinear a b c) : colinear a c b := by{
-  apply colinear_perm13
-  apply colinear_perm12
-  apply colinear_perm13
-  assumption
-}
-
-lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by{
-  unfold colinear
-  exact det_self a b c h
-}
-
-/-Going along a vector stays colinear:-/
-
-lemma colinear_add(a b c : Point): colinear a b c ↔ colinear a b (Point.mk (c.x + a.x -b.x)) := by{
-  obtain ⟨x,y⟩ := a
-  obtain ⟨z,v⟩ := b
-  obtain ⟨r,t⟩ := c
-  unfold colinear at *
-  unfold det at *
-  unfold conj at *
-  simp at *
-  constructor
-  intro h
-  linarith
-  intro h
-  linarith
-}
-
-/- We can shift colinear points-/
-
-lemma colinear_shift {a b c : Point} (p: Point)(h : colinear a b c): colinear (padd a p) (padd b p) (padd c p) := by{
-  unfold colinear at *
-  rw[← h]
-  exact det_shift a b c p
-}
-
-/-Mirroring colinear points stay colinear:-/
-
-lemma colinear_conj {a b c : Point}(h: colinear a b c): colinear (pconj a) (pconj b) (pconj c) := by{
-  unfold colinear at *
-  rw[det_conj]
-  linarith
-}
-
-/-Similarly if they are not colinear:-/
-lemma noncolinear_shift {a b c : Point} (p: Point)(h : noncolinear a b c): noncolinear (padd a p) (padd b p) (padd c p) := by{
-  unfold noncolinear at *
-  unfold colinear at *
-  rw[det_shift a b c p]
-  assumption
-}
-
-lemma noncolinear_conj {a b c : Point}(h: noncolinear a b c): noncolinear (pconj a) (pconj b) (pconj c) := by{
-  unfold noncolinear at *
-  unfold colinear at *
-  rw[det_conj] at *
-  contrapose h
-  simp at *
-  assumption
-}
 
 /- Now we feel confident enough to define Lines:-/
 
@@ -653,14 +759,439 @@ theorem lines_eq (L R : Line)(a b : Point)(ab : a ≠ b)(ah : Lies_on a L ∧ Li
   rw[LU,RU]
 }
 
+/-same theorem in a form we can use maybe more often:-/
+
+theorem lines_eq_ex (L R : Line)(h: ∃a b : Point, a ≠ b ∧ Lies_on a L ∧ Lies_on a R ∧ Lies_on b L ∧ Lies_on b R) : L = R := by{
+  obtain ⟨a,b,h1,h2,h3,h4,h5⟩ := h
+  have ah : Lies_on a L ∧ Lies_on a R := by{tauto}
+  have bh : Lies_on b L ∧ Lies_on b R := by{tauto}
+  exact lines_eq L R a b h1 ah bh
+}
+
+/-Finally, every line can be interpreted as a "Line through":-/
+lemma line_eq_line_through (L : Line) (a b : Point)(h: Lies_on a L ∧ Lies_on b L)(ab: a ≠ b): L = Line_through ab := by{
+  apply line_through_unique a b
+  assumption
+}
+/-There exist two different points on a Line:-/
+lemma ex_points_on_line (L : Line): ∃(u v : Point), (u ≠ v) ∧ (Lies_on u L) ∧ (Lies_on v L) := by{
+  obtain ⟨S,a,b,ab,r⟩ := L
+  use a
+  use b
+  constructor
+  exact ab
+  constructor
+  unfold Lies_on
+  simp
+  rw[r]
+  simp
+  apply colinear_self
+  right
+  right
+  rfl
+
+  unfold Lies_on
+  simp
+  rw[r]
+  simp
+  apply colinear_self
+  right
+  left
+  rfl
+}
+
+/-Sometimes we just need a single Point on a Line:-/
+lemma ex_point_on_line(L:Line): ∃(a : Point), Lies_on a L := by{
+  obtain ⟨u,_,_,h,_⟩ := ex_points_on_line L
+  use u
+}
+
+/- With those two lemmas together every Line can be written as a Line_through (i couldnt manage to get it into one lemma, which would have been nice of course)-/
+
+/-We can shift Lines. These are exactly the parallel lines:-/
+def shift_line: Line → Point → Line :=
+  fun L p ↦ ⟨{s : Point | ∃l : L.range, s = padd l p}, by{
+    obtain ⟨S,a,b,ab,r⟩ := L
+    use (padd a p)
+    use (padd b p)
+    constructor
+    unfold padd
+    simp
+    contrapose ab
+    simp at *
+    ext
+    assumption
+
+    ext s
+    simp
+    rw[r]
+    simp
+    constructor
+    intro h
+    obtain ⟨l,lh1,lh2⟩ := h
+    rw[lh2]
+    exact colinear_shift p lh1
+
+    intro h
+    use padd s (pneg p)
+    constructor
+    swap
+    unfold pneg padd
+    simp
+
+    have : colinear (padd (padd a p) (pneg p)) (padd (padd b p) (pneg p)) (padd s (pneg p)) := by{
+      exact colinear_shift (pneg p) h
+    }
+    have sla : (padd (padd a p) (pneg p)) = a := by{
+      unfold padd pneg
+      simp
+    }
+    have slb : (padd (padd b p) (pneg p)) = b := by{
+      unfold padd pneg
+      simp
+    }
+    rw[sla,slb] at this
+    assumption
+  }⟩
+
+/-Shifting line a group operation:-/
+lemma shift_line_zero (L : Line): shift_line L (Point.mk (0 : ℂ)) = L := by{
+  unfold shift_line
+  simp [padd_zero]
+}
+
+
+lemma shift_line_trans (L : Line)(p q : Point) : shift_line (shift_line L p) q = shift_line L (padd p q) := by {
+  unfold shift_line
+  simp
+  ext x
+  constructor
+  intro xh
+  simp at *
+  obtain ⟨a,⟨⟨b,⟨bh1,bh2⟩⟩,ah⟩⟩ := xh
+  use b
+  constructor
+  assumption
+  rw[← padd_assoc]
+  rw[← bh2]
+  rw[ah]
+
+  intro xh
+  simp at *
+  obtain ⟨a,ah1,ah2⟩ := xh
+  use padd a p
+  constructor
+  use a
+  rw[padd_assoc]
+  assumption
+}
+
+/-Shifting a point of a line by the same vector is in the shifted line:-/
+
+lemma mem_line_shift (a p : Point)(L : Line)(h: Lies_on a L): Lies_on (padd a p) (shift_line L p) := by{
+  unfold Lies_on
+  unfold shift_line
+  simp
+  use a
+  constructor
+  exact h
+  rfl
+}
+
 /- Lets define parallel lines. We say a line is parallel to itself, so we can get a nice equivalence relation-/
 def Parallel(L R : Line) : Prop :=
-  L.range ∩ R.range = ∅ ∨ L.range = R.range
+  ∃p : Point, R = shift_line L p
+
+/- A big Lemma is the following: Two Lines are parallel, if one is the other one shifted:
+ The cool thing about this, that we have defined enough for this to be proven (almost) purely geometrically-/
+ /-It still is quite a bummer though, unfortunately-/
+
+theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ ∨ L.range = R.range := by{
+  unfold Parallel
+  constructor
+  intro h
+  obtain ⟨p,ph⟩ := h
+  obtain ⟨a,ah⟩ := ex_point_on_line L
+  by_cases ap: Lies_on (padd a p) L
+  have : R = L := by{
+    by_cases h0: p = Point.mk (0)
+    rw[h0] at ph
+    rw[ph]
+    exact shift_line_zero L
+
+
+    apply lines_eq_ex
+    use a
+    use (padd a p)
+    constructor
+    contrapose h0
+    simp at *
+    unfold padd at h0
+    have : a.x = a.x + p.x := by{
+      nth_rw 1 [h0]
+    }
+    ext
+    simp
+    calc
+      p.x = -a.x + (a.x + p.x) := by ring
+        _= -a.x + a.x := by rw[← this]
+        _= 0 := by ring
+    constructor
+    unfold Lies_on
+    rw[ph]
+    unfold shift_line
+    simp
+    use padd a (pneg p)
+    have aap: a ≠ padd a p := by{
+      contrapose h0
+      unfold padd at h0
+      simp at *
+      ext
+      simp
+      have : a.x = ({ x := a.x + p.x } : Point).x := by{rw[← h0]}
+      simp at this
+      assumption
+    }
+    have Lh: L = Line_through aap := by{
+      apply line_through_unique
+      constructor
+      assumption
+      assumption
+    }
+    constructor
+    rw[Lh]
+    unfold Line_through
+    simp
+    unfold padd pneg colinear det conj
+    simp
+    ring
+
+    ext
+    unfold pneg padd
+    simp
+
+    constructor
+    assumption
+    constructor
+    rw[ph]
+    exact mem_line_shift a p L ah
+    assumption
+  }
+  rw[this]
+  right
+  rfl
+
+  left
+  by_contra h0
+  have : (L.range ∩ R.range).Nonempty := by{exact nonempty_iff_ne_empty.mpr h0}
+  apply Set.nonempty_def.1 at this
+  obtain ⟨b,bh⟩ := this
+  have ab: a ≠ b := by{
+    by_contra u
+    rw[← u] at bh
+    clear u b
+    have aR: a ∈ R.range := by exact bh.2
+    clear bh
+    rw[ph] at aR
+    unfold shift_line at aR
+    simp at aR
+    obtain ⟨c,ch1,ch2⟩ := aR
+    rw[ch2] at ah
+    rw[ch2] at ap
+    contrapose ap
+    simp
+    clear ch2 ap a h0 ph R
+    have cL: Lies_on c L := by{
+      unfold Lies_on
+      assumption
+    }
+    clear ch1
+    by_cases p0: p= Point.mk 0
+    rw[p0]
+    simp [padd_comm, padd_zero, cL]
+
+    have ccp: c ≠ padd c p := by{
+      contrapose p0
+      simp at *
+      ext
+      simp
+      unfold padd at p0
+      have : c.x = ({ x := c.x + p.x } : Point).x := by{rw[← p0]}
+      simp at this
+      assumption
+    }
+    have hL: L = Line_through ccp := by{
+      apply line_through_unique
+      constructor
+      assumption
+      assumption
+    }
+    rw[hL]
+    clear ah L hL cL
+    unfold Line_through Lies_on padd colinear det conj
+    simp
+    ring
+  }
+  obtain ⟨bh1,bh2⟩ := bh
+  rw[ph] at bh2
+  unfold shift_line at bh2
+  simp at bh2
+  obtain ⟨c,⟨ch1,ch2⟩⟩ := bh2
+  rw[ch2] at bh1
+  clear ab ch2 b ph
+  have hp: p ≠ Point.mk (0) := by{
+    contrapose ap
+    simp at *
+    rw[ap]
+    rw[padd_zero a]
+    assumption
+  }
+  have ccp: c ≠ padd c p := by{
+    contrapose hp
+    simp at *
+    unfold padd at hp
+    have : c.x = ({ x := c.x + p.x } : Point).x := by{rw[← hp]}
+    simp at this
+    ext
+    assumption
+  }
+  have hL : L = Line_through ccp := by{
+    apply line_through_unique
+    constructor
+    assumption
+    assumption
+  }
+  contrapose ap
+  simp
+  clear h0 ap
+  rw[hL] at ah
+  rw[hL]
+  unfold Line_through at *
+  unfold Lies_on at *
+  simp at *
+  clear hL ccp hp ch1 bh1 L R
+  unfold colinear at *
+  rw[← ah]
+  unfold padd det conj
+  simp
+  ring
+
+  intro h
+  obtain h|h := h
+  swap
+  have : L = R := by{
+    ext x
+    rw[h]
+  }
+  rw[this]
+  use Point.mk 0
+  rw[shift_line_zero R]
+
+  obtain ⟨a,b,ab,aL,bL⟩ := ex_points_on_line L
+  obtain ⟨c,ch⟩ := ex_point_on_line R
+  --OMG I FUCKING REVERSED P OMFG
+  let p := Point.mk (c.x-a.x)
+  use p
+  have : L = Line_through ab := by{
+    apply line_through_unique
+    constructor
+    assumption
+    assumption
+  }
+  rw[this]
+  let d := padd b p
+  have cd: c ≠ d := by{
+    unfold d
+    have p0: p ≠ Point.mk (0) := by{
+      unfold p
+      simp
+      contrapose h
+      simp at h
+      have : a.x = c.x := by{
+        calc
+          a.x = a.x - (0:ℂ) := by ring
+            _=a.x - (a.x-c.x) := by rw[h]
+            _= c.x := by ring
+      }
+      have ac: a = c := by{ext;exact this}
+      rw[ac] at aL
+      unfold Lies_on at *
+      by_contra z
+      have : c ∈ L.range ∩ R.range := by{constructor;assumption;assumption}
+      rw[z] at this
+      contradiction
+    }
+    have : c = padd a p := by{
+      unfold p padd
+      ext
+      ring
+    }
+    rw[this]
+    unfold padd
+    simp
+    by_contra h0
+    have : a = b := by{
+      ext
+      calc
+        a.x = a.x + c.x - c.x := by ring
+          _= a.x + (b.x + (c.x - a.x)) - c.x := by nth_rw 1 [h0]
+          _= b.x := by ring
+    }
+    contradiction
+  }
+  --following is the last main result, having proved it, it gets easy
+  have hR: R = Line_through cd := by{
+    apply line_through_unique
+    constructor
+    assumption
+    sorry
+  }
+  rw[hR]
+  unfold Line_through shift_line
+  simp
+  ext r
+  simp
+  unfold d
+  constructor
+  intro th
+  use padd r (pneg p)
+  constructor
+  swap
+  unfold padd pneg
+  ext
+  ring
+
+  have : c = padd a p := by{
+    unfold p padd
+    ext
+    ring
+  }
+  rw[this] at th
+  have : r = padd (padd r (pneg p)) p := by{
+    unfold padd pneg
+    ring
+  }
+  rw[this] at th
+  exact colinear_shift_bw a b (padd r (pneg p)) p th
+
+  intro rh
+  obtain ⟨u,uh1,uh2⟩ := rh
+  have : c = padd a p := by{
+    unfold p padd
+    ext
+    ring
+  }
+  rw[this]
+  rw[uh2]
+  exact colinear_shift p uh1
+}
 
 lemma parallel_refl (L : Line) : Parallel L L := by{
+  apply (parallel_def L L).2
   right
   rfl
 }
+
 
 /-With this we can now talk about Intersections of lines:-/
 
@@ -673,14 +1204,15 @@ theorem lines_intersect {L R : Line}(h : ¬Parallel L R) : ∃! s : Point, Lies_
       apply Set.encard_le_one_iff_eq.1 at p
       obtain p|p := p
       left
-      tauto
+      rw[p]
+      exact Set.encard_empty
       right
       exact Set.encard_eq_one.2 p
     }
     obtain this|this := this
     have : (L.range ∩ R.range = ∅) := by exact encard_eq_zero.mp this
     have : Parallel L R := by{
-      unfold Parallel
+      apply (parallel_def L R).2
       left
       assumption
     }
@@ -749,7 +1281,8 @@ lemma intersect_lines {L R : Line}{a : Point}(LR : ¬ Parallel L R){ah: Lies_on 
 /- With this we now show being parallel is an equivalence relation:-/
 
 lemma parallel_symm (L R : Line)(h : Parallel L R) : Parallel R L := by{
-  unfold Parallel at *
+  apply (parallel_def L R).1 at h
+  apply (parallel_def R L).2
   obtain h|h := h
   · left
     rw[Set.inter_comm]
@@ -760,150 +1293,20 @@ lemma parallel_symm (L R : Line)(h : Parallel L R) : Parallel R L := by{
 }
 
 lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Parallel L S := by{
-  by_contra p
   unfold Parallel at *
-  push_neg at p
-  obtain LR|LR := LR
-  swap
-  have : L = R := by{
-    ext x
-    rw[LR]
-  }
-  rw[this] at p
-  clear LR
-  clear this
-  obtain ⟨p1,p2⟩ := p
-  obtain RS|RS := RS
-  rw[RS] at p1
-  obtain ⟨a,ah⟩ := p1
-  contradiction
-  contradiction
-
-  obtain RS|RS := RS
-  obtain ⟨p1,p2⟩ := p
-
-
-  swap
-  have : R=S := by{
-    ext
-    rw[RS]
-  }
-  rw[this] at LR
-  obtain ⟨p1,p2⟩ := p
-  rw[LR] at p1
-  obtain ⟨a,ah⟩ := p1
-  contradiction
-
-  obtain ⟨s,sh⟩ := p1
-  --obtain ⟨⟨u,v⟩,vh,uv,hL⟩ := L
-  simp at *
-
-
-  sorry
-
-
+  obtain ⟨p,hp⟩ := LR
+  obtain ⟨q,hq⟩ := RS
+  use padd p q
+  rw[hp] at hq
+  rw[← shift_line_trans L p q]
+  assumption
 }
 
 /-Note: I should probably redo this section a bit, define parallel_through first and then use it
 for weak_parallel_postulate. Else everyhting is quite redundant-/
 
 lemma weak_parallel_postulate (L : Line)(a : Point) : ∃ Q : Line, Lies_on a Q ∧ Parallel L Q := by{
-  by_cases h0: Lies_on a L
-  use L
-  constructor
-  assumption
-  exact parallel_refl L
-
-  obtain ⟨S,u,v,uv,h⟩ := L
-  let p := Point.mk (a.x+u.x-v.x)
-  unfold Lies_on at h0
-  simp at h0
-  have ap: a ≠ p := by{
-    contrapose uv
-    simp at *
-    have : a.x = a.x + u.x - v.x := by{
-      exact congrArg Point.x uv
-    }
-    have : u.x-v.x = 0 := by
-      calc
-        u.x-v.x = -a.x +(a.x + u.x - v.x) := by ring
-          _= -a.x + a.x := by rw[← this]
-          _= 0 := by ring
-    ext
-    calc
-      u.x = u.x - 0 := by ring
-        _= u.x - (u.x - v.x) := by rw[this]
-        _= v.x := by ring
-  }
-  use Line_through ap
-  constructor
-  exact line_through_mem_left ap
-  unfold Parallel
-  left
-  simp
-  unfold Line_through
-  rw[h]
-  simp
-  ext o
-  constructor
-  swap
-  intro cc
-  contradiction
-  intro oh
-  simp at *
-  contrapose h0
-  rw[h]
-  simp at *
-  clear h0
-  clear h
-  clear S
-  obtain ⟨h1,h2⟩ := oh
-  apply colinear_perm13 at h1
-  apply colinear_perm13 at h2
-  have goal: colinear o v a := by{
-    unfold p at h2
-    unfold p at ap
-    clear p
-    unfold colinear at *
-    unfold det at *
-    unfold conj at *
-    obtain ⟨x,y⟩ := a
-    obtain ⟨g,b⟩ := u
-    obtain ⟨c,d⟩ := o
-    obtain ⟨e,f⟩ := v
-    simp at *
-    ring_nf
-    have : - (c * f) + (c * y) + (f * x) + (d * e) - (d * x) - (e * y) = 0 := by{
-      have ha: - (c * f) + (d * e) - (g * d) + (b * c) - (e * b) + (f * g) = 0 := by{linarith}
-      clear h1
-      have hb: -(c*y) -(b*c)+(c*f)+(d*x)+(d*g)-(d*e)-(x*d)+(y*c)-(x*y)-(g*y)+(e*y)+(y*x)+(b*x)-(f*x) = 0 := by{linarith}
-      clear h2
-      sorry
-      }
-    linarith
-    }
-  apply colinear_perm12
-  by_cases ov : o=v
-  swap
-  apply colinear_trans o v u a h1 goal
-  assumption
-
-  rw[ov] at h1
-  rw[ov] at h2
-  rw[ov] at goal
-  clear h1
-  clear goal
-  clear ov
-  clear o
-  unfold p at h2
-  apply colinear_perm23
-  apply colinear_perm23 at h2
-  apply colinear_perm12
-  apply (colinear_add a v u).2
-  apply colinear_perm12
-  have : u.x + a.x - v.x = a.x + u.x - v.x := by ring
-  rw[this]
-  assumption
+  sorry
 }
 
 theorem parallel_postulate (L : Line)(a : Point) : ∃! Q : Line, Lies_on a Q ∧ Parallel L Q := by{
