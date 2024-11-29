@@ -83,19 +83,29 @@ def conj : ℂ → ℂ :=
 def p_scal_mul : ℂ → Point → Point :=
   fun c a ↦ Point.mk (c*a.x)
 
-lemma conj_add (x:ℂ) (y:ℂ) : conj (x+y) = conj x + conj y := by{
+@[simp] lemma conj_add (x:ℂ) (y:ℂ) : conj (x+y) = conj x + conj y := by{
   unfold conj
   exact RingHom.map_add (starRingEnd ℂ) x y
 }
 
-lemma conj_mul' (x:ℂ) (y:ℂ) : conj (x*y) = (conj x) * (conj y) := by{
+@[simp] lemma conj_mul' (x:ℂ) (y:ℂ) : conj (x*y) = (conj x) * (conj y) := by{
   unfold conj
   exact RingHom.map_mul (starRingEnd ℂ) x y
 }
 
+@[simp] lemma conj_sub (x y : ℂ) : conj (x -y) = conj x - conj y := by{
+  unfold conj
+  exact RingHom.map_sub (starRingEnd ℂ) x y
+}
+
+@[simp] lemma conj_div (x y : ℂ) : conj (x / y) = (conj (x)) / (conj (y)) := by{
+  unfold conj
+  exact RCLike.conj_div x y
+}
+
 /-conjugating twice is self:-/
 
-lemma conj_twice (x : ℂ) : conj (conj x) = x := by{
+@[simp] lemma conj_twice (x : ℂ) : conj (conj x) = x := by{
   unfold conj
   simp
 }
@@ -152,10 +162,52 @@ def pconj : Point → Point :=
 
 /-Mirroring twice gives original:-/
 
-lemma pconj_twice (a : Point) : pconj (pconj a) = a := by{
+@[simp] lemma pconj_twice (a : Point) : pconj (pconj a) = a := by{
   unfold pconj
   simp
-  rw[conj_twice]
+}
+
+/-We can conjugate arbitriry sets with this:-/
+def set_conj : Set Point → Set Point :=
+  fun S ↦ {s | ∃p : S, s = pconj p}
+
+lemma set_conj_def (a : Point)(S : Set Point) : a ∈ S ↔ pconj a ∈ set_conj S := by{
+  unfold set_conj
+  constructor
+  intro ah
+  simp
+  use a
+  intro ah
+  simp at ah
+  obtain ⟨v,vh1,vh2⟩ := ah
+  have : a=v := by{
+    calc
+      a = pconj (pconj a) := by simp
+        _= pconj (pconj v) := by rw[vh2]
+        _= v := by simp
+  }
+  rw[this]
+  assumption
+}
+
+@[simp] lemma set_conj_twice (S : Set Point) : set_conj (set_conj S) = S := by{
+  ext s
+  constructor
+  intro sh
+  unfold set_conj at sh
+  simp at sh
+  obtain ⟨a,ah1,ah2⟩ := sh
+  obtain ⟨b,bh1,bh2⟩ := ah1
+  rw[ah2,bh2]
+  simp
+  assumption
+  intro sh
+  unfold set_conj
+  simp
+  use pconj s
+  constructor
+  use s
+  simp
 }
 
 def det : Point → Point → Point → ℝ :=
@@ -217,8 +269,6 @@ lemma det_conj (a b c : Point): det (pconj a) (pconj b) (pconj c) = - det a b c 
   unfold pconj
   unfold det
   simp
-  repeat
-    rw[conj_twice]
   ring
 }
 
@@ -305,7 +355,23 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
 lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
   by_cases p : b=c
   rw[p]
+  constructor
+  intro h
+  by_cases h0 : a.x = c.x
+  rw[h0]
   simp
+  have : a.x-c.x ≠ 0 := by{
+    contrapose h0
+    simp at *
+    calc
+      a.x = a.x - 0 := by ring
+        _= a.x - (a.x-c.x) := by rw[h0]
+        _= c.x := by ring
+  }
+  have : (a.x-c.x)/(a.x-c.x) = 1 := by{field_simp}
+  rw[this]
+  simp
+  intro
   apply colinear_self
   right
   left
@@ -345,6 +411,7 @@ lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im 
   }
   have s1: { re := x, im := y } - ({ re := u, im := v }:ℂ) = {re := (x - u), im := (y-v) } := rfl
   have s2: ({ re := u, im := v }:ℂ) - ({ re := r, im := s}:ℂ) = { re := (u-v), im := (r-s)} := rfl
+  /-
   rw[s1,s2]
   rw[s2] at maybe
   clear s1 s2
@@ -363,6 +430,7 @@ lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im 
   repeat
     ring
     field_simp
+  -/
   sorry
   sorry
 }
@@ -436,11 +504,30 @@ lemma colinear_trans_alt (a b c d : Point)(h: colinear a b c) (h': colinear a b 
   left
   assumption
   apply colinear_perm13 at h
-  apply (colinear_alt c b a).1 at h
+  apply colinear_perm12 at h
+  apply (colinear_alt b c a).1 at h
   apply colinear_perm12 a b d at h'
   apply (colinear_alt b a d).1 at h'
-  apply colinear_perm12
   apply (colinear_alt b c d).2
+  have cool: (((b.x - c.x) / (b.x - a.x)) * ((b.x - a.x) / (b.x - d.x))).im = 0 := by{
+    exact complex_real_mul h h'
+  }
+  have : b.x-a.x ≠ 0 := by{
+    by_contra h0
+    have: a.x = b.x := by{
+      calc
+        a.x = a.x + 0 := by ring
+          _= a.x + (b.x-a.x) := by rw[h0]
+          _= b.x := by ring
+    }
+    have : a = b := by{ext;assumption}
+    contradiction
+  }
+  have : ((b.x - c.x) / (b.x - a.x)) * ((b.x - a.x) / (b.x - d.x)) = ((b.x - c.x) / (b.x - d.x)) := by{
+    field_simp
+  }
+  rw[this] at cool
+  assumption
 }
 
 lemma colinear_trans (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(nab: a ≠ b):  colinear b c d := by{
@@ -806,6 +893,46 @@ lemma ex_point_on_line(L:Line): ∃(a : Point), Lies_on a L := by{
   use u
 }
 
+/-We can also conjugate lines:-/
+def line_conj : Line → Line :=
+  fun L ↦ ⟨set_conj L.range, by{
+    obtain ⟨s,t,st,stL⟩ := L.2
+    use pconj s
+    use pconj t
+    constructor
+    by_contra h0
+    rw[← pconj_twice s, ← pconj_twice t] at st
+    tauto
+    unfold set_conj
+    simp
+    ext x
+    constructor
+    intro xh
+    simp at *
+    obtain ⟨a,ah1,ah2⟩ := xh
+    rw[ah2]
+    rw[stL] at ah1
+    simp at ah1
+    exact colinear_conj ah1
+
+    intro xh
+    simp at *
+    use pconj x
+    constructor
+    rw[stL]
+    simp
+    rw[← pconj_twice s, ← pconj_twice t]
+    apply colinear_conj
+    assumption
+
+    simp
+  }⟩
+
+  @[simp] lemma line_conj_twice (L : Line) : line_conj (line_conj L) = L := by{
+    unfold line_conj
+    simp
+  }
+
 /- With those two lemmas together every Line can be written as a Line_through (i couldnt manage to get it into one lemma, which would have been nice of course)-/
 
 /-We can shift Lines. These are exactly the parallel lines:-/
@@ -886,6 +1013,8 @@ lemma shift_line_trans (L : Line)(p q : Point) : shift_line (shift_line L p) q =
   assumption
 }
 
+--lemma shift_line_conj (L : Line)(p : Point): shift_line
+
 /-Shifting a point of a line by the same vector is in the shifted line:-/
 
 lemma mem_line_shift (a p : Point)(L : Line)(h: Lies_on a L): Lies_on (padd a p) (shift_line L p) := by{
@@ -898,13 +1027,58 @@ lemma mem_line_shift (a p : Point)(L : Line)(h: Lies_on a L): Lies_on (padd a p)
   rfl
 }
 
+@[simp] lemma shift_line_conj (L : Line)(a : Point) : line_conj (shift_line L a) = shift_line (line_conj L) (pconj a) := by{
+  unfold line_conj shift_line
+  ext x
+  simp
+  constructor
+  intro xh
+  unfold set_conj at *
+  simp at *
+  obtain ⟨u,uh1,uh2⟩ := xh
+  obtain ⟨v,vh1,vh2⟩ := uh1
+  rw[uh2]
+  clear uh2 x
+  use pconj v
+  constructor
+  use v
+  rw[vh2]
+  unfold pconj
+  unfold padd
+  simp
+
+  intro xh
+  obtain ⟨u,uh1,uh2⟩ := xh
+  unfold set_conj
+  simp
+  use pconj x
+  constructor
+  use pconj u
+  constructor
+  swap
+  rw[uh2]
+  unfold pconj padd
+  simp
+  swap
+  simp
+
+  rw[← pconj_twice u] at uh1
+  exact (set_conj_def (pconj u) L.range).mpr uh1
+}
+
 /- Lets define parallel lines. We say a line is parallel to itself, so we can get a nice equivalence relation-/
 def Parallel(L R : Line) : Prop :=
   ∃p : Point, R = shift_line L p
 
+lemma shift_line_parallel (L : Line)(a : Point): Parallel L (shift_line L a) := by{
+  unfold Parallel
+  use a
+}
+
 /- A big Lemma is the following: Two Lines are parallel, if one is the other one shifted:
  The cool thing about this, that we have defined enough for this to be proven (almost) purely geometrically-/
  /-It still is quite a bummer though, unfortunately-/
+
 
 theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ ∨ L.range = R.range := by{
   unfold Parallel
@@ -1109,8 +1283,8 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
       simp at h
       have : a.x = c.x := by{
         calc
-          a.x = a.x - (0:ℂ) := by ring
-            _=a.x - (a.x-c.x) := by rw[h]
+          a.x = a.x + (0:ℂ) := by ring
+            _=a.x + (c.x-a.x) := by rw[h]
             _= c.x := by ring
       }
       have ac: a = c := by{ext;exact this}
@@ -1139,11 +1313,100 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     }
     contradiction
   }
-  --following is the last main result, having proved it, it gets easy
+  --following is the last main result, having proved it, rest gets easy
   have hR: R = Line_through cd := by{
     apply line_through_unique
     constructor
     assumption
+    obtain ⟨e,f,ef,re,rf⟩ := ex_points_on_line R
+    have : c ≠ e ∨ c ≠ f := by{
+      by_contra h0
+      simp at h0
+      have : e = f := by{
+        calc
+          e = c := by rw[h0.1]
+            _= f := by rw[h0.2]
+      }
+      contradiction
+    }
+    obtain ce|cf := this
+    have hR : R = Line_through ce := by{
+      apply line_through_unique
+      constructor
+      assumption
+      exact re
+    }
+    rw[hR]
+    unfold Lies_on
+    unfold Line_through
+    simp
+    clear f ef rf
+    by_contra h0
+    let m := ((conj a.x) - (conj b.x))*(c.x-e.x)-(a.x-b.x)*(conj c.x - conj e.x)
+    let n := (((conj a.x)*b.x-a.x*(conj b.x))*(c.x-d.x)-(a.x-b.x)*((conj c.x)*d.x-c.x*(conj d.x)))
+    have t1: m ≠ 0 := by{
+      sorry
+    }
+    --I also have to do the reverse...
+    unfold conj at t1
+    have t2: conj m ≠ 0 := by{
+      by_contra h0
+      rw[← conj_twice m] at t1
+      rw[h0] at t1
+      unfold conj at t1
+      simp at t1
+    }
+    let q := Point.mk (n / m)
+    have colinear1 : colinear a b q := by{
+      unfold q
+      unfold colinear det
+      have s1: (a.x * conj b.x + ({ x := n / m }: Point).x * conj a.x + b.x * conj ({ x := n / m }: Point).x - a.x * conj ({ x := n / m }: Point).x -
+        ({ x := n / m }: Point).x * conj b.x -
+      b.x * conj a.x) = 0 := by{
+        simp
+        field_simp
+        unfold n m
+        simp
+        sorry
+      }
+      exact
+        (AddSemiconjBy.eq_zero_iff (Complex.im 0)
+              (congrFun (congrArg HAdd.hAdd (congrArg Complex.im (id (Eq.symm s1))))
+                (Complex.im 0))).mp
+          rfl
+    }
+    have colinear2: colinear c e q := by{
+      unfold q
+      unfold colinear det
+      have s2: (c.x * conj e.x + ({ x := n / m } : Point).x * conj c.x + e.x * conj ({ x := n / m } : Point).x - c.x * conj ({ x := n / m } : Point).x -
+        ({ x := n / m } : Point).x * conj e.x -
+      e.x * conj c.x) = 0 := by{
+        simp
+        field_simp
+        sorry
+      }
+      exact
+        (AddSemiconjBy.eq_zero_iff (Complex.im 0)
+              (congrFun (congrArg HAdd.hAdd (congrArg Complex.im (id (Eq.symm s2))))
+                (Complex.im 0))).mp
+          rfl
+    }
+    have qbad: q ∈ L.range ∩ R.range := by{
+      constructor
+      swap
+      rw[hR]
+      unfold Line_through
+      simp
+      assumption
+
+      have : L = Line_through ab := by{assumption}
+      rw[this]
+      unfold Line_through
+      simp
+      assumption
+    }
+    rw[h] at qbad
+    contradiction
     sorry
   }
   rw[hR]
@@ -1262,9 +1525,8 @@ def Intersection {L R : Line}(h : ¬ Parallel L R) : Point :=
 
 /-This indeed is in the intersection:-/
 
-/-do this with Exists.choose_spec somehow-/
 lemma intersection_mem {L R : Line}(LR : ¬ Parallel L R) : Lies_on (Intersection LR) L ∧ Lies_on (Intersection LR) R := by{
-  sorry
+  exact (Classical.choose_spec (lines_intersect LR)).1
 }
 
 /-lines_intersect lemma now become nicer:-/
@@ -1306,7 +1568,19 @@ lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Para
 for weak_parallel_postulate. Else everyhting is quite redundant-/
 
 lemma weak_parallel_postulate (L : Line)(a : Point) : ∃ Q : Line, Lies_on a Q ∧ Parallel L Q := by{
-  sorry
+  obtain ⟨b,bh⟩ := ex_point_on_line L
+  use (shift_line L (Point.mk (a.x-b.x)))
+  constructor
+  unfold Lies_on shift_line
+  simp
+
+  use b
+  constructor
+  assumption
+  ext
+  unfold padd
+  ring
+  exact shift_line_parallel L (Point.mk (a.x-b.x))
 }
 
 theorem parallel_postulate (L : Line)(a : Point) : ∃! Q : Line, Lies_on a Q ∧ Parallel L Q := by{
@@ -1319,7 +1593,6 @@ theorem parallel_postulate (L : Line)(a : Point) : ∃! Q : Line, Lies_on a Q �
   by_cases UR: Parallel U R
   unfold Parallel at UR
   obtain h|h := UR
-  exfalso
   unfold Lies_on at *
   have : a ∈ U.range ∧ a ∈ R.range := by{
     constructor
@@ -1327,10 +1600,17 @@ theorem parallel_postulate (L : Line)(a : Point) : ∃! Q : Line, Lies_on a Q �
     exact Rh.1
   }
   have : a ∈ U.range ∩ R.range := by exact this
-  rw[h] at this
+  have UR: Parallel U R := by{
+    obtain ⟨_,hi⟩ := Uh
+    apply parallel_symm at hi
+    exact parallel_trans hi Rh.2
+  }
+  apply (parallel_def U R).1 at UR
+  obtain h'|h' := UR
+  rw[h'] at this
   contradiction
-
-  exact Line.ext_iff.mpr (id (Eq.symm h))
+  ext
+  rw[h']
 
   exfalso
   obtain ⟨_,hU⟩ := Uh
@@ -1342,24 +1622,40 @@ theorem parallel_postulate (L : Line)(a : Point) : ∃! Q : Line, Lies_on a Q �
   contradiction
 }
 
-/-This is NOT THE WAY-/
-
 def parallel_through : Line → Point → Line :=
-  fun L a ↦ (parallel_postulate L a).choose
+  fun L a ↦ (weak_parallel_postulate L a).choose
 
-/-This indeed is a parallel to the original Line:-/
+/-This really has the properties we want: -/
+
+lemma point_lies_on_parallel_through (L: Line)(a : Point) : Lies_on a (parallel_through L a) := by{
+  unfold parallel_through
+  exact (Exists.choose_spec (weak_parallel_postulate L a)).1
+}
 
 lemma parallel_through_is_parallel (L : Line)(a : Point) : Parallel L (parallel_through L a) := by{
   unfold parallel_through
-  sorry
+  exact (Exists.choose_spec (weak_parallel_postulate L a)).2
 }
 
-/- And the point lies on the Line:-/
-
-lemma parallel_through_on_line (L : Line)(a : Point) : Lies_on a (parallel_through L a) := by{
+lemma parallel_through_is_parallel_through (L : Line)(a : Point) : Lies_on a (parallel_through L a) ∧ Parallel L (parallel_through L a) := by{
   unfold parallel_through
-  sorry
+  exact Exists.choose_spec (weak_parallel_postulate L a)
 }
+
+/-Now we can formulate the parallel postualte in a nice way:-/
+
+theorem parallel_through_unique (L R : Line)(a : Point)(h : Lies_on a R ∧ Parallel L R) : R = parallel_through L a := by{
+  obtain ⟨S,hS1,hS2⟩ := parallel_postulate L a
+  simp at hS2
+  have RS: R = S := by{
+    exact hS2 R h.1 h.2
+  }
+  have PTS: parallel_through L a = S := by{
+    exact hS2 (parallel_through L a) (point_lies_on_parallel_through L a) (parallel_through_is_parallel L a)
+  }
+  rw[RS,PTS]
+}
+
 /-Old Section about sLine (Line as a function ew)
 def sLine : Point → Point → Set Point :=
   fun a b ↦ {c | colinear a b c}
@@ -1490,7 +1786,7 @@ def tri_conj : Triangle → Triangle :=
 
 /-Mirroring twice gives the same-/
 
-lemma tri_conj_twice (T : Triangle) : tri_conj (tri_conj T) = T := by{
+@[simp] lemma tri_conj_twice (T : Triangle) : tri_conj (tri_conj T) = T := by{
   unfold tri_conj
   simp [pconj_twice]
 }
@@ -1557,8 +1853,18 @@ def midtriangle : Triangle → Triangle :=
 
 theorem heron{a b c : Point}{s : ℝ}(h: s = 1/2 * (perimiter_points a b c)) : |(area_points a b c)| = Real.sqrt (s*(s - (point_abs a b))*(s - (point_abs b c))*(s - point_abs c a)) := by{
   refine Eq.symm ((fun {x y} hx hy ↦ (Real.sqrt_eq_iff_mul_self_eq hx hy).mpr) ?hx ?hy ?_)
+  rw[h]
+  unfold perimiter_points at *
+  have : 0≤ point_abs a b := by{
+    exact point_abs_pos a b
+  }
+  have : 0≤ point_abs b c := by{
+    exact point_abs_pos b c
+  }
+  have : 0≤ point_abs c a := by{
+    exact point_abs_pos c a
+  }
   sorry
-  exact abs_nonneg (area_points a b c)
   sorry
 }
 
@@ -1579,11 +1885,12 @@ theorem heron{a b c : Point}{s : ℝ}(h: s = 1/2 * (perimiter_points a b c)) : |
 
 /- An important speical case is when X lies on the side of a triangle-/
 
-lemma area_add_side (a b c x : Point)(h : x ∈ sLine b c): area_points a b c = area_points a b x + area_points a x c := by{
+lemma area_add_side (a b c x : Point)(bc : b≠c)(h : Lies_on x (Line_through bc)): area_points a b c = area_points a b x + area_points a x c := by{
   rw[area_add a b c x]
   have : area_points x b c = 0 := by{
     refine (area_zero_iff x b c).mpr ?_
-    unfold sLine at h
+    unfold Lies_on at h
+    unfold Line_through at h
     simp at h
     apply colinear_perm13
     apply colinear_perm12
@@ -1680,6 +1987,19 @@ lemma oldsimilar_trans {T Q R: Triangle} (h : oldSimilar T Q) (h': oldSimilar Q 
   tauto
 }
 
+/-conjugating "very" similar triangles gives very similar triangles:-/
+
+lemma oldsimilar_conj {T Q : Triangle}(h : oldSimilar T Q): oldSimilar (tri_conj T) (tri_conj Q) := by{
+  unfold oldSimilar at *
+  obtain ⟨r,rh⟩ := h
+  use conj r
+  unfold tri_conj pconj
+  simp
+  repeat
+    rw[← conj_mul']
+  tauto
+}
+
 /-To obtain the scaling factor we define a function for arbitrary triangles. This works as at there has to be at least one "pair" where eahc coordinates are nonzero-/
 
 def scale_factor : Triangle → Triangle → ℝ :=
@@ -1738,15 +2058,16 @@ lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (tri_ab T) = (scale_factor 
 /-The version of Similar triangles actually useable are the following:-/
 
 /-direct similar means, we cannont mirror (this preserves directed area and angles)-/
+/-omfg i suck-/
 
 def directSimilar (T Q : Triangle) : Prop :=
-  ∃p : Point, oldSimilar (tri_shift T p) (tri_shift Q p)
+  ∃p : Point, oldSimilar (tri_shift T p) (Q)
 
 /-directSimilar is weaker than oldSimilar:-/
 
 lemma oldsimilar_imp_directsimilar {T Q : Triangle} (h: oldSimilar T Q) : directSimilar T Q := by{
   use Point.mk 0
-  rw[tri_shift_zero,tri_shift_zero]
+  rw[tri_shift_zero]
   assumption
 }
 
@@ -1759,15 +2080,72 @@ lemma directsimilar_refl (T : Triangle) : directSimilar T T :=  by{
 }
 
 lemma directsimilar_symm {T Q : Triangle} (h: directSimilar T Q) : directSimilar Q T := by{
-  sorry
+  unfold directSimilar at *
+  unfold oldSimilar at *
+  obtain ⟨p,hp⟩ := h
+  obtain ⟨r,rh1,rh2,rh3⟩ := hp
+  use Point.mk (-p.x * r)
+  use 1/r
+  unfold tri_shift padd at *
+  simp at *
+  have : r≠ 0 := by{
+    by_contra h0
+    rw[h0] at rh1 rh2 rh3
+    simp at *
+    obtain ⟨a,b,c,h⟩ := Q
+    unfold noncolinear colinear det at h
+    simp at *
+    rw[← rh1,← rh2,← rh3] at h
+    simp at h
+  }
+  rw[← rh1,← rh2,← rh3]
+  field_simp
+  ring
+  tauto
 }
 
 lemma directsimilar_trans{T Q R : Triangle}(TQ : directSimilar T Q)(QR: directSimilar Q R) : directSimilar T R := by{
-  sorry
+  unfold directSimilar at *
+  obtain ⟨p,hp⟩ := TQ
+  obtain ⟨q,hq⟩ := QR
+  unfold oldSimilar at *
+  obtain ⟨n,hn⟩ := hp
+  obtain ⟨m,hm⟩ := hq
+  use (Point.mk (q.x /n +p.x))
+  use n*m
+  unfold tri_shift at *
+  unfold padd at *
+  simp at *
+  obtain ⟨hn1,hn2,hn3⟩ := hn
+  obtain ⟨hm1,hm2,hm3⟩ := hm
+  rw[← hm1, ← hn1,← hm2, ← hn2,← hm3, ← hn3]
+  have : n≠ 0 := by{
+    by_contra h0
+    rw[h0] at hn1 hn2 hn3
+    simp at *
+    obtain ⟨a,b,c,Q2⟩ := Q
+    simp at *
+    unfold noncolinear colinear det at Q2
+    rw[← hn1,← hn2,← hn3] at Q2
+    simp at Q2
+   }
+  field_simp
+  ring
+  tauto
 }
 /-Mirrorring is cool:-/
-lemma directsimilar_conj (T Q : Triangle) : directSimilar T Q ↔ directSimilar (tri_conj T) (tri_conj Q) := by{
-  sorry
+lemma directsimilar_conj {T Q : Triangle}(h: directSimilar T Q) : directSimilar (tri_conj T) (tri_conj Q) := by{
+  unfold directSimilar at *
+  obtain ⟨p,hp⟩ := h
+  use pconj p
+  unfold oldSimilar at *
+  obtain ⟨r,hr1,hr2,hr3⟩ := hp
+  use conj r
+  unfold tri_conj pconj tri_shift padd conj
+  simp
+  rw[← hr1,← hr2,← hr3]
+  unfold tri_shift padd
+  simp
 }
 
 /-Antisimilar is now define as being similar to the mirrored:-/
@@ -1785,9 +2163,8 @@ lemma antisimilar_pseudo_refl (T: Triangle) : antiSimilar T (tri_conj T) := by{
 lemma antisimilar_symm {T Q : Triangle}(h : antiSimilar T Q) : antiSimilar Q T := by{
   unfold antiSimilar at *
   apply directsimilar_symm
-  apply (directsimilar_conj (tri_conj T) Q).2
-  rw[tri_conj_twice]
-  assumption
+  rw[← tri_conj_twice Q]
+  exact directsimilar_conj h
 }
 
 lemma antisimilar_pseudo_trans {T Q R : Triangle}(TQ: antiSimilar T Q)(QR : antiSimilar Q R) : directSimilar T R := by{
@@ -1797,6 +2174,11 @@ lemma antisimilar_pseudo_trans {T Q R : Triangle}(TQ: antiSimilar T Q)(QR : anti
     exact (directsimilar_conj Q (tri_conj R)).1 QR
   }
   exact directsimilar_trans TQ this
+}
+
+lemma antisimilar_conj {T Q : Triangle}(TQ: antiSimilar T Q) : antiSimilar (tri_conj T) (tri_conj Q) := by{
+  unfold antiSimilar at *
+  exact directsimilar_conj TQ
 }
 
 /-the usual definition of Similar is the following:-/
@@ -1823,7 +2205,45 @@ lemma oldsimilar_imp_similar {T Q : Triangle}(h: oldSimilar T Q) : Similar T Q :
 
 /-once again being Similar is an equivalence relation:-/
 
-/-first following may be useful:-/
+
+lemma similar_refl (T : Triangle) : Similar T T := by{
+  unfold Similar
+  left
+  exact directsimilar_refl T
+}
+
+lemma similar_symm {T Q : Triangle}(h : Similar T Q) : Similar Q T := by{
+  unfold Similar at *
+  obtain h|h := h
+  left
+  exact directsimilar_symm h
+  right
+  exact antisimilar_symm h
+}
+
+lemma similar_trans {T Q R : Triangle}(TQ : Similar T Q)(QR : Similar Q R) : Similar T R := by{
+  unfold Similar at *
+  obtain h|h := TQ
+  obtain h'|h' := QR
+  left
+  exact directsimilar_trans h h'
+  right
+  unfold antiSimilar at *
+  exact directsimilar_trans h h'
+
+  obtain h'|h' := QR
+  right
+  unfold antiSimilar at *
+  have : directSimilar (tri_conj Q) (tri_conj R) := by{
+    exact directsimilar_conj h'
+  }
+  exact directsimilar_trans h this
+
+  left
+  exact antisimilar_pseudo_trans h h'
+}
+
+/-following may be useful:-/
 lemma similar_conj {T Q : Triangle} (h: Similar T Q) : Similar T (tri_conj Q) := by{
   unfold Similar at *
   obtain h|h := h
@@ -1834,20 +2254,6 @@ lemma similar_conj {T Q : Triangle} (h: Similar T Q) : Similar T (tri_conj Q) :=
   unfold antiSimilar at h
   left
   assumption
-}
-
-lemma similar_refl (T : Triangle) : Similar T T := by{
-  unfold Similar
-  left
-  exact directsimilar_refl T
-}
-
-lemma similar_symm {T Q : Triangle}(h : Similar T Q) : Similar Q T := by{
-  sorry
-}
-
-lemma similar_trans {T Q R : Triangle}(TQ : Similar T Q)(QR : Similar Q R) : Similar T R := by{
-  sorry
 }
 
 

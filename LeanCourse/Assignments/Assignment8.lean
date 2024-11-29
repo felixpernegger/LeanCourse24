@@ -259,11 +259,27 @@ instance completeDistribLattice : CompleteDistribLattice (RegularOpens X) :=
     iInf_sup_le_sup_sInf := by sorry
     }
 
+/- Finally, we can show that the regular open subsets form a complete Boolean algebra.
+Define `compl` and`coe_compl` holds and complete the instance below. -/
 
-instance : HasCompl (RegularOpens X) := sorry
+structure CompleteBooleanAlgebra.MinimalAxioms (α : Type*) extends
+    CompleteDistribLattice.MinimalAxioms α, HasCompl α where
+  inf_compl_le_bot : ∀ (x : α), x ⊓ xᶜ ≤ ⊥
+  top_le_sup_compl : ∀ (x : α), ⊤ ≤ x ⊔ xᶜ
 
+abbrev CompleteBooleanAlgebra.ofMinimalAxioms {α : Type*}
+    (h : CompleteBooleanAlgebra.MinimalAxioms α) : CompleteBooleanAlgebra α where
+      __ := h
+      le_sup_inf x y z :=
+        let z := CompleteDistribLattice.ofMinimalAxioms h.toMinimalAxioms
+        le_sup_inf
+
+
+instance : HasCompl (RegularOpens X) where
+  compl U := sorry
 
 @[simp]
+<<<<<<< HEAD
 lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := by{
   ext x
   constructor
@@ -363,7 +379,19 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
     }}
 
 
+=======
+lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := sorry
+>>>>>>> d2d8b567bc8329b7ce0a281165b976e0a0a2d6df
 
+instance completeBooleanAlgebra : CompleteBooleanAlgebra (RegularOpens X) :=
+  CompleteBooleanAlgebra.ofMinimalAxioms {
+    inf_sSup_le_iSup_inf := completeDistribLattice.inf_sSup_le_iSup_inf
+    iInf_sup_le_sup_sInf := completeDistribLattice.iInf_sup_le_sup_sInf
+    inf_compl_le_bot := by
+      sorry
+    top_le_sup_compl := by
+      sorry
+  }
 
 /-! # Exercises to hand-in. -/
 

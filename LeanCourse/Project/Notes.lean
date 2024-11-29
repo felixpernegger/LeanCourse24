@@ -22,6 +22,8 @@ Then do following:
 -With this (maybe (point, vector) is better), define line_thorugh properly and prove parallel_trans (easy)
 
 
+-MAYBE ADD COLINEAR THAT IT HAS TO BE ZERO AND NOT DEPENDENT ON .im FOR SOME CALCLULATIONS TO MAKE IT A BIT EASIER FOR LEAN
+
 
 
 
@@ -39,9 +41,12 @@ Stretch:
 --Namely:
 
 
---new main goal is to prove parallel_trans and the stuff missing for parallel_postulate
+--PARALLEL POSTULATE
 --Laying a parallel through a point, fix the order etc.
 --Introduce scaling. Redo oldSimilar with scaling (not much should change). And rename oldSimilar to verysimilar or something
 
 
 --NOT EVEN COPUNCTAL YET!
+
+--Alma 1Klaur 13.2 Fr 14.2 Korrektur evtl aufisch am 13.
+--2klausur 18.3 korrektur 20.3
