@@ -272,6 +272,49 @@ lemma det_conj (a b c : Point): det (pconj a) (pconj b) (pconj c) = - det a b c 
   ring
 }
 
+/-When deteermining intersections, normal ring and simp tactics wont be enough for plain brute force unfortunately.
+Therefore we introduce 3x3 determinant properly here and how to simplify them-/
+def detproper: ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ :=
+  fun a b c x y z r s t ↦ a*y*t+b*z*r+x*s*c-a*s*z-x*b*t-r*y*c
+
+lemma det_detproper(a b c : Point): det a b c = (detproper a.x (conj a.x) 1 b.x (conj b.x) 1 c.x (conj c.x) (1:ℂ)).im := by{
+  unfold det detproper
+  ring
+}
+
+/-Scalar multiplication with rows:-/
+lemma detproper_row1 (a b c x y z r s t factor : ℂ): detproper (factor*a) (factor*b) (factor*c) x y z r s t = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
+lemma detproper_row2 (a b c x y z r s t factor : ℂ): detproper a b c (factor*x) (factor*y) (factor*z) r s t = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
+lemma detproper_row3 (a b c x y z r s t factor : ℂ): detproper a b c x y z (factor*r) (factor*s) (factor*t) = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
+/-Scalar multiplication with columns;-/
+
+lemma detproper_column1 (a b c x y z r s t factor : ℂ): detproper (factor*a) b c (factor*x) y z (factor*r) s t = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
+lemma detproper_column2 (a b c x y z r s t factor : ℂ): detproper a (factor*b) c x (factor*y) z r (factor*s) t = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
+lemma detproper_column3 (a b c x y z r s t factor : ℂ): detproper a b (factor*c) x y (factor*z) r s (factor*t) = factor * detproper a b c x y z r s t := by{
+  unfold detproper
+  ring
+}
+
 def colinear (a b c : Point) : Prop :=
   det a b c = 0
 
@@ -304,89 +347,269 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
   exact det_self a b c h
 }
 
+/-Some lemmas i added to simp because for some reason they werent included, despite ebing useful for my calculations:-/
+
+@[simp] lemma wtf(x y z v : ℝ): {re := x, im := y} + ({re := z, im := v}:ℂ) = ({re := (x+z), im := (y+v)} : ℂ) := by{
+  exact rfl
+}
+
+@[simp] lemma wtf2(x y z v : ℝ): {re := x, im := y} - ({re := z, im := v}:ℂ) = ({re := (x-z), im := (y-v)} : ℂ) := by{
+  exact rfl
+}
+
+@[simp] lemma wtf3(x y z v : ℝ): {re := x, im := y} * ({re := z, im := v}:ℂ) = ({re := (x*z-y*v), im := (x*v+y*z)} : ℂ) := by{
+  exact rfl
+}
+
+@[simp] lemma wtf4(x y z v : ℝ): {re := x, im := y} / ({re := z, im := v}:ℂ) = ({re := (x*z+y*v)/(z^2+v^2), im := (-x*v+y*z)/(z^2+v^2)} : ℂ) := by{
+  calc
+    {re := x, im := y} / ({re := z, im := v}:ℂ) = {re := x, im := y} * ((1:ℂ)/({re := z, im := v}:ℂ)) := by ring
+      _=  {re := x, im := y} * ({re := z/(z^2+v^2), im := -v/(z^2+v^2)}) := by{
+        have : ((1:ℂ) / { re := z, im := v }) = { re := z / (z ^ 2 + v ^ 2), im := -v / (z ^ 2 + v ^ 2) } := by{
+          by_cases h0:  { re := z, im := v } = (0:ℂ)
+          rw[h0]
+          simp
+          have : ({ re := z, im := v }:ℂ).re=(0:ℂ) ∧ ({ re := z, im := v }:ℂ).im=(0:ℂ) := by{
+            have : { re := z, im := v } = ({re := 0, im := 0}:ℂ) := by{
+              rw[h0]
+              rfl
+            }
+            rw[this]
+            simp
+          }
+          simp at this
+          rw[this.1]
+          rw[this.2]
+          simp
+          rfl
+
+          field_simp
+          ring
+          have : z ^ 2 * (z ^ 2 + v ^ 2)⁻¹ + v ^ 2 * (z ^ 2 + v ^ 2)⁻¹ = 1 := by{
+            have : (z ^ 2 + v ^ 2) ≠ 0 := by{
+              have : z≠0 ∨ v ≠ 0 := by{
+                by_contra h1
+                simp at *
+                rw[h1.1] at h0
+                rw[h1.2] at h0
+                tauto
+              }
+              have : 0<z^2+v^2 := by{
+                obtain h|h := this
+                calc
+                  0 < z^2 := by exact pow_two_pos_of_ne_zero h
+                    _= z^2 + 0 := by ring
+                    _≤ z^2 + v^2 := by apply add_le_add;rfl;exact sq_nonneg v
+
+                calc
+                  0 < v^2 := by exact pow_two_pos_of_ne_zero h
+                    _= 0+v^2 := by ring
+                    _≤ z^2 + v^2 := by apply add_le_add;exact sq_nonneg z;rfl
+              }
+              exact Ne.symm (ne_of_lt this)
+            }
+            field_simp
+          }
+          rw[this]
+          rfl
+        }
+        rw[this]
+      }
+      _=  ({re := (x*z+y*v)/(z^2+v^2), im := (-x*v+y*z)/(z^2+v^2)} : ℂ) := by simp; ring; tauto
+}
+
+
 /-The alternative (nonsymmetric) notion of colinear is now the following:-/
 /-Dont use fucking cyclyic rotation you weirdo-/
 lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
-  by_cases p : b=c
+  by_cases p : a=c
   rw[p]
-  constructor
-  intro h
-  by_cases h0 : a.x = c.x
-  rw[h0]
   simp
-  have : a.x-c.x ≠ 0 := by{
-    contrapose h0
-    simp at *
-    calc
-      a.x = a.x - 0 := by ring
-        _= a.x - (a.x-c.x) := by rw[h0]
-        _= c.x := by ring
-  }
-  have : (a.x-c.x)/(a.x-c.x) = 1 := by{field_simp}
-  rw[this]
-  simp
-  intro
   apply colinear_self
   right
-  left
+  right
   rfl
 
-  have : b.x-c.x ≠ 0 := by{
-    by_contra h0
-    have : b = c := by{
-      ext
-      calc
-        b.x = b.x - 0 := by ring
-          _= b.x -(b.x-c.x) := by rw[h0]
-          _=c.x := by ring
-    }
-    contradiction
-  }
-  unfold colinear det conj
-  obtain ⟨x,y⟩ := a
-  obtain ⟨u, v⟩ := b
-  obtain ⟨r,s⟩ := c
-  simp at *
   constructor
   intro h
-  have maybe:  ({ re := u, im := v } - { re := r, im := s }) ≠ (0:ℂ) := by{
-    by_contra h0
-    have : { re := u, im := v } = ({ re := r, im := s }:ℂ) := by{
-      calc
-        ({ re := u, im := v }:ℂ ) =  ({ re := u, im := v }:ℂ ) - 0 := by ring
-          _= ({ re := u, im := v }:ℂ ) - (({ re := u, im := v } - { re := r, im := s })) := by rw[h0]
-          _= ({ re := r, im := s } : ℂ) := by ring
-    }
-    have : u=r ∧ v = s:= by{
-      simp at this
-      assumption
-    }
+  have ac : a.x-c.x ≠ 0 := by{
+    contrapose p
+    simp at *
+    ext
+    calc
+      a.x = a.x - 0 := by ring
+        _= a.x - (a.x-c.x) := by rw[p]
+        _= c.x := by ring
+  }
+
+  unfold colinear det at h
+  unfold conj at *
+  simp at *
+  obtain ⟨x,y⟩ := a
+  obtain ⟨z,r⟩ := b
+  obtain ⟨u,v⟩ := c
+  simp at *
+  left
+  by_cases h0: x= u
+  have yv : y ≠ v := by{
     tauto
   }
-  have s1: { re := x, im := y } - ({ re := u, im := v }:ℂ) = {re := (x - u), im := (y-v) } := rfl
-  have s2: ({ re := u, im := v }:ℂ) - ({ re := r, im := s}:ℂ) = { re := (u-v), im := (r-s)} := rfl
-  /-
-  rw[s1,s2]
-  rw[s2] at maybe
-  clear s1 s2
-  have pls: ({ re := x - u, im := y - v } :ℂ) / ({ re := u - v, im := r - s }:ℂ) = ({ re := x - u, im := y - v } :ℂ) * ((1:ℂ)/({ re := u - v, im := r - s }:ℂ)) := by{field_simp}
-  rw[pls]
-  clear pls
-  have pls2: ((1:ℂ) / ({ re := u - v, im := r - s }:ℂ)) = ({ re := (u-v)/((u-v)^2+(r-s)^2), im := -(r-s)/((u-v)^2+(r-s)^2)}:ℂ) := by{
-    have : (u-v)^2+(r-s)^2 ≠ 0 := by{
-      sorry
-    }
-    sorry
+  have yvsub: y-v≠ 0 := by{
+    contrapose yv
+    simp at *
+    linarith
   }
-  rw[pls2]
-  clear pls2
-  simp
-  repeat
+  --test
+  have : 2*(z - x) * (y - v) + (y - r) * (x - u) = 0 := by{
+    rw[← h]
+    rw[h0]
     ring
+  }
+  linarith
+
+  have xusub: x-u ≠ 0 := by{
+    contrapose h0
+    simp at *
+    linarith
+  }
+  have :  2*(x-u)*r =  y * z + (-(u * y) + v * x) + (-(z * v) ) - (-(x * v) + y * u) - (v * z) -
+    (-(z * y) )
+  := by{
+    linarith
+  }
+  have : r = (y * z + (-(u * y) + v * x) + (-(z * v) ) - (-(x * v) + y * u) - (v * z) -
+    (-(z * y) ))/(2*(x-u)) := by{
+      field_simp
+      linarith
+    }
+  rw[this]
+  field_simp
+  ring
+  --OMG I DID ITTTTT
+
+
+  intro h
+  have ac : a.x-c.x ≠ 0 := by{
+    contrapose p
+    simp at *
+    ext
+    calc
+      a.x = a.x - 0 := by ring
+        _= a.x - (a.x-c.x) := by rw[p]
+        _= c.x := by ring
+  }
+
+  unfold colinear det at *
+  unfold conj at *
+  simp at *
+  obtain ⟨x,y⟩ := a
+  obtain ⟨z,r⟩ := b
+  obtain ⟨u,v⟩ := c
+  simp at *
+  obtain h|h := h
+  swap
+  exfalso
+  by_cases h0: x=u
+  have : y-v ≠ 0 := by{
+    contrapose p
+    simp at *
+    constructor
+    assumption
+    linarith
+  }
+  rw[h0] at h
+  simp at h
+  contradiction
+
+  have xusub : x-u ≠ 0 := by{
+    contrapose h0
+    simp at *
+    linarith
+  }
+  have : 0 < (x-u)^2+(y-v)^2 := by{
+    calc
+      0 < (x-u)^2 := by exact pow_two_pos_of_ne_zero xusub
+        _= (x-u)^2 + 0 := by ring
+        _≤ (x-u)^2+(y-v)^2 := by apply add_le_add; rfl; exact sq_nonneg (y - v)
+  }
+  rw[h] at this
+  linarith
+
+
+  by_cases h0: x=u
+  have yv : y ≠ v := by{
+    tauto
+  }
+  have yvsub: y-v≠ 0 := by{
+    contrapose yv
+    simp at *
+    linarith
+  }
+  rw[h0]
+  ring
+  rw[h0] at h
+  simp at h
+  obtain h|h := h
+  have : z = u := by{linarith}
+  rw[this]
+  ring
+  contradiction
+
+  have xusub: x-u ≠ 0 := by{
+    contrapose h0
+    simp at *
+    linarith
+  }
+  have : (z - x) * (y - v) = (r-y)*(x-u) := by{
+    linarith
+  }
+  have : r=(z-x)*(y-v) / (x-u) + y := by{
     field_simp
-  -/
-  sorry
-  sorry
+    linarith
+  }
+  rw[this]
+  field_simp
+  ring
+  }
+
+/-With this we can now give the "intuitive" version of colinear:-/
+/-We chose this specific formulation, so we have to reindex the least, all others are quite obviously equivalent-/
+/-We also wont use this at all, its just a demonstration that our notion with the determinant is indeed "correct" in the usual sense-/
+lemma colinear_alt2 (a b c : Point): colinear a b c ↔ a=c ∨ ∃(t : ℝ), b = Point.mk (a.x-(t*(a.x-c.x))) := by{
+  constructor
+  intro h
+  by_cases ac: a=c
+  left
+  assumption
+  have : a.x-c.x ≠ 0 := by{
+    contrapose ac
+    simp at *
+    ext
+    calc
+      a.x=a.x-0 := by ring
+        _= a.x - (a.x-c.x) := by rw[ac]
+        _=c.x := by ring
+  }
+  right
+  use ((a.x-b.x)/(a.x-c.x)).re
+  have alt: ((a.x-b.x)/(a.x-c.x)).im = 0 := by{exact (colinear_alt a b c).mp h}
+  have : (↑((a.x - b.x) / (a.x - c.x)).re : ℂ) = {re := ((a.x - b.x) / (a.x - c.x)).re, im := 0} := by{rfl}
+  rw[this]
+  rw[← alt]
+  simp
+  ext
+  field_simp
+
+  intro h
+  obtain h|h := h
+  apply colinear_self
+  tauto
+
+  obtain ⟨t,ht⟩ := h
+  rw[ht]
+  unfold colinear det conj
+  simp
+  ring
 }
 
 /-Going along a vector stays colinear:-/
@@ -451,7 +674,7 @@ lemma noncolinear_conj {a b c : Point}(h: noncolinear a b c): noncolinear (pconj
 /-The following took me over a week (!) to formalise. It is extremely gruesome and mostly brute force calculations with determinants
 However it is central for everything else. Maybe one can simplify the proof significantly, i do not know -/
 
-lemma colinear_trans_alt (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(nab: a ≠ b):  colinear b c d := by{
+lemma colinear_trans (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(nab: a ≠ b):  colinear b c d := by{
   by_cases cd: c=d
   apply colinear_self
   right
@@ -837,6 +1060,176 @@ lemma shift_line_parallel (L : Line)(a : Point): Parallel L (shift_line L a) := 
   use a
 }
 
+/-With colinear alt we can give a neat alternative notion of colinear:-/
+lemma parallel_quot {a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): Parallel (Line_through ab) (Line_through cd) ↔ ((a.x-b.x)/(c.x-d.x)).im = 0 := by{
+  constructor
+  intro h
+  unfold Parallel at h
+  obtain ⟨p,ph⟩ := h
+  have cmem: Lies_on c (Line_through cd) := by {exact line_through_mem_left cd}
+  have dmem: Lies_on d (Line_through cd) := by {exact line_through_mem_right cd}
+  rw[ph] at cmem
+  rw[ph] at dmem
+  unfold shift_line at cmem dmem
+  unfold Lies_on at cmem dmem
+  simp at *
+  obtain ⟨r,rh1,rh2⟩ := cmem
+  obtain ⟨s,sh1,sh2⟩ := dmem
+  by_cases sbo : b=s
+  have as: a ≠ s := by{
+    rw[sbo] at ab
+    assumption
+  }
+  have uwu: Line_through ab = Line_through as := by{
+    apply line_through_unique
+    constructor
+    exact line_through_mem_left ab
+    rw[← sbo]
+    exact line_through_mem_right ab
+  }
+  rw[uwu]at sh1 rh1 ph
+  clear ab uwu
+  have : b.x = s.x := by{
+    rw[sbo]
+  }
+  rw[this]
+  clear this b sbo
+  rw[rh2,sh2]
+  unfold padd
+  simp
+  have rs: r ≠ s := by{
+    by_contra rs
+    have : c=d := by{
+      rw[rh2,sh2]
+      ext
+      unfold padd
+      simp
+      rw[rs]
+    }
+    contradiction
+  }
+  clear ph rh2 sh2 cd c d sh1
+  unfold Line_through at rh1
+  simp at rh1
+  apply colinear_perm12 at rh1
+  apply (colinear_alt s a r).1 at rh1
+  rw[← rh1]
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨s1,s2⟩ := s
+  obtain ⟨r1,r2⟩ := r
+  simp
+  ring
+
+
+  unfold Line_through at sh1 rh1
+  simp at *
+  rw[rh2,sh2]
+  unfold padd
+  simp
+  have brs : colinear b r s := by{exact colinear_trans a b r s rh1 sh1 ab}
+  have : ((a.x - b.x) / (s.x - r.x)).im = 0 := by{
+    apply colinear_perm13 at brs
+    apply colinear_perm23 at brs
+    apply colinear_perm12 at sh1
+    apply (colinear_alt s b r).1 at brs
+    apply (colinear_alt b a s).1 at sh1
+    have : (b.x - a.x) / (b.x - s.x) = (a.x-b.x)/(s.x-b.x) := by{
+      by_cases bs: b.x=s.x
+      rw[bs]
+      simp
+
+      have bssub: b.x-s.x ≠ 0 := by{
+        contrapose bs
+        simp at *
+        calc
+          b.x = b.x - 0 := by ring
+            _= b.x - (b.x-s.x) := by{rw[bs]}
+            _= s.x := by{ring}
+      }
+      have sbsub: s.x-b.x ≠ 0 := by{
+        contrapose bs
+        simp at *
+        calc
+          b.x = b.x + 0 := by{ring}
+            _= b.x + (s.x-b.x) := by{rw[bs]}
+            _= s.x := by{ring}
+      }
+      field_simp
+      ring
+    }
+    rw[this] at sh1
+    clear this
+    by_cases sbsub: s.x-b.x = 0
+    swap
+    have : (a.x - b.x) / (s.x - r.x) = (a.x - b.x) / (s.x - b.x) * ((s.x - b.x) / (s.x - r.x)) := by{field_simp}
+    rw[this]
+    clear this
+    exact complex_real_mul sh1 brs
+
+    have sb: s = b := by{
+      ext
+      calc
+        s.x = s.x - 0 := by{ring}
+          _= s.x - (s.x-b.x) := by{rw[sbsub]}
+          _= b.x := by ring
+    }
+    tauto
+  }
+  calc
+    ((a.x - b.x) / (r.x - s.x)).im = -1 * ((a.x - b.x) / (s.x - r.x)).im := by{
+      obtain ⟨a1,a2⟩ := a
+      obtain ⟨b1,b2⟩ := b
+      obtain ⟨s1,s2⟩ := s
+      obtain ⟨r1,r2⟩ := r
+      simp
+      ring
+    }
+      _= -1*0 := by{rw[this]}
+      _= 0 := by ring
+
+
+
+  intro h
+  unfold Parallel
+  let p := Point.mk (c.x-a.x)
+  use p
+  have nice: colinear a b (padd d (pneg p)) := by{
+    apply (colinear_alt a b (padd d (pneg p))).2
+    unfold padd pneg p
+    simp
+    rw[← h]
+    obtain ⟨a1,a2⟩ := a
+    obtain ⟨b1,b2⟩ := b
+    obtain ⟨c1,c2⟩ := c
+    obtain⟨d1,d2⟩ := d
+    simp
+    ring
+  }
+  symm
+  apply line_through_unique
+  unfold Lies_on shift_line Line_through
+  simp
+  constructor
+  use a
+  unfold p
+  constructor
+  apply colinear_self
+  right
+  right
+  rfl
+  ext
+  unfold padd
+  ring
+
+  use (padd d (pneg p))
+  constructor
+  assumption
+  unfold padd pneg
+  ext
+  simp
+  ring
+}
+
 /- A big Lemma is the following: Two Lines are parallel, if one is the other one shifted:
  The cool thing about this, that we have defined enough for this to be proven (almost) purely geometrically-/
  /-It still is quite a bummer though, unfortunately-/
@@ -1090,6 +1483,7 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
       contradiction
     }
     obtain ce|cf := this
+    /-ab hier-/
     have hR : R = Line_through ce := by{
       apply line_through_unique
       constructor
@@ -1103,9 +1497,137 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     clear f ef rf
     by_contra h0
     let m := ((conj a.x) - (conj b.x))*(c.x-e.x)-(a.x-b.x)*(conj c.x - conj e.x)
-    let n := (((conj a.x)*b.x-a.x*(conj b.x))*(c.x-d.x)-(a.x-b.x)*((conj c.x)*d.x-c.x*(conj d.x)))
+    --n IST FALSCH DEFINIERT OJE
+    let n := (((conj a.x)*b.x-a.x*(conj b.x))*(c.x-e.x)-(a.x-b.x)*((conj c.x)*e.x-c.x*(conj e.x)))
     have t1: m ≠ 0 := by{
-      sorry
+      by_contra h1
+      unfold m at h1
+      have h2: (conj a.x - conj b.x) * (c.x - e.x) = (a.x - b.x) * (conj c.x - conj e.x) := by{
+        calc
+          (conj a.x - conj b.x) * (c.x - e.x) = (conj a.x - conj b.x) * (c.x - e.x) - 0 := by ring
+            _= (conj a.x - conj b.x) * (c.x - e.x) - ((conj a.x - conj b.x) * (c.x - e.x) - (a.x - b.x) * (conj c.x - conj e.x)) := by rw[h1]
+            _= (a.x - b.x) * (conj c.x - conj e.x) := by ring
+      }
+      clear h1
+      have ab_sub: a.x-b.x ≠ 0 := by{
+        by_contra ab
+        have : a=b := by{
+        simp at *
+        ext
+        calc
+          a.x = a.x -0 := by ring
+            _= a.x -(a.x-b.x) := by rw[ab]
+            _= b.x := by ring
+        }
+        contradiction
+      }
+      have ce_conj_sub : conj c.x - conj e.x ≠ 0 := by{
+        by_contra h3
+        simp at *
+        have : conj c.x = conj e.x := by{
+          calc
+            conj c.x = conj c.x - 0 := by ring
+              _= conj c.x - (conj c.x - conj e.x) := by{rw[h3]}
+              _= conj e.x := by ring
+        }
+        have : c=e := by{
+          ext
+          rw[← conj_twice c.x, ← conj_twice e.x, this]
+        }
+        contradiction
+      }
+      have ce_sub : c.x - e.x ≠ 0 := by{
+        by_contra ab
+        have : c=e := by{
+        simp at *
+        ext
+        calc
+          c.x = c.x -0 := by ring
+            _= c.x -(c.x-e.x) := by rw[ab]
+            _= e.x := by ring
+        }
+        contradiction
+      }
+      have abce: conj ((a.x-b.x)/(c.x-e.x)) = (a.x-b.x)/(c.x-e.x) := by{
+        simp
+        field_simp
+        assumption
+      }
+      --focus on h0
+      have imzero: ( (a.x - b.x) / (c.x - e.x)).im = 0 := by{
+        exact Complex.conj_eq_iff_im.mp abce
+      }
+      /-Aus dem könnte man mit colinear_alt folgern:
+      ab parallel zu ce
+      und dann wird h0 halt zum problem-/
+      have LR_parallel: Parallel L R := by{
+        rw[this,hR]
+        exact (parallel_quot ab ce).mpr imzero
+      }
+      obtain ⟨q,qh⟩ := LR_parallel
+      clear abce ce_sub ce_conj_sub ab_sub h2 m n
+      contrapose h0
+      simp
+      rw[qh] at ch re
+      unfold Lies_on shift_line at re ch
+      simp at *
+      obtain ⟨u,uh1,uh2⟩ := ch
+      obtain ⟨v,vh1,vh2⟩ := re
+      unfold d p
+      rw[uh2,vh2]
+      unfold padd
+      simp
+      unfold colinear
+      have : det { x := u.x + q.x } { x := v.x + q.x } { x := b.x + (u.x + q.x - a.x) } = det u v (padd u (Point.mk (b.x-a.x))) := by{
+        unfold det padd conj
+        simp
+        ring
+      }
+      rw[this]
+      clear this
+      have goal: colinear u v (padd u (Point.mk (b.x - a.x))) := by{
+        rw[this] at vh1 uh1
+        unfold Line_through at vh1 uh1
+        simp at vh1 uh1
+        have abshift: colinear a b (padd u (Point.mk (b.x-a.x))) := by{
+          unfold colinear at uh1
+          unfold colinear
+          calc
+            det a b (padd u { x := b.x - a.x }) = det a b u := by{
+              unfold det padd
+              simp
+              ring
+            }
+              _= 0 := by{assumption}
+        }
+        have shiftmem: Lies_on (padd u (Point.mk (b.x-a.x))) (Line_through ab) := by{
+          unfold Lies_on Line_through
+          simp
+          assumption
+        }
+        have uv : u ≠ v := by{
+          by_contra ce
+          have : c = e := by{
+            rw[uh2,vh2]
+            ext
+            unfold padd
+            rw[ce]
+          }
+          contradiction
+        }
+        have uvL: Line_through ab = Line_through uv := by{
+          apply line_through_unique
+          constructor
+          repeat
+            unfold Lies_on Line_through
+            assumption
+        }
+        rw[uvL] at shiftmem
+        unfold Lies_on Line_through at shiftmem
+        assumption
+      }
+      unfold colinear at goal
+      assumption
     }
     --I also have to do the reverse...
     unfold conj at t1
@@ -1117,35 +1639,303 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
       simp at t1
     }
     let q := Point.mk (n / m)
+    have : conj m = -m := by{
+      unfold m
+      simp
+    }
+    rw[this] at t2
     have colinear1 : colinear a b q := by{
-      unfold q
-      unfold colinear det
-      have s1: (a.x * conj b.x + ({ x := n / m }: Point).x * conj a.x + b.x * conj ({ x := n / m }: Point).x - a.x * conj ({ x := n / m }: Point).x -
-        ({ x := n / m }: Point).x * conj b.x -
-      b.x * conj a.x) = 0 := by{
+      unfold colinear
+      rw[det_detproper a b q]
+      have goal: (detproper a.x (conj a.x) 1 b.x (conj b.x) 1 q.x (conj q.x) 1) = 0 := by{
+        unfold q
         simp
+        rw[this]
+        have : detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{
+            calc
+              detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = detproper a.x (conj a.x) 1 b.x (conj b.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+                field_simp
+                have : conj n / -m = - conj n / m := by{
+                  field_simp
+                }
+                rw[this]
+              }
+                _= 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+        }
+        rw[this]
+        clear this
         field_simp
         unfold n m
+        unfold detproper
         simp
-        sorry
+        ring
       }
-      exact
-        (AddSemiconjBy.eq_zero_iff (Complex.im 0)
-              (congrFun (congrArg HAdd.hAdd (congrArg Complex.im (id (Eq.symm s1))))
-                (Complex.im 0))).mp
-          rfl
+      rw[goal]
+      rfl
     }
+
     have colinear2: colinear c e q := by{
-      unfold q
+      unfold colinear
+      rw[det_detproper c e q]
+      have goal: detproper c.x (conj c.x) 1 e.x (conj e.x) 1 q.x (conj q.x) 1 = 0 := by{
+        unfold q
+        simp
+        rw[this]
+        have : detproper c.x (conj c.x) 1 e.x (conj e.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper c.x (conj c.x) 1 e.x (conj e.x) 1 (n) (-conj n) (m) := by{
+            calc
+              detproper c.x (conj c.x) 1 e.x (conj e.x) 1 (n / m) (conj n / - m) 1 = detproper c.x (conj c.x) 1 e.x (conj e.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+                field_simp
+                have : conj n / -m = - conj n / m := by{
+                  field_simp
+                }
+                rw[this]
+              }
+                _= 1/m * detproper c.x (conj c.x) 1 e.x (conj e.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+        }
+        rw[this]
+        clear this
+        field_simp
+        unfold n m
+        unfold detproper
+        simp
+        ring
+      }
+      rw[goal]
+      rfl
+    }
+    have qbad: q ∈ L.range ∩ R.range := by{
+      constructor
+      swap
+      rw[hR]
+      unfold Line_through
+      simp
+      assumption
+
+      have : L = Line_through ab := by{assumption}
+      rw[this]
+      unfold Line_through
+      simp
+      assumption
+    }
+    rw[h] at qbad
+    contradiction
+
+    --letzte 200 zeilen nohcmal bruhhh
+
+    have hR : R = Line_through cf := by{
+      apply line_through_unique
+      constructor
+      assumption
+      exact rf
+    }
+    rw[hR]
+    unfold Lies_on
+    unfold Line_through
+    simp
+    clear e ef re
+    by_contra h0
+    let m := ((conj a.x) - (conj b.x))*(c.x-f.x)-(a.x-b.x)*(conj c.x - conj f.x)
+    let n := (((conj a.x)*b.x-a.x*(conj b.x))*(c.x-f.x)-(a.x-b.x)*((conj c.x)*f.x-c.x*(conj f.x)))
+    have t1: m ≠ 0 := by{
+      by_contra h1
+      unfold m at h1
+      have h2: (conj a.x - conj b.x) * (c.x - f.x) = (a.x - b.x) * (conj c.x - conj f.x) := by{
+        calc
+          (conj a.x - conj b.x) * (c.x - f.x) = (conj a.x - conj b.x) * (c.x - f.x) - 0 := by ring
+            _= (conj a.x - conj b.x) * (c.x - f.x) - ((conj a.x - conj b.x) * (c.x - f.x) - (a.x - b.x) * (conj c.x - conj f.x)) := by rw[h1]
+            _= (a.x - b.x) * (conj c.x - conj f.x) := by ring
+      }
+      clear h1
+      have ab_sub: a.x-b.x ≠ 0 := by{
+        by_contra ab
+        have : a=b := by{
+        simp at *
+        ext
+        calc
+          a.x = a.x -0 := by ring
+            _= a.x -(a.x-b.x) := by rw[ab]
+            _= b.x := by ring
+        }
+        contradiction
+      }
+      have cf_conj_sub : conj c.x - conj f.x ≠ 0 := by{
+        by_contra h3
+        simp at *
+        have : conj c.x = conj f.x := by{
+          calc
+            conj c.x = conj c.x - 0 := by ring
+              _= conj c.x - (conj c.x - conj f.x) := by{rw[h3]}
+              _= conj f.x := by ring
+        }
+        have : c=f := by{
+          ext
+          rw[← conj_twice c.x, ← conj_twice f.x, this]
+        }
+        contradiction
+      }
+      have cf_sub : c.x - f.x ≠ 0 := by{
+        by_contra ab
+        have : c=f := by{
+        simp at *
+        ext
+        calc
+          c.x = c.x -0 := by ring
+            _= c.x -(c.x-f.x) := by rw[ab]
+            _= f.x := by ring
+        }
+        contradiction
+      }
+      have abcf: conj ((a.x-b.x)/(c.x-f.x)) = (a.x-b.x)/(c.x-f.x) := by{
         simp
         field_simp
-        sorry
+        assumption
       }
-      exact
-        (AddSemiconjBy.eq_zero_iff (Complex.im 0)
-              (congrFun (congrArg HAdd.hAdd (congrArg Complex.im (id (Eq.symm s2))))
-                (Complex.im 0))).mp
-          rfl
+      --focus on h0
+      have imzero: ( (a.x - b.x) / (c.x - f.x)).im = 0 := by{
+        exact Complex.conj_eq_iff_im.mp abcf
+      }
+      have LR_parallel: Parallel L R := by{
+        rw[this,hR]
+        exact (parallel_quot ab cf).mpr imzero
+      }
+      obtain ⟨q,qh⟩ := LR_parallel
+      clear abcf cf_sub cf_conj_sub ab_sub h2 m n
+      contrapose h0
+      simp
+      rw[qh] at ch rf
+      unfold Lies_on shift_line at rf ch
+      simp at *
+      obtain ⟨u,uh1,uh2⟩ := ch
+      obtain ⟨v,vh1,vh2⟩ := rf
+      unfold d p
+      rw[uh2,vh2]
+      unfold padd
+      simp
+      unfold colinear
+      have : det { x := u.x + q.x } { x := v.x + q.x } { x := b.x + (u.x + q.x - a.x) } = det u v (padd u (Point.mk (b.x-a.x))) := by{
+        unfold det padd conj
+        simp
+        ring
+      }
+      rw[this]
+      clear this
+      have goal: colinear u v (padd u (Point.mk (b.x - a.x))) := by{
+        rw[this] at vh1 uh1
+        unfold Line_through at vh1 uh1
+        simp at vh1 uh1
+        have abshift: colinear a b (padd u (Point.mk (b.x-a.x))) := by{
+          unfold colinear at uh1
+          unfold colinear
+          calc
+            det a b (padd u { x := b.x - a.x }) = det a b u := by{
+              unfold det padd
+              simp
+              ring
+            }
+              _= 0 := by{assumption}
+        }
+        have shiftmem: Lies_on (padd u (Point.mk (b.x-a.x))) (Line_through ab) := by{
+          unfold Lies_on Line_through
+          simp
+          assumption
+        }
+        have uv : u ≠ v := by{
+          by_contra cf
+          have : c = f := by{
+            rw[uh2,vh2]
+            ext
+            unfold padd
+            rw[cf]
+          }
+          contradiction
+        }
+        have uvL: Line_through ab = Line_through uv := by{
+          apply line_through_unique
+          constructor
+          repeat
+            unfold Lies_on Line_through
+            assumption
+        }
+        rw[uvL] at shiftmem
+        unfold Lies_on Line_through at shiftmem
+        assumption
+      }
+      unfold colinear at goal
+      assumption
+    }
+
+    unfold conj at t1
+    have t2: conj m ≠ 0 := by{
+      by_contra h0
+      rw[← conj_twice m] at t1
+      rw[h0] at t1
+      unfold conj at t1
+      simp at t1
+    }
+    let q := Point.mk (n / m)
+    have : conj m = -m := by{
+      unfold m
+      simp
+    }
+    rw[this] at t2
+    have colinear1 : colinear a b q := by{
+      unfold colinear
+      rw[det_detproper a b q]
+      have goal: (detproper a.x (conj a.x) 1 b.x (conj b.x) 1 q.x (conj q.x) 1) = 0 := by{
+        unfold q
+        simp
+        rw[this]
+        have : detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{
+            calc
+              detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = detproper a.x (conj a.x) 1 b.x (conj b.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+                field_simp
+                have : conj n / -m = - conj n / m := by{
+                  field_simp
+                }
+                rw[this]
+              }
+                _= 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+        }
+        rw[this]
+        clear this
+        field_simp
+        unfold n m
+        unfold detproper
+        simp
+        ring
+      }
+      rw[goal]
+      rfl
+    }
+
+    have colinear2: colinear c f q := by{
+      unfold colinear
+      rw[det_detproper c e q]
+      have goal: detproper c.x (conj c.x) 1 f.x (conj f.x) 1 q.x (conj q.x) 1 = 0 := by{
+        unfold q
+        simp
+        rw[this]
+        have : detproper c.x (conj c.x) 1 f.x (conj f.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper c.x (conj c.x) 1 f.x (conj f.x) 1 (n) (-conj n) (m) := by{
+            calc
+              detproper c.x (conj c.x) 1 f.x (conj f.x) 1 (n / m) (conj n / - m) 1 = detproper c.x (conj c.x) 1 f.x (conj f.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+                field_simp
+                have : conj n / -m = - conj n / m := by{
+                  field_simp
+                }
+                rw[this]
+              }
+                _= 1/m * detproper c.x (conj c.x) 1 f.x (conj f.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+        }
+        rw[this]
+        clear this
+        field_simp
+        unfold n m
+        unfold detproper
+        simp
+        ring
+      }
+      rw[goal]
+      rfl
     }
     have qbad: q ∈ L.range ∩ R.range := by{
       constructor
