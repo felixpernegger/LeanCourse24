@@ -1024,7 +1024,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
 
   obtain ⟨a,b,ab,aL,bL⟩ := ex_points_on_line L
   obtain ⟨c,ch⟩ := ex_point_on_line R
-  --OMG I FUCKING REVERSED P OMFG
   let p := Point.mk (c.x-a.x)
   use p
   have : L = Line_through ab := by{
@@ -1138,10 +1137,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     }
     have colinear2: colinear c e q := by{
       unfold q
-      unfold colinear det
-      have s2: (c.x * conj e.x + ({ x := n / m } : Point).x * conj c.x + e.x * conj ({ x := n / m } : Point).x - c.x * conj ({ x := n / m } : Point).x -
-        ({ x := n / m } : Point).x * conj e.x -
-      e.x * conj c.x) = 0 := by{
         simp
         field_simp
         sorry
@@ -1168,7 +1163,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     }
     rw[h] at qbad
     contradiction
-    sorry
   }
   rw[hR]
   unfold Line_through shift_line
