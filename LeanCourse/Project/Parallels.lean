@@ -1,12 +1,17 @@
 import LeanCourse.Project.Basic
 import Mathlib
 
+open Function Set Classical
+
 noncomputable section
 
 
 /- Lets define parallel lines. We say a line is parallel to itself, so we can get a nice equivalence relation-/
 def Parallel(L R : Line) : Prop :=
   ∃p : Point, R = shift_line L p
+
+/-The goal of this section is to prove the parallel postulate from our definition of paralllel
+and colinear. This will be quite unconfortable.-/
 
 lemma shift_line_parallel (L : Line)(a : Point): Parallel L (shift_line L a) := by{
   unfold Parallel

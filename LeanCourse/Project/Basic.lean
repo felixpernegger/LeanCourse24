@@ -60,14 +60,14 @@ lemma padd_zero (a : Point) : padd a (Point.mk 0) = a := by{
 /-Adding is commutative:-/
 lemma padd_comm (a b : Point) : padd a b = padd b a := by{
   unfold padd
-  ring
+  ring_nf
 }
 
 /-And associative:-/
 
 lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
   unfold padd
-  ring
+  ring_nf
 }
 
 /-So we have an abelian group:-/
@@ -146,7 +146,7 @@ lemma point_abs_pos (a b : Point): 0 ≤ point_abs a b := by{
 
 lemma point_abs_self (a : Point) : point_abs a a = 0 := by{
   unfold point_abs
-  ring
+  ring_nf
   exact AbsoluteValue.map_zero Complex.abs
 }
 
@@ -159,7 +159,7 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
   unfold point_abs
   calc
     Complex.abs (a.x - b.x) + Complex.abs (b.x - c.x) ≥ Complex.abs ((a.x-b.x) + (b.x-c.x)) := by exact AbsoluteValue.add_le Complex.abs (a.x - b.x) (b.x - c.x)
-      _= Complex.abs (a.x-c.x) := by ring
+      _= Complex.abs (a.x-c.x) := by ring_nf
 }
 
 def pconj : Point → Point :=
@@ -256,7 +256,7 @@ lemma det_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): det a b c = 0 := by{
   repeat
     rw[h]
     unfold det
-    ring
+    ring_nf
     rfl
 }
 
@@ -284,7 +284,7 @@ def detproper: ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → ℂ → �
 
 lemma det_detproper(a b c : Point): det a b c = (detproper a.x (conj a.x) 1 b.x (conj b.x) 1 c.x (conj c.x) (1:ℂ)).im := by{
   unfold det detproper
-  ring
+  ring_nf
 }
 
 /-Scalar multiplication with rows:-/
@@ -389,7 +389,7 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
           rfl
 
           field_simp
-          ring
+          ring_nf
           have : z ^ 2 * (z ^ 2 + v ^ 2)⁻¹ + v ^ 2 * (z ^ 2 + v ^ 2)⁻¹ = 1 := by{
             have : (z ^ 2 + v ^ 2) ≠ 0 := by{
               have : z≠0 ∨ v ≠ 0 := by{
@@ -420,7 +420,7 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
         }
         rw[this]
       }
-      _=  ({re := (x*z+y*v)/(z^2+v^2), im := (-x*v+y*z)/(z^2+v^2)} : ℂ) := by simp; ring; tauto
+      _=  ({re := (x*z+y*v)/(z^2+v^2), im := (-x*v+y*z)/(z^2+v^2)} : ℂ) := by simp; ring_nf; tauto
 }
 
 
@@ -551,7 +551,7 @@ lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im 
     linarith
   }
   rw[h0]
-  ring
+  ring_nf
   rw[h0] at h
   simp at h
   obtain h|h := h
