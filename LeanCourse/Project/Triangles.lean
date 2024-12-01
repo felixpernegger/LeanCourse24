@@ -1,4 +1,4 @@
-import LeanCourse.Project.Basic
+import LeanCourse.Project.Parallels
 import Mathlib
 
 open Function Set Classical

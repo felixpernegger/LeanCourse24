@@ -324,7 +324,10 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
         assumption
 
         right
-        sorry
+        #check mem_compl_iff
+        apply (mem_compl_iff (↑U : Set X) x).2 at p
+        assumption
+        by_contra h0
       }
       rw[this]
       rw[mem_interior]
@@ -379,9 +382,8 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
     }}
 
 
-=======
+
 lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := sorry
->>>>>>> d2d8b567bc8329b7ce0a281165b976e0a0a2d6df
 
 instance completeBooleanAlgebra : CompleteBooleanAlgebra (RegularOpens X) :=
   CompleteBooleanAlgebra.ofMinimalAxioms {
@@ -400,15 +402,75 @@ a filter of the form `if q then F else G`. The next exercise is a more concrete 
 Useful lemmas here are
 * `Filter.Eventually.filter_mono`
 * `Filter.Eventually.mono` -/
+#check Filter.Eventually.filter_mono
+#check Filter.Eventually.mono
 lemma technical_filter_exercise {ι α : Type*} {p : ι → Prop} {q : Prop} {a b : α}
     {L : Filter ι} {F G : Filter α}
     (hbF : ∀ᶠ x in F, x ≠ b) (haG : ∀ᶠ x in G, x ≠ a) (haF : pure a ≤ F) (hbG : pure b ≤ G) :
     (∀ᶠ i in L, p i ↔ q) ↔
     Tendsto (fun i ↦ if p i then a else b) L (if q then F else G) := by {
   have hab : a ≠ b
-  · sorry
+  · have ah : ∀ᶠ (x : α) in (pure a), x ≠ b := by{
+    exact haF hbF
+    }
+    have bh : ∀ᶠ (x : α) in (pure b), x ≠ a := by{
+    exact hbG haG
+    }
+    by_contra ab
+    rw[ab] at ah bh haF haG
+    clear a ab
+    have : b ≠ b := by{
+      exact ah
+    }
+    tauto
   rw [tendsto_iff_eventually]
-  sorry
+  constructor
+  intro r t h
+  filter_upwards [r] with u uh
+  rw[uh]
+  clear u uh
+  clear r
+  clear p L ι
+  by_cases h0: q
+  simp [h0] at *
+  exact haF h
+  simp [h0] at *
+  exact hbG h
+
+  intro u
+  by_cases h0: q
+  simp [h0] at u
+  simp [h0]
+  let r := fun x ↦ x ≠ b
+  have : ∀ᶠ (x : α) in F, r x := by{
+    unfold r
+    assumption
+  }
+  specialize u this
+  filter_upwards [u] with i j
+  by_cases h0: p i
+  assumption
+  exfalso
+  simp [h0] at *
+  unfold r at j
+  tauto
+
+
+  simp [h0] at u
+  simp [h0]
+  let r := fun x ↦ x ≠ a
+  have : ∀ᶠ (x : α) in G, r x := by{
+    unfold r
+    assumption
+  }
+  specialize u this
+  filter_upwards [u] with i j
+  by_cases h0: p i
+  exfalso
+  simp [h0] at *
+  unfold r at j
+  tauto
+  assumption
   }
 
 /- To be more concrete, we can use the previous lemma to prove the following.
@@ -421,5 +483,12 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
+  constructor
+  intro h
+  sorry
+
+  #check indicator_apply
+  #check apply_ite
+  #check tendsto_pi_nhds
   sorry
   }

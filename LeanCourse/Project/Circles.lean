@@ -8,6 +8,8 @@ noncomputable section
 /-In this section we will define circles and prove some stuff about them.
 One of the main goals is to prove that every Triangle has a unique circumcircle.-/
 
+/-Because Circle is taken in mathlib...........
+We use CCircle "Complex Circle"-/
 
 /- Now introduce circles:-/
 @[ext] structure CCircle where
