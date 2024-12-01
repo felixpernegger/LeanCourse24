@@ -1,4 +1,4 @@
-import LeanCourse.Project.Basic
+import LeanCourse.Project.Parallels
 import Mathlib
 
 open Function Set Classical
@@ -285,7 +285,7 @@ lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (tri_ab T) = (scale_factor 
   rw[u3]
   simp
   calc
-    Complex.abs (z * Q.a.x - z * Q.b.x) = Complex.abs (z * (Q.a.x - Q.b.x)) := by ring
+    Complex.abs (z * Q.a.x - z * Q.b.x) = Complex.abs (z * (Q.a.x - Q.b.x)) := by ring_nf
       _= (Complex.abs z) * Complex.abs (Q.a.x -Q.b.x) := by exact AbsoluteValue.map_mul Complex.abs z (Q.a.x - Q.b.x)
   sorry
 }
@@ -335,7 +335,7 @@ lemma directsimilar_symm {T Q : Triangle} (h: directSimilar T Q) : directSimilar
   }
   rw[← rh1,← rh2,← rh3]
   field_simp
-  ring
+  ring_nf
   tauto
 }
 
@@ -365,7 +365,7 @@ lemma directsimilar_trans{T Q R : Triangle}(TQ : directSimilar T Q)(QR: directSi
     simp at Q2
    }
   field_simp
-  ring
+  ring_nf
   tauto
 }
 /-Mirrorring is cool:-/

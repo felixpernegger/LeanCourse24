@@ -1,4 +1,4 @@
-import LeanCourse.Project.Basic
+import LeanCourse.Project.Lines
 import Mathlib
 
 open Function Set Classical
@@ -935,7 +935,7 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
   rw[this] at th
   have : r = padd (padd r (pneg p)) p := by{
     unfold padd pneg
-    ring
+    ring_nf
   }
   rw[this] at th
   exact colinear_shift_bw a b (padd r (pneg p)) p th
