@@ -711,3 +711,7 @@ lemma colinear_trans (a b c d : Point)(h: colinear a b c) (h': colinear a b d)(n
   rw[this] at cool
   assumption
 }
+
+/-Fun fact: I originally did this prove without colinear_alt (so with determinants).
+That took me about 300 lines of awful calculations and a week of work.
+Luckily I saw the light!-/
