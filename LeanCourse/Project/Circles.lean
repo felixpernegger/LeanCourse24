@@ -182,15 +182,15 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   have pq_sub2: Complex.abs (p.x-q.x) ≠ 0 := by{
     exact (AbsoluteValue.ne_zero_iff Complex.abs).mpr pq_sub
   }
-  let r := padd q (Point.mk (R*(p.x-q.x)/(Complex.abs (p.x-q.x))))
+  let r := padd q (pneg (Point.mk (R*(p.x-q.x)/(Complex.abs (p.x-q.x)))))
   have rqR : Lies_on_circle r (Circle_through q R) := by{
-    unfold Lies_on_circle Circle_through point_abs r padd
+    unfold Lies_on_circle Circle_through point_abs r padd pneg
     simp
     field_simp
   }
   rw[← h] at rqR
   have pqr: colinear p q r := by{
-    unfold r padd colinear det conj
+    unfold r padd colinear det conj pneg
     simp
     field_simp
     obtain ⟨a,b⟩ := p
@@ -206,15 +206,14 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
     unfold point_abs
     assumption
   }
-  have rqR' : Lies_on_circle r (Circle_through q R) := by{
-    unfold Lies_on_circle Circle_through point_abs r padd
+  have tt: Lies_on_circle r (Circle_through q R) := by{
+    unfold Lies_on_circle Circle_through point_abs r padd pneg
     simp
     field_simp
   }
-  unfold Lies_on_circle Circle_through at rqR'
-  simp at rqR'
-  sorry
-  --for this i should probably improve in between in the Triangle section and use that lemma
+  unfold Lies_on_circle Circle_through at tt
+  simp at tt
+  apply colinear_imp_in_between at pqr
 }
 
 theorem center_unique (z : Point)(R : PosReal) : z = Center (Circle_through z R) := by{

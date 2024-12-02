@@ -164,12 +164,41 @@ lemma area_add_side (a b c x : Point)(bc : b≠c)(h : Lies_on x (Line_through bc
 def in_between (a b x : Point) : Prop :=
   point_abs  a x + point_abs x b = point_abs a b
 
-/-A sweet consequence is that this can only happen when x already lies on the line between a b-/
+/-The wording of this is of course a bit unfortunate, but putting x in the middle wouldnt be
+mich better in my opinion-/
 
-lemma in_between_imp_colinear {a b x : Point} (h: in_between a b x) : colinear a b x := by{
-  sorry
+/-This is symmetric in the first two arguments:-/
+
+lemma in_between_symm {a b x : Point}(h : in_between a b x) : in_between b a x := by{
+  unfold in_between at *
+  rw[point_abs_symm b a, ← h, add_comm, point_abs_symm x a, point_abs_symm b x]
 }
 
+/-A sweet consequence is that this can only happen when x already lies on the line between a b-/
+
+lemma in_between_imp_colinear {a b z : Point} (h: in_between a b z) : colinear a b z := by{
+  sorry
+}
+--BIG TODO: Also do the reverse here: if a b c are colinear, one of them is between the other two
+
+/-The reverse (kind of) holds as well:-/
+lemma colinear_imp_in_between {a b c : Point} (h : colinear a b c) : in_between a b c ∨ in_between a c b ∨ in_between b c a := by{
+  apply (colinear_alt2 a b c).1 at h
+  obtain h|h := h
+  rw[h]
+  clear h
+  right
+  right
+  unfold in_between
+  rw[point_abs_self c]
+  ring
+
+  obtain ⟨t,ht⟩ := h
+  rw[ht]
+  by_cases h0 : t<0
+  --ab hier fälle durchrattern, aber genau aufpassen
+  sorry
+}
 
 def oldSimilar (T Q : Triangle) : Prop :=
   ∃z : ℂ, (z* T.a.x = Q.a.x) ∧ (z* T.b.x = Q.b.x) ∧ (z* T.c.x = Q.c.x)
