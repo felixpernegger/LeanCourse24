@@ -278,9 +278,7 @@ abbrev CompleteBooleanAlgebra.ofMinimalAxioms {α : Type*}
 instance : HasCompl (RegularOpens X) where
   compl U := sorry
 
-@[simp]
-<<<<<<< HEAD
-lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := by{
+@[simp] lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := by{
   ext x
   constructor
   intro xh
@@ -326,8 +324,7 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
         right
         #check mem_compl_iff
         apply (mem_compl_iff (↑U : Set X) x).2 at p
-        assumption
-        by_contra h0
+        sorry
       }
       rw[this]
       rw[mem_interior]
@@ -379,11 +376,9 @@ instance : CompleteBooleanAlgebra (RegularOpens X) :=
       obtain ⟨A,hA⟩ := xh
       simp at hA
       sorry
-    }}
-
-
-
-lemma coe_compl (U : RegularOpens X) : ↑Uᶜ = interior (U : Set X)ᶜ := sorry
+      sorry
+    }
+  }
 
 instance completeBooleanAlgebra : CompleteBooleanAlgebra (RegularOpens X) :=
   CompleteBooleanAlgebra.ofMinimalAxioms {
@@ -481,11 +476,46 @@ lemma tendsto_indicator_iff {ι : Type*} {L : Filter ι} {s : ι → Set ℝ} {t
     (ha : ∀ x, f x ≠ 0) :
     (∀ x, ∀ᶠ i in L, x ∈ s i ↔ x ∈ t) ↔
     Tendsto (fun i ↦ indicator (s i) f) L (𝓝 (indicator t f)) := by {
+
+  have : ∀(x : ℝ), ∀ᶠ (i : ι) in L, x ∈ s i ↔ x ∈ t ↔ Tendsto (fun i ↦ (s i).indicator f x) L (𝓝 (t.indicator f x)) := by{
+    --(∀ᶠ (i : ι) in L, p i ↔ q) ↔ Tendsto (fun i ↦ if p i then a else b) L (if q then F else G)
+    intro x
+    rw[indicator_apply]
+    specialize ha x
+    have : (∀ᶠ (i : ι) in L, x ∈ s i ↔ x ∈ t) ↔ Tendsto (fun i ↦ if x ∈ (s i) then f x else 0) L (𝓝 (if x ∈ t then f x else 0)) := by{
+      have : 𝓝 (if x ∈ t then f x else 0) = if x ∈ t then 𝓝 (f x) else 𝓝 (0) := by{
+        exact apply_ite 𝓝 (x ∈ t) (f x) 0
+      }
+      rw[this]
+      clear this
+      have t1: pure (f x) ≤ 𝓝 (f x) := by{
+        exact intervalIntegral.FTCFilter.pure_le
+      }
+      have t2: pure (@OfNat.ofNat ℝ 0 Zero.toOfNat0) ≤ 𝓝 (0) := by{
+        exact Specializes.pure_le_nhds fun ⦃U⦄ a ↦ a
+      }
+      have s1 : ∀ᶠ y in 𝓝 (f x), y ≠ 0 := by{
+        exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) ha
+      }
+      have s2 : ∀ᶠ y in 𝓝 (0), y ≠ f x := by{
+        exact ContinuousAt.eventually_ne (fun ⦃U⦄ a ↦ a) (id (Ne.symm ha))
+      }
+      exact technical_filter_exercise s1 s2 t1 t2
+    }
+    exact this
+  }
   constructor
   intro h
+  refine tendsto_pi_nhds.mpr ?mp.a
+  intro x
+  specialize this x
+  specialize h x
+  apply this.1
+  assumption
 
-  #check indicator_apply
-  #check apply_ite
-  #check tendsto_pi_nhds
-  sorry
+  intro h
+  intro x
+  specialize this x
+  apply this.2
+  exact Tendsto.apply_nhds h x
   }
