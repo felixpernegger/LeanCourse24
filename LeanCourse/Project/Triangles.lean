@@ -198,6 +198,7 @@ lemma colinear_imp_in_between {a b c : Point} (h : colinear a b c) : in_between 
   by_cases h0 : t<0
   --ab hier fälle durchrattern, aber genau aufpassen
   sorry
+  sorry
 }
 
 def oldSimilar (T Q : Triangle) : Prop :=
