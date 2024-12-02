@@ -213,23 +213,53 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   }
   unfold Lies_on_circle Circle_through at tt
   simp at tt
-  apply colinear_imp_in_between at pqr
-  unfold in_between at pqr
-  obtain h1|h1|h1 := pqr
-  rw[point_abs_symm r q, tt, rqR] at h1
-  --fuckyou
-
-
-  sorry
-
-
-  rw[tt,rqR] at h1
-  simp at h1
-  contradiction
-
-  rw[rqR,tt] at h1
-  simp at h1
-  rw[point_abs_symm q p] at h1
+  have : point_abs p r = (point_abs p q) + R := by{
+    unfold point_abs r pneg padd
+    simp
+    field_simp
+    obtain ⟨a,b⟩ := p
+    obtain ⟨c,d⟩ := q
+    simp
+    unfold Complex.abs
+    simp
+    unfold Complex.normSq
+    simp at *
+    clear h rqR pqr pqdist r tt pq_sub pq_sub2
+    have : √((a - c) * (a - c) + (b - d) * (b - d)) ≠ 0 := by{
+      refine Real.sqrt_ne_zero'.mpr ?_
+      by_cases h1: a=c
+      rw[h1]
+      simp
+      have : b - d ≠ 0 := by{
+        have : b ≠ d := by{
+          exact h0 h1
+        }
+        contrapose this
+        simp at *
+        linarith
+      }
+      assumption
+      have : (a-c) ≠ 0 := by{
+        contrapose h1
+        simp at *
+        linarith
+      }
+      calc
+        0 < (a-c)*(a-c) := by{sorry}
+          _= (a-c)*(a-c)+0 := by{ring}
+          _≤ (a-c)*(a-c)+(b-d)*(b-d) := by{
+            apply add_le_add
+            rfl
+            exact mul_self_nonneg (b - d)
+          }
+    }
+    field_simp
+    clear this
+    sorry -- send help
+  }
+  rw[rqR] at this
+  simp at this
+  unfold point_abs at this
   contradiction
 }
 
