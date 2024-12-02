@@ -214,6 +214,23 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   unfold Lies_on_circle Circle_through at tt
   simp at tt
   apply colinear_imp_in_between at pqr
+  unfold in_between at pqr
+  obtain h1|h1|h1 := pqr
+  rw[point_abs_symm r q, tt, rqR] at h1
+  --fuckyou
+
+
+  sorry
+
+
+  rw[tt,rqR] at h1
+  simp at h1
+  contradiction
+
+  rw[rqR,tt] at h1
+  simp at h1
+  rw[point_abs_symm q p] at h1
+  contradiction
 }
 
 theorem center_unique (z : Point)(R : PosReal) : z = Center (Circle_through z R) := by{
