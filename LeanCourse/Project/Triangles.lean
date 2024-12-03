@@ -97,9 +97,6 @@ example : area_points (Point.mk (0:ℂ)) (Point.mk (1:ℂ)) (Point.mk (Complex.I
 def perimiter_points : Point → Point → Point → ℝ :=
   fun a b c ↦ point_abs a b + point_abs b c + point_abs c a
 
-def centroid : Triangle → Point :=
-  fun T ↦ Point.mk ((T.a.x+T.b.x+T.c.x)/3)
-
 lemma midtriangle_noncolinear (T : Triangle): noncolinear (Point.mk ((T.b.x+T.c.x)/2)) (Point.mk ((T.c.x+T.a.x)/2)) (Point.mk ((T.a.x + T.b.x)/2)) := by{
   obtain ⟨a,b,c,h⟩ := T
   obtain ⟨a1,a2⟩ := a
