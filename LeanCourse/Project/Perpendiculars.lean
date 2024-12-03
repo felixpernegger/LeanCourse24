@@ -508,5 +508,20 @@ Otherwise, perp_through L p = line_through (p≠(foot p L))
 /-foot really satisfies what we want: It is on L and perp_through L p:-/
 
 lemma foot_on_line(L : Line)(p : Point): Lies_on (foot p L) L := by{
+  unfold foot
+  exact (intersection_mem (perp_through_not_parallel L p)).1
+}
 
+lemma foot_on_perp(L : Line)(p : Point): Lies_on (foot p L) (perp_through L p) := by{
+  unfold foot
+  exact (intersection_mem (perp_through_not_parallel L p)).2
+}
+
+/-It is unique (this is just uniqueness of intersection):-/
+
+lemma foot_unique{L : Line}{p q : Point}(h: Lies_on q L ∧ Lies_on q (perp_through L p)): q = foot p L := by{
+  unfold foot
+  --bruh
+  #check intersection_unique L (perp_through L p) (perp_through_not_parallel L p) h
+  exact intersection_unique L (perp_through L p) (perp_through_not_parallel L p) h
 }
