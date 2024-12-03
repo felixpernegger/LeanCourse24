@@ -50,6 +50,7 @@ lemma perp_points_perm_front{a b c d : Point}(h : perp_points a b c d) : perp_po
   ring_nf
   norm_num
 
+
   clear this h
   calc
     ((b.x - a.x) / (c.x - d.x)).re = (-1* (a.x-b.x)/(c.x-d.x)).re := by{ring_nf}
