@@ -498,13 +498,6 @@ lemma perp_through_not_parallel(L : Line)(p : Point): ¬ Parallel L (perp_throug
 def foot : Point → Line → Point :=
   fun p L ↦ Intersection (perp_through_not_parallel L p)
 
-/-I get a bit bored now but next show:
-Foot lies on Line
-Foot lies on perpendicular Line
-If p Lies on L, p is the foot
-Otherwise, perp_through L p = line_through (p≠(foot p L))
--/
-
 /-foot really satisfies what we want: It is on L and perp_through L p:-/
 
 lemma foot_on_line(L : Line)(p : Point): Lies_on (foot p L) L := by{
@@ -521,11 +514,35 @@ lemma foot_on_perp(L : Line)(p : Point): Lies_on (foot p L) (perp_through L p) :
 
 lemma foot_unique{L : Line}{p q : Point}(h: Lies_on q L ∧ Lies_on q (perp_through L p)): q = foot p L := by{
   unfold foot
-  #check perp_through_not_parallel L p
-  have this: ¬ Parallel L (perp_through L p) := by{
-    exact perp_through_not_parallel L p
-  }
-  --bruh
-  #check intersection_unique L (perp_through L p) {this} h
-  exact intersection_unique L (perp_through L p) this h
+  exact intersection_unique (perp_through_not_parallel L p) h
 }
+
+/-If p lies on L, foot p L = p:-/
+lemma foot_point_on_line{L : Line}{p : Point}(h : Lies_on p L): foot p L = p := by{
+  symm
+  apply foot_unique
+  constructor
+  · assumption
+  exact point_lies_on_perp_through L p
+}
+
+/-otherwise this is not the case:-/
+lemma foot_point_not_on_line{L : Line}{p : Point}(h : ¬Lies_on p L): foot p L ≠ p := by{
+  contrapose h
+  simp at *
+  rw[← h]
+  exact foot_on_line L p
+}
+
+/-Therefore the perpendicular line is the line_through p and foot p L:-/
+
+lemma foot_line_through{L : Line}{p : Point}(h: ¬Lies_on p L): Line_through (foot_point_not_on_line h) = perp_through L p := by{
+  symm
+  apply line_through_unique
+  constructor
+  exact foot_on_perp L p
+  exact point_lies_on_perp_through L p
+}
+
+/-This is pretty much all there is to say about perpendicul lines in general, so in the next file we
+focus on triangles (3 noncolinear points) and perpendicular lines, in particular the orthocenter!-/
