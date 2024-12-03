@@ -8,6 +8,32 @@ noncomputable section
 /-This section is for introducing perpendiculars. Goals are to highilght how Parallel and Perpenduclar
 are connected, show every point and line has a unique perpendicular line and finishing off with the orthocenter.-/
 
+/-Some lemmas about complex numbers that will be cinvenient here-/
+#check complex_real_mul
+
+lemma complex_im_mul{x y : ℂ}(hx: x.re = 0)(hy : y.re = 0): (x*y).im=0 := by{
+  obtain ⟨x1,x2⟩ := x
+  obtain ⟨y1,y2⟩ := y
+  simp at *
+  rw[hx,hy]
+  ring
+}
+
+lemma complex_real_im_mul{x y : ℂ}(hx: x.im = 0)(hy: y.re = 0): (x*y).re = 0 := by{
+  obtain ⟨x1,x2⟩ := x
+  obtain ⟨y1,y2⟩ := y
+  simp at *
+  rw[hx,hy]
+  ring
+}
+
+lemma complex_im_real_mul{x y : ℂ}(hx: x.re = 0)(hy: y.im = 0): (x*y).re = 0 := by{
+  obtain ⟨x1,x2⟩ := x
+  obtain ⟨y1,y2⟩ := y
+  simp at *
+  rw[hx,hy]
+  ring
+}
 
 /-Firstt we define perpedicular "points"-/
 def perp_points(a b c d : Point) : Prop :=

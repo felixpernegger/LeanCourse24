@@ -38,6 +38,17 @@ open Classical -- In order to take intersections and stuff
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1
 
+/-A quick lemma we will use quite often so its nice to have it explicitly, as ring doesnt work on it:-/
+lemma sub_neq_zero {a b : Point}(h: a ≠ b): a.x-b.x ≠ 0 := by{
+  contrapose h
+  simp at *
+  ext
+  calc
+    a.x = a.x - 0 := by{ring}
+      _= a.x - (a.x-b.x) := by{rw[h]}
+      _= b.x := by{ring}
+}
+
 
 /- It will be convinient to multiply and add Points-/
 
