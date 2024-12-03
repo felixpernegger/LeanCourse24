@@ -1043,6 +1043,138 @@ lemma intersection_unique {L R : Line}{a : Point}(LR : ¬ Parallel L R)(ah: Lies
   rw[as,is]
 }
 
+/-In some rare cases, one might want to use an explicit formula for the intersection of lines.
+There is one but it is not pretty:-/
+/-Note I actually *copied* the proof from  the awful parallel_def proof for (most of) this. There is nothing new to see here.-/
+lemma intersection_explicit{a b c d : Point}{ab : a ≠ b}{cd : c ≠ d}(h : ¬Parallel (Line_through ab) (Line_through cd)):
+  Intersection h = Point.mk ((((conj a.x)*(b.x)-(a.x)*(conj b.x))*(c.x-d.x)-((a.x-b.x)*((conj c.x)*(d.x)-(c.x)*(conj d.x))))/(((conj a.x)-(conj b.x))*(c.x-d.x)-(a.x-b.x)*((conj c.x)-(conj d.x)))) := by{
+
+  let m := (((conj a.x)-(conj b.x))*(c.x-d.x)-(a.x-b.x)*((conj c.x)-(conj d.x)))
+  let n := ((conj a.x)*(b.x)-(a.x)*(conj b.x))*(c.x-d.x)-((a.x-b.x)*((conj c.x)*(d.x)-(c.x)*(conj d.x)))
+  have s1: m ≠ 0 := by{
+    contrapose h
+    simp at *
+    clear n
+    apply (parallel_quot ab cd).2
+    have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
+    have cdsub: c.x-d.x ≠ 0 := by{exact sub_neq_zero cd}
+    have conjself: conj ((a.x - b.x) / (c.x - d.x)) = (a.x-b.x)/(c.x-d.x) := by{
+      simp
+      have : (conj c.x - conj d.x) ≠ 0 := by{
+        contrapose cdsub
+        simp at *
+        calc
+          c.x - d.x = conj (conj (c.x-d.x)) := by{simp}
+            _= conj (conj (c.x) - conj (d.x)) := by{simp}
+            _= conj (0) := by{rw[cdsub]}
+            _= 0 := by{unfold conj; simp}
+      }
+      field_simp
+      unfold m at h
+      clear m
+      calc
+        (conj a.x - conj b.x) * (c.x - d.x) = (conj a.x - conj b.x) * (c.x - d.x) - 0 := by{ring}
+          _= (conj a.x - conj b.x) * (c.x - d.x) - ( (conj a.x - conj b.x) * (c.x - d.x) - (a.x - b.x) * (conj c.x - conj d.x)) := by{rw[h]}
+          _= (a.x - b.x) * (conj c.x - conj d.x) := by{ring}
+    }
+    exact Complex.conj_eq_iff_im.mp conjself
+  }
+  let q := Point.mk (n / m)
+  have : conj m = -m := by{
+    unfold m
+    simp
+  }
+  have colinear1 : colinear a b q := by{
+      unfold colinear
+      rw[det_detproper a b q]
+      have goal: (detproper a.x (conj a.x) 1 b.x (conj b.x) 1 q.x (conj q.x) 1) = 0 := by{
+        unfold q
+        simp
+        rw[this]
+        have : detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{
+            calc
+              detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n / m) (conj n / - m) 1 = detproper a.x (conj a.x) 1 b.x (conj b.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+                field_simp
+                have : conj n / -m = - conj n / m := by{
+                  have : -m ≠ 0 := by{
+                    contrapose s1
+                    simp at *
+                    assumption
+                  }
+                  field_simp
+                }
+                rw[this]
+              }
+                _= 1/m * detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+        }
+        rw[this]
+        clear this
+        field_simp
+        unfold n m
+        unfold detproper
+        simp
+        ring
+      }
+      rw[goal]
+      rfl
+    }
+
+  have colinear2: colinear c d q := by{
+    unfold colinear
+    rw[det_detproper c d q]
+    have goal: detproper c.x (conj c.x) 1 d.x (conj d.x) 1 q.x (conj q.x) 1 = 0 := by{
+      unfold q
+      simp
+      rw[this]
+      have : detproper c.x (conj c.x) 1 d.x (conj d.x) 1 (n / m) (conj n / - m) 1 = 1/m * detproper c.x (conj c.x) 1 d.x (conj d.x) 1 (n) (-conj n) (m) := by{
+          calc
+            detproper c.x (conj c.x) 1 d.x (conj d.x) 1 (n / m) (conj n / - m) 1 = detproper c.x (conj c.x) 1 d.x (conj d.x) 1 ((1/m)*(n)) ((1/m)*(-conj n)) (1/m * m) := by{
+              field_simp
+              have : conj n / -m = - conj n / m := by{
+                have : -m ≠ 0 := by{
+                  contrapose s1
+                  simp at *
+                  assumption
+                }
+                field_simp
+              }
+              rw[this]
+            }
+              _= 1/m * detproper c.x (conj c.x) 1 d.x (conj d.x) 1 (n) (-conj n) (m) := by{rw [detproper_row3]}
+      }
+      rw[this]
+      clear this
+      field_simp
+      unfold n m
+      unfold detproper
+      simp
+      ring
+    }
+    rw[goal]
+    rfl
+  }
+  symm
+  apply intersection_unique
+  unfold Lies_on Line_through
+  simp
+  have mdef: m = (((conj a.x)-(conj b.x))*(c.x-d.x)-(a.x-b.x)*((conj c.x)-(conj d.x))) := by{
+    unfold m
+    rfl
+  }
+  rw[← mdef]
+  have ndef: n = ((conj a.x)*(b.x)-(a.x)*(conj b.x))*(c.x-d.x)-((a.x-b.x)*((conj c.x)*(d.x)-(c.x)*(conj d.x))) := by{
+    unfold n
+    rfl
+  }
+  rw[← ndef]
+  unfold q at colinear2
+  unfold q at colinear1
+  constructor
+  assumption
+  assumption
+  }
+
+
 /- With this we now show being parallel is an equivalence relation:-/
 
 lemma parallel_symm (L R : Line)(h : Parallel L R) : Parallel R L := by{
