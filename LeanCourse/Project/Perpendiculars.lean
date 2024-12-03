@@ -441,6 +441,7 @@ lemma ex_perp_through_point(L : Line)(p : Point): ∃(R: Line), Perpendicular L 
 }
 
 /-Similar as with parallel_through  beforewe can now define Perpendicular through:-/
+/-(Note: you could call this "Altitude" if you want to, we will reserve this word for later usage in triangles though)-/
 
 def perp_through : Line → Point → Line :=
   fun L p ↦ (ex_perp_through_point L p).choose
@@ -542,6 +543,14 @@ lemma foot_line_through{L : Line}{p : Point}(h: ¬Lies_on p L): Line_through (fo
   constructor
   exact foot_on_perp L p
   exact point_lies_on_perp_through L p
+}
+
+/-Similar to intersections, there is an explicit formula for foots on lines.
+Once again, I dont recommend this fo general usage though.-/
+
+lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through ab) = Point.mk (((conj a.x - conj b.x)*(p.x)-(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x))/(2*(conj a.x - conj b.x))) := by{
+  symm
+  sorry
 }
 
 /-This is pretty much all there is to say about perpendicul lines in general, so in the next file we
