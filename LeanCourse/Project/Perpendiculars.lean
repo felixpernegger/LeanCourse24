@@ -504,3 +504,9 @@ Foot lies on perpendicular Line
 If p Lies on L, p is the foot
 Otherwise, perp_through L p = line_through (p≠(foot p L))
 -/
+
+/-foot really satisfies what we want: It is on L and perp_through L p:-/
+
+lemma foot_on_line(L : Line)(p : Point): Lies_on (foot p L) L := by{
+
+}
