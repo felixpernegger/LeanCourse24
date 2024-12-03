@@ -1034,7 +1034,7 @@ lemma intersection_mem {L R : Line}(LR : ¬ Parallel L R) : Lies_on (Intersectio
 
 /-lines_intersect lemma now become nicer:-/
 
-lemma intersection_unique (L R : Line)(a : Point)(LR : ¬ Parallel L R)(ah: Lies_on a L ∧ Lies_on a R) : a = Intersection LR := by{
+lemma intersection_unique {L R : Line}{a : Point}(LR : ¬ Parallel L R)(ah: Lies_on a L ∧ Lies_on a R) : a = Intersection LR := by{
   have : ∃! s, Lies_on s L ∧ Lies_on s R := by{exact lines_intersect LR}
   obtain ⟨s,sh1,sh2⟩ := this
   simp at sh2

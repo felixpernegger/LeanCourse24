@@ -521,7 +521,11 @@ lemma foot_on_perp(L : Line)(p : Point): Lies_on (foot p L) (perp_through L p) :
 
 lemma foot_unique{L : Line}{p q : Point}(h: Lies_on q L ∧ Lies_on q (perp_through L p)): q = foot p L := by{
   unfold foot
+  #check perp_through_not_parallel L p
+  have this: ¬ Parallel L (perp_through L p) := by{
+    exact perp_through_not_parallel L p
+  }
   --bruh
-  #check intersection_unique L (perp_through L p) (perp_through_not_parallel L p) h
-  exact intersection_unique L (perp_through L p) (perp_through_not_parallel L p) h
+  #check intersection_unique L (perp_through L p) {this} h
+  exact intersection_unique L (perp_through L p) this h
 }
