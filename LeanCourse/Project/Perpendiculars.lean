@@ -548,8 +548,56 @@ lemma foot_line_through{L : Line}{p : Point}(h: ¬Lies_on p L): Line_through (fo
 /-Similar to intersections, there is an explicit formula for foots on lines.
 Once again, I dont recommend this fo general usage though.-/
 
-lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through ab) = Point.mk (((conj a.x - conj b.x)*(p.x)-(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x))/(2*(conj a.x - conj b.x))) := by{
+lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through ab) = Point.mk (((conj a.x - conj b.x)*(p.x)+(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x))/(2*(conj a.x - conj b.x))) := by{
   symm
+  let n := (conj a.x - conj b.x)*(p.x)+(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x)
+  let m := 2*(conj a.x - conj b.x)
+  have ndef: n = (conj a.x - conj b.x)*(p.x)+(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x) := rfl
+  have mdef : m = 2*(conj a.x - conj b.x) := rfl
+  have s1: m ≠ 0 := by{
+    unfold m
+    simp
+    suffices : a.x - b.x ≠ (0:ℂ)
+    contrapose this
+    · simp at *
+      rw[← conj_sub] at this
+      rw[← conj_twice (a.x-b.x)]
+      rw[this]
+      unfold conj
+      simp
+    exact sub_neq_zero ab
+  }
+  have s2: conj m ≠ 0 := by{
+    contrapose s1
+    simp at *
+    rw[← conj_twice m]
+    rw[s1]
+    unfold conj
+    simp
+  }
+  rw[← ndef, ← mdef]
+  apply foot_unique
+  unfold Lies_on Line_through colinear
+  simp
+  constructor
+  suffices : detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n/m) (conj n / conj m) 1 = 0
+  · rw[det_detproper a b ({x := n / m}: Point)]
+    simp
+    rw[this]
+    simp
+  unfold detproper
+  simp
+  field_simp
+  unfold m
+  simp
+  have : conj 2 = 2 := by{
+    unfold conj
+    sorry
+  }
+  rw[this]
+  unfold n
+  sorry
+
   sorry
 }
 
