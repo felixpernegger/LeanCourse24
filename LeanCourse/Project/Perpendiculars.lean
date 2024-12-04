@@ -547,6 +547,7 @@ lemma foot_line_through{L : Line}{p : Point}(h: ¬Lies_on p L): Line_through (fo
 
 /-Similar to intersections, there is an explicit formula for foots on lines.
 Once again, I dont recommend this fo general usage though.-/
+/-The proof is basically just using perp_through_unique and brute force calculations, nothing particular to add-/
 
 lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through ab) = Point.mk (((conj a.x - conj b.x)*(p.x)+(a.x-b.x)*(conj p.x)+(conj a.x)*(b.x)-(a.x)*(conj b.x))/(2*(conj a.x - conj b.x))) := by{
   symm
@@ -577,9 +578,9 @@ lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through 
   }
   rw[← ndef, ← mdef]
   apply foot_unique
+  constructor
   unfold Lies_on Line_through colinear
   simp
-  constructor
   suffices : detproper a.x (conj a.x) 1 b.x (conj b.x) 1 (n/m) (conj n / conj m) 1 = 0
   · rw[det_detproper a b ({x := n / m}: Point)]
     simp
@@ -592,14 +593,99 @@ lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through 
   simp
   have : conj 2 = 2 := by{
     unfold conj
-    sorry
+    have : (2:ℂ)= ({re := 2, im := 0}:ℂ) :=by{rfl}
+    rw[this]
+    calc
+      (starRingEnd ℂ) { re := 2, im := 0 } = { re := 2, im := -0 } := by{rfl}
+        _= {re := 2, im := 0} := by{ring_nf}
+
   }
   rw[this]
   unfold n
-  sorry
+  simp
+  ring
 
-  sorry
-}
+  have : Line_through (sub_neq_zero_point a b p ab) = perp_through (Line_through ab) p := by{
+    apply perp_through_unique
+    constructor
+    exact perp_line_points_is_perp a b p ab
+
+    unfold Line_through Lies_on
+    simp
+    apply colinear_self
+    tauto
+  }
+  rw[← this]
+  clear this
+  unfold Lies_on Line_through
+  simp
+  unfold colinear
+  rw[det_detproper]
+  suffices : (detproper p.x (conj p.x) 1 ({ x := { re := 0, im := 1 } * (a.x - b.x) + p.x } : Point).x
+      (conj ({ x := { re := 0, im := 1 } * (a.x - b.x) + p.x } : Point).x) 1 ({ x := n / m }: Point).x (conj ({ x := n / m } : Point).x) 1) = 0
+  · rw[this]
+    rfl
+  unfold detproper
+  simp
+  field_simp
+  have : conj { re := 0, im := 1 } = {re := 0, im := -1} := by{
+    unfold conj
+    rfl
+  }
+  rw[this]
+  have : conj 2 = 2 := by{
+    unfold conj
+    have : (2:ℂ)= ({re := 2, im := 0}:ℂ) :=by{rfl}
+    rw[this]
+    calc
+      (starRingEnd ℂ) { re := 2, im := 0 } = { re := 2, im := -0 } := by{rfl}
+        _= {re := 2, im := 0} := by{ring_nf}
+
+  }
+  unfold n m
+  simp
+  rw[this]
+  clear this s1 s2
+  obtain ⟨a1,a2⟩ := a
+  have : conj ({ x := { re := a1, im := a2 }} : Point).x = ({ re := a1, im := -a2} : ℂ) := by{
+    unfold conj
+    simp
+    rfl
+  }
+  rw[this]
+  clear this
+  simp
+  obtain ⟨b1,b2⟩ := b
+  have : conj ({ x := { re := b1, im := b2 }} : Point).x = ({ re := b1, im := -b2} : ℂ) := by{
+    unfold conj
+    simp
+    rfl
+  }
+  rw[this]
+  clear this
+  simp
+  obtain ⟨p1,p2⟩ := p
+  have : conj ({ x := { re := p1, im := p2 }} : Point).x = ({ re := p1, im := -p2} : ℂ) := by{
+    unfold conj
+    simp
+    rfl
+  }
+  rw[this]
+  clear this
+  simp
+  have {x y : ℝ}: 2*({ re := x, im := y}: ℂ)= ({ re := 2*x, im := 2*y}:ℂ) := by{
+    have: 2 = ({ re := 2, im := 0} : ℂ) := by{
+      rfl
+    }
+    rw[this]
+    simp
+  }
+  repeat
+    rw[this]
+    simp
+  ring_nf
+  rfl
+  }
 
 /-This is pretty much all there is to say about perpendicul lines in general, so in the next file we
 focus on triangles (3 noncolinear points) and perpendicular lines, in particular the orthocenter!-/

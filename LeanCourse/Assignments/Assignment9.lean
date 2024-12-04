@@ -33,7 +33,22 @@ open BigOperators Function Set Real Filter Classical Topology TopologicalSpace
 
 example (x : ℝ) :
     deriv (fun x ↦ Real.exp (x ^ 2)) x = 2 * x * Real.exp (x ^ 2) := by {
-  sorry
+  #check deriv.comp
+  have h1: DifferentiableAt ℝ (fun x ↦ x^2) x := by{
+    fun_prop
+  }
+  have h2: DifferentiableAt ℝ (fun x ↦ Real.exp x) ((fun x ↦ x^2) x) := by{
+    fun_prop
+  }
+  have : (fun x ↦ rexp (x ^ 2)) =  (fun x ↦ Real.exp x)∘(fun x ↦ x^2) := by{
+    rfl
+  }
+  rw[this]
+  apply HasDerivAt.deriv
+  rw?
+  apply?
+  #check deriv.comp h2
+  apply deriv.comp h2 h1
   }
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]

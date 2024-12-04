@@ -342,7 +342,7 @@ example (a b : ℝ) : ∫ x in a..b, exp (x + 3) =
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt]
   · intro x hx
     refine HasDerivAt.comp_add_const x 3 ?hderiv.hf
-    exact?
+    exact Real.hasDerivAt_exp (x + 3)
   · apply Continuous.intervalIntegrable
     fun_prop
   }
