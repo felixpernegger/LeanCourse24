@@ -160,6 +160,7 @@ lemma mono_exercise_part1 {f : α → α} (hf : Continuous f) (h2f : Injective f
   exact (lt_self_iff_false (f b)).mp this
   }
 
+
 /- Now use this and the intermediate value theorem again
 to prove that `f` is at least monotone on `[a, ∞)`. -/
 lemma mono_exercise_part2 {f : α → α} (hf : Continuous f) (h2f : Injective f)
@@ -183,6 +184,7 @@ lemma mono_exercise_part2 {f : α → α} (hf : Continuous f) (h2f : Injective f
     exact lt_of_le_of_ne ay this
   }
   have : f x ≤ f y := by{
+    clear hab h2ab b
     sorry
   }
   have uu: f x ≠ f y := by{
@@ -339,7 +341,6 @@ lemma mono_exercise_part1_copy {f : α → α} (hf : Continuous f) (h2f : Inject
   exact (lt_self_iff_false (f b)).mp this
   }
 
---set_option maxHeartbeats 0
 /- Prove the following using the change of variables theorem. -/
 lemma change_of_variables_exercise (f : ℝ → ℝ) :
     ∫ x in (0)..π, sin x * f (cos x) = ∫ y in (-1)..1, f y := by {
