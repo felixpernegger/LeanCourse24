@@ -355,3 +355,45 @@ lemma mem_line_shift (a p : Point)(L : Line)(h: Lies_on a L): Lies_on (padd a p)
   rw[← pconj_twice u] at uh1
   exact (set_conj_def (pconj u) L.range).mpr uh1
 }
+
+/-Now we introduce the notion of going between two points in a cetain direction a certain distance:-/
+
+def go_along : Point → Point → ℝ → Point :=
+  fun a b R ↦ padd a (p_scal_mul R (dir a b))
+
+/-This is always colinear:-/
+
+lemma go_along_colinear (a b : Point)(R : ℝ): colinear a b (go_along a b R) := by{
+  apply colinear_perm23
+  apply (colinear_alt2 a (go_along a b R) b).2
+  by_cases ab: a = b
+  · tauto
+  right
+
+  use R / point_abs a b
+  have absub: a.x - b.x ≠ 0 := by{exact sub_neq_zero ab}
+  unfold go_along p_scal_mul dir padd
+  ext
+  simp
+  have : ↑(point_abs a b : ℂ) ≠ 0 := by{
+    contrapose ab
+    simp at *
+    exact abs_zero_imp_same a b ab
+  }
+  field_simp
+  ring
+}
+
+/-And we the distance from a is exactly R, if a ≠ b and R positive:-/
+
+lemma go_along_abs{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs a (go_along a b R) = abs R := by{
+  unfold go_along point_abs padd
+  simp
+  have t:  Complex.abs (p_scal_mul (↑R) (dir a b)).x = Complex.abs R * Complex.abs (dir a b).x := by{exact IsAbsoluteValue.abv_mul (⇑Complex.abs) (↑R) (dir a b).x}
+  rw[Complex.abs_ofReal R] at t
+  have : pabs (dir a b) = 1 := by{exact dir_one ab}
+  unfold pabs at this
+  rw[this] at t
+  simp at t
+  assumption
+}
