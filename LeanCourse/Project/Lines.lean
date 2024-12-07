@@ -384,9 +384,15 @@ lemma go_along_colinear (a b : Point)(R : ℝ): colinear a b (go_along a b R) :=
   ring
 }
 
+/-Going along a to b is similar to going along b to a in the following sense:-/
+lemma go_along_symm(a b : Point)(R : ℝ): go_along b a R = go_along a b (1-R):= by{
+  unfold go_along
+  rw[dir_antisymm b a]
+}
+
 /-And we the distance from a is exactly R, if a ≠ b and R positive:-/
 
-lemma go_along_abs{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs a (go_along a b R) = abs R := by{
+lemma go_along_abs1{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs a (go_along a b R) = abs R := by{
   unfold go_along point_abs padd
   simp
   have t:  Complex.abs (p_scal_mul (↑R) (dir a b)).x = Complex.abs R * Complex.abs (dir a b).x := by{exact IsAbsoluteValue.abv_mul (⇑Complex.abs) (↑R) (dir a b).x}
@@ -397,3 +403,6 @@ lemma go_along_abs{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs a (go_along a 
   simp at t
   assumption
 }
+
+/-If R is negative, the distance from b is R + point_abs a b-/
+lemma go_along_abs2(a b : Point){R : ℝ}(hR: R ≤ 0): point_abs b (go_along a b R) =

@@ -240,6 +240,14 @@ lemma dir_one {a b : Point}(h : a ≠ b): pabs (dir a b) = 1 := by{
   field_simp
 }
 
+/-dir is antisymmetric:-/
+lemma dir_antisymm(a b : Point): dir b a = pneg (dir a b) := by{
+  unfold dir pneg
+  simp
+  rw[point_abs_symm b a]
+  field_simp
+}
+
 def pconj : Point → Point :=
   fun a ↦ Point.mk (conj a.x)
 
