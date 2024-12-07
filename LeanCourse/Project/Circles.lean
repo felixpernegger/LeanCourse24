@@ -163,6 +163,10 @@ lemma radius_unique_spec {z z' : Point}{R R' : PosReal}(h: Circle_through z R = 
 /-With this we can show that the center is unique as well. This will be a bit painful.
 For simplicities sake we first show this without (Center C). (so first the spec way)-/
 
+/-First tho, a useful lemma about distances on a line:-/
+
+lemma abs_in_direction(a b : Point)(R : PosReal)(p := padd b (p_scal_mul R (dir a b))): abs a b = 0 := by
+
 lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Circle_through q S): p = q := by{
   have RS: R = S := by{
     exact radius_unique_spec h
@@ -213,7 +217,7 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   }
   unfold Lies_on_circle Circle_through at tt
   simp at tt
-  have : point_abs p r = (point_abs p q) + R := by{
+  have goal1: point_abs p r = (point_abs p q) + R := by{
     unfold point_abs r pneg padd
     simp
     field_simp
@@ -245,7 +249,7 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
         linarith
       }
       calc
-        0 < (a-c)*(a-c) := by{sorry}
+        0 < (a-c)*(a-c) := by{exact mul_self_pos.mpr this}
           _= (a-c)*(a-c)+0 := by{ring}
           _≤ (a-c)*(a-c)+(b-d)*(b-d) := by{
             apply add_le_add
@@ -257,9 +261,15 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
     clear this
     sorry -- send help
   }
-  rw[rqR] at this
-  simp at this
-  unfold point_abs at this
+  have goal: point_abs p r = (point_abs p q) + R := by{
+    have col: colinear p q r := by{
+      #check colinear_alt2
+      sorry
+    }
+  }
+  rw[rqR] at goal1
+  simp at goal1
+  unfold point_abs at goal1
   contradiction
 }
 

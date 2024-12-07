@@ -63,6 +63,9 @@ def pmul : Point → Point → Point :=
 def padd : Point → Point → Point :=
   fun a b ↦ Point.mk (a.x+b.x)
 
+def psub : Point → Point → Point :=
+  fun a b ↦ padd a (pneg b)
+
 /-Adding zero stays constant-/
 lemma padd_zero (a : Point) : padd a (Point.mk 0) = a := by{
   unfold padd
@@ -172,6 +175,10 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
     Complex.abs (a.x - b.x) + Complex.abs (b.x - c.x) ≥ Complex.abs ((a.x-b.x) + (b.x-c.x)) := by exact AbsoluteValue.add_le Complex.abs (a.x - b.x) (b.x - c.x)
       _= Complex.abs (a.x-c.x) := by ring_nf
 }
+
+/-The "direction" two point is the normed vector between them:-/
+def dir: Point → Point → Point :=
+  fun a b ↦ Point.mk ((b.x-a.x)/ (point_abs a b))
 
 def pconj : Point → Point :=
   fun a ↦ Point.mk (conj a.x)
