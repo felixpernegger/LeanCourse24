@@ -170,7 +170,35 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   rw[← RS] at h
   clear S RS
   by_contra h0
-  have lo: Lies_on_circle (go_along p q -R) Circle_through p R
+  have lo: Lies_on_circle (go_along p q (-R)) (Circle_through p R) := by{
+    unfold Lies_on_circle Circle_through
+    simp
+    rw[go_along_abs1]
+    simp
+    assumption
+  }
+  rw[h] at lo
+  unfold Lies_on_circle Circle_through at lo
+  simp at lo
+  have : point_abs q (go_along p q (-(↑R : ℝ))) = point_abs p q + ((↑R : ℂ)) := by{
+    rw[go_along_abs2]
+    simp
+    norm_cast
+    have : 0 ≤ point_abs p q + ↑R := by{
+      apply add_nonneg
+      exact point_abs_pos p q
+      exact R.2
+    }
+    exact abs_of_nonneg this
+
+    assumption
+  }
+  norm_cast at this
+  simp at this
+  rw[this] at lo
+  simp at lo
+  apply abs_zero_imp_same at lo
+  contradiction
 }
 
 theorem center_unique (z : Point)(R : PosReal) : z = Center (Circle_through z R) := by{
