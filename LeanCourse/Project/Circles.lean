@@ -35,7 +35,6 @@ I ultimately decided for radius 0. Where this wont work, we will use an extensio
 
 
 /-And tangents to circles-/
-#check Tangential
 
 def LineCircleTangent (C: CCircle) (L : Line) : Prop :=
   Tangential C.range L.range
