@@ -385,9 +385,21 @@ lemma go_along_colinear (a b : Point)(R : ℝ): colinear a b (go_along a b R) :=
 }
 
 /-Going along a to b is similar to going along b to a in the following sense:-/
-lemma go_along_symm(a b : Point)(R : ℝ): go_along b a R = go_along a b (1-R):= by{
-  unfold go_along
-  rw[dir_antisymm b a]
+lemma go_along_symm(a b : Point)(R : ℝ): go_along b a R = go_along a b (point_abs a b - R):= by{
+  unfold go_along p_scal_mul padd dir
+  rw[point_abs_symm b a]
+  simp
+  by_cases ab: a = b
+  · rw[ab]
+    simp
+
+  have : (↑(point_abs a b) : ℂ) ≠ 0 := by{
+    contrapose ab
+    simp at *
+    exact abs_zero_imp_same a b ab
+  }
+  field_simp
+  ring
 }
 
 /-And we the distance from a is exactly R, if a ≠ b and R positive:-/
@@ -405,4 +417,10 @@ lemma go_along_abs1{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs a (go_along a
 }
 
 /-If R is negative, the distance from b is R + point_abs a b-/
-lemma go_along_abs2(a b : Point){R : ℝ}(hR: R ≤ 0): point_abs b (go_along a b R) =
+lemma go_along_abs2{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs b (go_along a b R) = abs (point_abs a b - R) := by{
+  have : R = point_abs a b - (point_abs a b - R) := by{ring}
+  nth_rw 1 [this]
+  rw[← go_along_symm a b (point_abs a b - R)]
+  rw[go_along_abs1]
+  tauto
+}
