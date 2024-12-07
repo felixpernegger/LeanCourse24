@@ -163,10 +163,6 @@ lemma radius_unique_spec {z z' : Point}{R R' : PosReal}(h: Circle_through z R = 
 /-With this we can show that the center is unique as well. This will be a bit painful.
 For simplicities sake we first show this without (Center C). (so first the spec way)-/
 
-/-First tho, a useful lemma about distances on a line:-/
-
-lemma abs_in_direction(a b : Point)(R : PosReal)(p := padd b (p_scal_mul R (dir a b))): abs a b = 0 := by
-
 lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Circle_through q S): p = q := by{
   have RS: R = S := by{
     exact radius_unique_spec h

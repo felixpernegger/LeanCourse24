@@ -176,9 +176,69 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
       _= Complex.abs (a.x-c.x) := by ring_nf
 }
 
+/-The absolute value of a point is the obvious thing:-/
+def pabs : Point → ℝ :=
+  fun a ↦ Complex.abs a.x
+
+/-This is zero iff a is zero:-/
+lemma pabs_zero (a : Point) : pabs a = 0 ↔ a = Point.mk 0 := by{
+  unfold pabs
+  simp
+  constructor
+  intro h
+  ext
+  simp
+  assumption
+
+  intro h
+  rw[h]
+}
+
 /-The "direction" two point is the normed vector between them:-/
 def dir: Point → Point → Point :=
   fun a b ↦ Point.mk ((b.x-a.x)/ (point_abs a b))
+
+/-The direction is zero iff a = b:-/
+lemma dir_zero (a b : Point): pabs (dir a b) = 0 ↔ a = b := by{
+  constructor
+  intro h
+  apply (pabs_zero (dir a b)).1 at h
+  unfold dir at h
+  simp at *
+  obtain h|h := h
+  ext
+  calc
+    a.x = a.x + 0 := by{ring}
+      _=a.x + (b.x - a.x) := by{rw[h]}
+      _= b.x := by{ring}
+
+  apply abs_zero_imp_same a b at h
+  assumption
+
+  intro h
+  rw[h]
+  clear h
+  unfold dir
+  simp
+  unfold pabs
+  simp
+}
+
+/-Otherwise the direction has abosulte value 1:-/
+lemma dir_one {a b : Point}(h : a ≠ b): pabs (dir a b) = 1 := by{
+  unfold dir pabs
+  rw[point_abs_symm  a b]
+  unfold point_abs
+  simp
+  have : Complex.abs (b.x - a.x) ≠ 0 := by{
+    contrapose h
+    simp at *
+    symm
+    ext
+    assumption
+  }
+  field_simp
+}
 
 def pconj : Point → Point :=
   fun a ↦ Point.mk (conj a.x)
