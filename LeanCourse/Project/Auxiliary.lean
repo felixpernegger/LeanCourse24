@@ -1,4 +1,4 @@
-import LeanCourse.Project.Circles
+import LeanCourse.Project.Perpendiculars
 import Mathlib
 
 open Function Set Classical
