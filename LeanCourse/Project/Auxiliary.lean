@@ -131,8 +131,10 @@ lemma not_same_side_not_same_side{L : Line}{a b c : Point}(ha: ¬Lies_on a L)(ab
 
 /-Same side of ab as c, etc.-/
 
+def inside_triangle (T : Triangle)(p : Point): Prop :=
+  same_side (tri_ab T) T.c p ∧ same_side (tri_bc T) T.a p ∧ same_side (tri_ca T) T.b p
 
 
 /-The inside of a circle is shorter to define:-/
-def Inside_circle(a : Point)(C : CCircle) : Prop :=
+def inside_circle(a : Point)(C : CCircle) : Prop :=
   point_abs a (Center C) < Radius C

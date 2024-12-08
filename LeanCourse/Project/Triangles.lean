@@ -12,22 +12,112 @@ noncomputable section
   a : Point
   b : Point
   c : Point
-  notline : noncolinear a b c
+  noncolinear : noncolinear a b c
 
 /- We will use the lenghts of sides of triangles often-/
 
-def tri_ab: Triangle → ℝ :=
+def abs_tri_ab: Triangle → ℝ :=
   fun T ↦ (point_abs T.a T.b)
 
-def tri_bc: Triangle → ℝ :=
+def abs_tri_bc: Triangle → ℝ :=
   fun T ↦ (point_abs T.b T.c)
 
-def tri_ca: Triangle → ℝ :=
+def abs_tri_ca: Triangle → ℝ :=
   fun T ↦ (point_abs T.c T.a)
+
+/-The points of the Triangle are disjoint.-/
+lemma tri_disj (T : Triangle): T.a ≠ T.b ∧ T.b ≠ T.c ∧ T.c ≠ T.a := by{
+  obtain ⟨a,b,c,h⟩ := T
+  simp
+  contrapose h
+  unfold noncolinear
+  simp
+  push_neg at h
+  have h' : a = b ∨ b = c ∨ c = a :=by{tauto}
+  obtain h'|h'|h' := h'
+  repeat
+    unfold colinear
+    apply det_self
+    tauto
+}
+
+/-using this we can quickly acces the sides of a triangle:-/
+def tri_ab : Triangle → Line :=
+  fun T ↦ Line_through (tri_disj T).1
+
+def tri_bc : Triangle → Line :=
+  fun T ↦ Line_through (tri_disj T).2.1
+
+def tri_ca : Triangle → Line :=
+  fun T ↦ Line_through (tri_disj T).2.2
+
+/-As usual, the points indeed lie on the lines...-/
+lemma tri_a_on_ab (T : Triangle): Lies_on T.a (tri_ab T) := by{
+  unfold tri_ab
+  exact line_through_mem_left (tri_disj T).1
+}
+
+lemma tri_b_on_ab (T : Triangle): Lies_on T.b (tri_ab T) := by{
+  unfold tri_ab
+  exact line_through_mem_right (tri_disj T).1
+}
+
+lemma tri_b_on_bc (T : Triangle): Lies_on T.b (tri_bc T) := by{
+  unfold tri_bc
+  exact line_through_mem_left (tri_disj T).2.1
+}
+
+lemma tri_c_on_bc (T : Triangle): Lies_on T.c (tri_bc T) := by{
+  unfold tri_bc
+  exact line_through_mem_right (tri_disj T).2.1
+}
+
+lemma tri_c_on_ca (T : Triangle): Lies_on T.c (tri_ca T) := by{
+  unfold tri_ca
+  exact line_through_mem_left (tri_disj T).2.2
+}
+
+lemma tri_a_on_ca (T : Triangle): Lies_on T.a (tri_ca T) := by{
+  unfold tri_ca
+  exact line_through_mem_right (tri_disj T).2.2
+}
+
+/-Annnnd also from definition c doesnt lie on a b etc-/
+lemma tri_c_not_on_ab(T : Triangle): ¬(Lies_on T.c (tri_ab T)) := by{
+  unfold tri_ab Lies_on Line_through
+  simp
+  have : noncolinear T.a T.b T.c :=by{exact T.noncolinear}
+  unfold noncolinear at this
+  assumption
+}
+
+lemma tri_a_not_on_bc(T : Triangle): ¬(Lies_on T.a (tri_bc T)) := by{
+  unfold tri_bc Lies_on Line_through
+  simp
+  have : noncolinear T.a T.b T.c :=by{exact T.noncolinear}
+  unfold noncolinear at this
+  contrapose this
+  simp at *
+  apply colinear_perm12
+  apply colinear_perm23
+  assumption
+}
+
+lemma tri_b_not_on_ca(T : Triangle): ¬(Lies_on T.b (tri_ca T)) := by{
+  unfold tri_ca Lies_on Line_through
+  simp
+  have : noncolinear T.a T.b T.c :=by{exact T.noncolinear}
+  unfold noncolinear at this
+  contrapose this
+  simp at *
+  apply colinear_perm12
+  apply colinear_perm13
+  assumption
+}
 
 /-We can shift and scale Triangles:-/
 lemma tri_shift_lemma (T : Triangle)(p : Point): noncolinear (padd T.a p) (padd T.b p) (padd T.c p) := by{
-  exact noncolinear_shift p T.notline
+  exact noncolinear_shift p T.noncolinear
 }
 
 def tri_shift : Triangle → Point → Triangle :=
@@ -49,7 +139,7 @@ lemma tri_shift_padd (T : Triangle) (p q : Point) : tri_shift T (padd p q) = tri
 
 /-Similarly we can mirror/conjugate Triangles:-/
 lemma tri_conj_lemma (T : Triangle) : noncolinear (pconj T.a) (pconj T.b) (pconj T.c) := by{
-  exact noncolinear_conj T.notline
+  exact noncolinear_conj T.noncolinear
 }
 
 def tri_conj : Triangle → Triangle :=
@@ -281,10 +371,10 @@ def scale_factor : Triangle → Triangle → ℝ :=
   fun T Q ↦ max (max (Complex.abs (T.a.x / Q.a.x)) (Complex.abs (T.b.x / Q.b.x))) (Complex.abs (T.c.x / Q.c.x))
 
 /-With this we can prove that lengths scale according to this:-/
-lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (tri_ab T) = (scale_factor T Q) * (tri_ab Q) := by{
+lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (abs_tri_ab T) = (scale_factor T Q) * (abs_tri_ab Q) := by{
   apply oldsimilar_symm at h
   unfold scale_factor
-  unfold tri_ab
+  unfold abs_tri_ab
   unfold oldSimilar at h
   unfold point_abs
   obtain ⟨z,⟨zh1,zh2,zh3⟩⟩ := h
