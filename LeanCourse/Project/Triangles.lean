@@ -254,15 +254,71 @@ def in_between (a b x : Point) : Prop :=
 /-The wording of this is of course a bit unfortunate, but putting x in the middle wouldnt be
 mich better in my opinion-/
 
-lemma in_between_alt (a b x : Point): in_between a b x ↔ (∃(t : ℝ), (0 ≤ t) ∧ (t ≤ 1) ∧ x = padd (p_scal_mul t a) (p_scal_mul (1-t) b)) := by{
-  constructor
-  sorry--here you can determine t explicitly
+lemma in_between_imp_scal (a b x : Point): (∃(t : ℝ), (0 ≤ t) ∧ (t ≤ 1) ∧ x = padd (p_scal_mul t a) (p_scal_mul (1-t) b)) → in_between a b x := by{
+
   intro h
+  by_cases ab : a = b
+  rw[ab]
+  rw[ab] at h
   obtain ⟨t,t0,t1,ht⟩ := h
-  rw[ht]
+  have xb: x = b := by{
+    rw[ht]
+    ext
+    unfold padd p_scal_mul
+    simp
+    ring
+  }
+  rw[xb]
   unfold in_between
-  sorry--at least this direction doesnt seem to bad
+  rw[point_abs_self]
+  ring
+
+  obtain ⟨t,t0,t1,ht⟩ := h
+  have xgo: x = go_along a b ((1-t)*(point_abs a b)) := by{
+    rw[ht]
+    unfold go_along p_scal_mul dir padd
+    simp
+    have : (↑(point_abs a b) : ℂ) ≠ 0 := by{
+      contrapose ab
+      simp at *
+      exact abs_zero_imp_same a b ab
+    }
+    field_simp
+    ring
+  }
+  have abd: 0 < point_abs a b := by{
+    have nonneg: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+    have neqzero: point_abs a b ≠ 0 := by{
+      contrapose ab
+      simp at *
+      exact abs_zero_imp_same a b ab
+    }
+    exact lt_of_le_of_ne nonneg (id (Ne.symm neqzero))
+  }
+  have ax: point_abs a x = (1-t)*(point_abs a b) := by{
+    rw[xgo]
+    rw [go_along_abs1 ab ((1 - t) * point_abs a b)]
+    simp
+    have : 0 ≤ 1-t := by{linarith}
+    exact (mul_nonneg_iff_of_pos_right abd).mpr this
+  }
+  have bx : point_abs b x = t*(point_abs a b) := by{
+    rw[xgo]
+    rw [go_along_abs2 ab ((1 - t) * point_abs a b)]
+    have :|point_abs a b - (1 - t) * point_abs a b| = point_abs a b - (1 - t) * point_abs a b := by{
+      simp
+      field_simp
+      assumption
+    }
+    rw[this]
+    ring
+  }
+  unfold in_between
+  rw[point_abs_symm x b, ax, bx]
+  ring
 }
+
+/-We will later show the reverse of this with pythagorean theorem. Proving it directly is very tricky.-/
 
 /-This is symmetric in the first two arguments:-/
 
@@ -271,12 +327,13 @@ lemma in_between_symm {a b x : Point}(h : in_between a b x) : in_between b a x :
   rw[point_abs_symm b a, ← h, add_comm, point_abs_symm x a, point_abs_symm b x]
 }
 
+/-
 /-A sweet consequence is that this can only happen when x already lies on the line between a b-/
 --Proving this directly is horrible.
 --However prove in between is equivalent to saying there is a t ∈ [0,1] s.t. x = t*a + (1-t)*b.
 --This is sort of equivalent to colinear_alt2, which should be able to do the rest!
 lemma in_between_imp_colinear {a b z : Point} (h: in_between a b z) : colinear a b z := by{
-  apply (in_between_alt a b z).1 at h
+  apply (in_between_alt a b z) at h
   obtain ⟨t,t0,t1,ht⟩ := h
   rw[ht]
   unfold colinear det conj padd p_scal_mul
@@ -284,21 +341,201 @@ lemma in_between_imp_colinear {a b z : Point} (h: in_between a b z) : colinear a
   ring_nf
 }
 --BIG TODO: Also do the reverse here: if a b c are colinear, one of them is between the other two
-
+-/
 /-The reverse (kind of) holds as well:-/
-lemma colinear_imp_in_between {a b c : Point} (h : colinear a b c) : in_between a b c ∨ in_between a c b ∨ in_between b c a := by{
-  apply (colinear_alt2 a b c).1 at h
-  obtain h|h := h
-  rw[h]
-  clear h
-  right
-  right
+lemma colinear_imp_in_between1 {a b z : Point} (h : colinear a b z)(ha: point_abs a z ≤ point_abs a b)(hb: point_abs z b ≤ point_abs a b): in_between a b z := by{
+  apply colinear_perm23 at h
+  apply (colinear_alt2 a z b).1 at h
+  by_cases h' : a = b
+  rw[h'] at ha
+  rw[point_abs_self b] at ha
+  have : 0 = point_abs b z := by{
+    apply le_antisymm
+    exact point_abs_pos b z
+    assumption
+  }
+  have : b = z := by{exact abs_zero_imp_same b z (id (Eq.symm this))}
+  rw[h',this]
   unfold in_between
-  rw[point_abs_self c]
-  ring
+  simp
+  exact point_abs_self z
 
+  simp [*] at *
   obtain ⟨t,ht⟩ := h
-  sorry
+  have zz: z = go_along a b (t*(point_abs a b)) := by{
+    unfold go_along p_scal_mul dir padd
+    ext
+    rw[ht]
+    simp
+    have : (↑(point_abs a b) : ℂ) ≠ 0 := by{
+      contrapose h'
+      simp at *
+      exact abs_zero_imp_same a b h'
+    }
+    field_simp
+    ring
+  }
+  have hht: 0 ≤ t ∧ t ≤ 1 := by{
+    have abb: 0 < point_abs a b := by{
+      contrapose h'
+      simp at *
+      apply abs_zero_imp_same
+      apply le_antisymm
+      assumption
+      exact point_abs_pos a b
+    }
+    constructor
+    contrapose hb
+    simp at *
+    have : point_abs b z = (1-t)*(point_abs a b) := by{
+      rw[zz]
+      rw [go_along_abs2 h' (t * point_abs a b)]
+      have : |point_abs a b - t * point_abs a b| = point_abs a b - t * point_abs a b := by{
+        simp
+        field_simp
+        linarith
+      }
+      rw[this]
+      ring
+    }
+    rw[point_abs_symm z b, this]
+    field_simp
+    linarith
+
+
+    contrapose ha
+    simp at *
+    have : point_abs a z = t*(point_abs a b) := by{
+      rw[zz]
+      rw [go_along_abs1 h' (t * point_abs a b)]
+      have : |t * point_abs a b| = t * point_abs a b := by{
+        simp
+        field_simp
+        linarith
+      }
+      rw[this]
+    }
+    rw[this]
+    field_simp
+    assumption
+  }
+  have ad: point_abs a z = t*(point_abs a b) := by{
+    have : abs (t * (point_abs a b)) = t * (point_abs a b) := by{
+      simp
+      have u: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+      exact Left.mul_nonneg hht.1 u
+    }
+    rw[← this]
+    rw[zz]
+    exact go_along_abs1 h' (t * point_abs a b)
+  }
+  have bd: point_abs b z = (1-t)*(point_abs a b) := by{
+    rw[zz]
+    rw [go_along_abs2 h' (t * point_abs a b)]
+    have : |point_abs a b - t * point_abs a b| = point_abs a b - t * point_abs a b := by{
+      simp
+      have : 0<(point_abs a b) := by{
+        have g0: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+        have n0: 0 ≠ point_abs a b := by{
+          contrapose h'
+          simp at *
+          exact abs_zero_imp_same a b (id (Eq.symm h'))
+        }
+        exact lt_of_le_of_ne g0 n0
+      }
+      field_simp
+      exact hht.2
+    }
+    rw[this]
+    ring
+  }
+  unfold in_between
+  rw[point_abs_symm z b]
+  rw[ad,bd]
+  ring
+  }
+
+/-This immediately implies given 3 points, 1 is in between the other two:-/
+lemma colinear_imp_in_between2 (a b c : Point)(h : colinear a b c): in_between a b c ∨ in_between b c a ∨ in_between c a b := by{
+  have p1: colinear b c a := by{
+    apply colinear_perm13
+    apply colinear_perm23
+    assumption
+  }
+  have p2: colinear c a b := by{
+    apply colinear_perm12
+    apply colinear_perm13
+    assumption
+  }
+  by_cases h0 : point_abs a b ≤ point_abs b c
+  by_cases h1 : point_abs b c ≤ point_abs c a
+  by_cases h2 : point_abs c a ≤ point_abs a b
+
+  have : point_abs b c ≤ point_abs a b := by{linarith}
+  left
+  apply colinear_imp_in_between1 h
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h2
+  have h3: point_abs a b ≤ point_abs c a := by{exact LT.lt.le h2}
+  right
+  right
+  apply colinear_imp_in_between1 p2
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h1
+  have h3: point_abs c a ≤ point_abs b c := by{exact LT.lt.le h1}
+  right
+  left
+  apply colinear_imp_in_between1 p1
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h0
+  have h3: point_abs b c ≤ point_abs a b := by{exact LT.lt.le h0}
+  by_cases h1 : point_abs b c ≤ point_abs c a
+  by_cases h2 : point_abs c a ≤ point_abs a b
+
+  left
+  apply colinear_imp_in_between1 h
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h2
+  have h4: point_abs a b ≤ point_abs c a := by{exact LT.lt.le h2}
+  right
+  right
+  apply colinear_imp_in_between1 p2
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h1
+  have h4: point_abs c a ≤ point_abs b c := by{exact LT.lt.le h1}
+  by_cases h2 : point_abs c a ≤ point_abs a b
+
+  left
+  apply colinear_imp_in_between1 h
+  repeat
+    rw[point_abs_symm]
+    assumption
+
+  simp at h2
+  clear h3 h4 p1 p2 h
+  exfalso
+  have : point_abs b c < point_abs b c := by{
+    calc
+      point_abs b c < point_abs a b := by{exact h0}
+        _< point_abs c a := by{exact h2}
+        _< point_abs b c := by{exact h1}
+  }
+  simp at this
 }
 
 def oldSimilar (T Q : Triangle) : Prop :=
