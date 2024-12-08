@@ -77,6 +77,14 @@ lemma not_same_side_not_same_side{L : Line}{a b c : Point}(ha: ¬Lies_on a L)(ab
   simp at *
   obtain ⟨x,xh0,xh1,xh⟩ := ab
   obtain ⟨y,yh0,yh1,yh⟩ := ac
+  intro t ht hht
+  by_contra p0
+  have coll: colinear b c (padd (p_scal_mul (↑t) b) (p_scal_mul (1 - ↑t) c)) := by{
+    unfold padd p_scal_mul colinear det conj
+    simp
+    ring
+  }
+
   by_cases h0: (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) = (padd (p_scal_mul (↑y) a) (p_scal_mul (1 - ↑y) c))
   have abcol: colinear a b (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) := by{
     unfold padd p_scal_mul colinear det conj
@@ -99,6 +107,32 @@ lemma not_same_side_not_same_side{L : Line}{a b c : Point}(ha: ¬Lies_on a L)(ab
     rwa[← ha]
   }
   have col: colinear a b c := by{
-    exact colinear_trans (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) a b c abcol accol tt
+    sorry
   }
+  have gg: (padd (p_scal_mul (↑t) b) (p_scal_mul (1 - ↑t) c)) = padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b) := by{
+    by_contra p1
+    sorry--this cannot be because of in between stuff but its annoying
+  }
+  sorry
+
+  have hL: L = Line_through h0 := by{
+    apply line_through_unique
+    constructor
+    assumption
+    assumption
+  }
+  sorry
 }
+--actually make this prove a lot nicer please, this is horrible.
+--maybe give following characterization:
+--b c not on the same side, is the same as that in_between b c (Intersection L (Line_through bc))
+
+/-With this we get a relatively nice notion for the inside of the Triangle:-/
+
+/-Same side of ab as c, etc.-/
+
+
+
+/-The inside of a circle is shorter to define:-/
+def Inside_circle(a : Point)(C : CCircle) : Prop :=
+  point_abs a (Center C) < Radius C

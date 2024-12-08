@@ -164,6 +164,16 @@ def in_between (a b x : Point) : Prop :=
 /-The wording of this is of course a bit unfortunate, but putting x in the middle wouldnt be
 mich better in my opinion-/
 
+lemma in_between_alt (a b x : Point): in_between a b x ↔ (∃(t : ℝ), (0 ≤ t) ∧ (t ≤ 1) ∧ x = padd (p_scal_mul t a) (p_scal_mul (1-t) b)) := by{
+  constructor
+  sorry--here you can determine t explicitly
+  intro h
+  obtain ⟨t,t0,t1,ht⟩ := h
+  rw[ht]
+  unfold in_between
+  sorry--at least this direction doesnt seem to bad
+}
+
 /-This is symmetric in the first two arguments:-/
 
 lemma in_between_symm {a b x : Point}(h : in_between a b x) : in_between b a x := by{
@@ -172,9 +182,16 @@ lemma in_between_symm {a b x : Point}(h : in_between a b x) : in_between b a x :
 }
 
 /-A sweet consequence is that this can only happen when x already lies on the line between a b-/
-
+--Proving this directly is horrible.
+--However prove in between is equivalent to saying there is a t ∈ [0,1] s.t. x = t*a + (1-t)*b.
+--This is sort of equivalent to colinear_alt2, which should be able to do the rest!
 lemma in_between_imp_colinear {a b z : Point} (h: in_between a b z) : colinear a b z := by{
-  sorry
+  apply (in_between_alt a b z).1 at h
+  obtain ⟨t,t0,t1,ht⟩ := h
+  rw[ht]
+  unfold colinear det conj padd p_scal_mul
+  simp
+  ring_nf
 }
 --BIG TODO: Also do the reverse here: if a b c are colinear, one of them is between the other two
 
@@ -191,10 +208,6 @@ lemma colinear_imp_in_between {a b c : Point} (h : colinear a b c) : in_between 
   ring
 
   obtain ⟨t,ht⟩ := h
-  rw[ht]
-  by_cases h0 : t<0
-  --ab hier fälle durchrattern, aber genau aufpassen
-  sorry
   sorry
 }
 
