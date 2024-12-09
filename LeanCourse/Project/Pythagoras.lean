@@ -183,3 +183,43 @@ lemma in_between_imp_colinear{a b x : Point}(h : in_between a b x): colinear a b
   rw[h] at this
   linarith
 }
+
+/-To simplify usage, we make a few specifications for pythagoras:-/
+
+lemma pythagoras_points_bc {a b c : Point}(h : perp_points a b a c): (point_abs b c)  = √((point_abs a b)^2 + (point_abs c a)^2) := by{
+  rw[← pythagoras_points h]
+  have : 0 ≤ point_abs b c := by{exact point_abs_pos b c}
+  simp [*]
+}
+
+lemma pythagoras_points_ab {a b c : Point}(h : perp_points a b a c): (point_abs a b)  = √((point_abs b c)^2 - (point_abs c a)^2) := by{
+  rw[pythagoras_points h]
+  simp
+  have : 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+  simp [*]
+}
+
+lemma pythagoras_points_ca {a b c : Point}(h : perp_points a b a c): (point_abs c a)  = √((point_abs b c)^2 - (point_abs a b)^2) := by{
+  rw[pythagoras_points h]
+  simp
+  have : 0 ≤ point_abs c a := by{exact point_abs_pos c a}
+  simp [*]
+}
+
+lemma pythagoras_bc {T : Triangle}(h: RightTriangle T): (abs_tri_bc T) = √((abs_tri_ab T)^2 + (abs_tri_ca T)^2) := by{
+  rw[← pythagoras h]
+  have : 0 ≤ abs_tri_bc T := by{unfold abs_tri_bc; exact point_abs_pos T.b T.c}
+  simp [*]
+}
+
+lemma pythagoras_ab {T : Triangle}(h: RightTriangle T): (abs_tri_ab T) = √((abs_tri_bc T)^2 - (abs_tri_ca T)^2) := by{
+  rw[pythagoras h]
+  have : 0 ≤ abs_tri_ab T := by{unfold abs_tri_ab; exact point_abs_pos T.a T.b}
+  simp [*]
+}
+
+lemma pythagoras_ca {T : Triangle}(h: RightTriangle T): (abs_tri_ca T) = √((abs_tri_bc T)^2 - (abs_tri_ab T)^2) := by{
+  rw[pythagoras h]
+  have : 0 ≤ abs_tri_ca T := by{unfold abs_tri_ca; exact point_abs_pos T.c T.a}
+  simp [*]
+}
