@@ -96,6 +96,12 @@ lemma padd_neg (a : Point): padd a (pneg a) = Point.mk 0 := by{
 def pmidpoint : Point → Point → Point :=
   fun a b ↦ Point.mk ((a.x+b.x)/2)
 
+@[simp] lemma pmidpoint_self (a : Point) : pmidpoint a a = a := by{
+  unfold pmidpoint
+  ext
+  ring
+}
+
 def conj : ℂ → ℂ :=
   fun z ↦ (starRingEnd ℂ) z
 
