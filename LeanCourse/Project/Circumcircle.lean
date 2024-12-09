@@ -119,16 +119,59 @@ theorem pmidpoint_unique {a b p : Point}(ab : a ≠ b)(h : colinear a b p)(hp : 
 
   unfold in_between at p0
   rw[point_abs_symm p a, ap, pmidpoint_abs_left] at p0
-  apply colinear_perm23 at h
-  apply (colinear_alt2 a p b).1 at h
-  simp [*] at *
-  obtain ⟨t,ht⟩ := h
+  obtain ⟨R,hR⟩ := colinear_go_along ab h
+  have t1: point_abs a p = abs R := by{rw[hR];exact go_along_abs1 ab R}
+  rw[ap] at t1
+  obtain ⟨S,hS⟩ := colinear_go_along ab (pmidpoint_colinear a b)
+  have t2: point_abs a (pmidpoint a b) = abs S := by{rw[hS]; exact go_along_abs1 ab S}
+  rw[pmidpoint_abs_left] at t2
+  rw[t1] at t2
+  have q0: R = S ∨ R = -S := by{exact abs_eq_abs.mp t2}
+  obtain q0|q0 := q0
+  rw[hR,hS,q0]
 
 
-  sorry
+  have : S = 1/2 * point_abs a b := by{
+    unfold pmidpoint go_along p_scal_mul padd dir at hS
+    simp at hS
+    have ba: b ≠ a := by{exact id (Ne.symm ab)}
+    have : b.x - a.x ≠ 0 := by{exact sub_neq_zero ba}
+    have : (↑(point_abs a b):ℂ) ≠ 0 := by{
+      contrapose ab
+      simp at *
+      exact abs_zero_imp_same a b ab
+    }
+    field_simp at hS
+    have : (↑S * (b.x - a.x)) * 2 = (a.x + b.x) * ↑(point_abs a b) - (a.x * ↑(point_abs a b))*2 := by{
 
-
-
+      calc
+        (↑S * (b.x - a.x)) * 2 = - a.x * ↑(point_abs a b)*2 + (((a.x * ↑(point_abs a b)  + (↑S * (b.x - a.x))) * 2) ) := by{ring}
+          _= - a.x * ↑(point_abs a b)*2 + (a.x + b.x) * ↑(point_abs a b) := by{rw[hS]}
+          _= (a.x + b.x) * ↑(point_abs a b) - (a.x * ↑(point_abs a b))*2 := by{ring}
+    }
+    have tt: (↑S:ℂ) = 1/2 * (↑(point_abs a b) : ℂ) := by{
+      calc
+        (↑S:ℂ) = 1/2 * 1/(b.x-a.x) * (↑S * (b.x - a.x) * 2) := by{field_simp;ring}
+          _= 1/2 * 1/(b.x-a.x) * ((a.x + b.x) * ↑(point_abs a b) - a.x * ↑(point_abs a b) * 2) := by{rw[this]}
+          _= 1/2 * (↑(point_abs a b) : ℂ) := by{field_simp;ring}
+    }
+    field_simp at *
+    norm_cast at tt
+  }
+  rw[this] at q0
+  rw[q0] at hR
+  rw[hp,point_abs_symm,hR,go_along_abs2 ab (-(1 / 2 * point_abs a b))] at ap
+  have : 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+  have : |point_abs a b - -(1 / 2 * point_abs a b)| = point_abs a b - -(1 / 2 * point_abs a b) := by{
+    simp
+    ring_nf
+    linarith
+  }
+  rw[this] at ap
+  simp at ap
+  contrapose ab
+  simp at *
+  exact abs_zero_imp_same a b ap
 
   unfold in_between at p0
   rw[point_abs_symm p a, ap, point_abs_symm (pmidpoint a b) a, pmidpoint_abs_left] at p0
