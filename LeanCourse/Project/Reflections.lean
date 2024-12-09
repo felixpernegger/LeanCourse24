@@ -86,10 +86,8 @@ theorem reflection_point_line_on_line (a : Point)(L : Line): reflection_point_li
   rw[← this]
   exact foot_on_line L a
 
-  have : foot a L = a := by{
-    exact foot_point_on_line h
-  }
   intro h
+  have : foot a L = a := by{exact foot_point_on_line h}
   unfold reflection_point_line
   rw[this]
   exact reflection_point_point_self a
@@ -137,4 +135,50 @@ theorem reflection_point_line_on_line (a : Point)(L : Line): reflection_point_li
   unfold reflection_point_line at this
   rw[this]
   exact reflection_point_point_twice a (foot a L)
+}
+
+/-Now lets define the reflection_line_point-/
+
+def reflection_line_point : Line → Point → Line :=
+  fun L a ↦ ⟨{p : Point | ∃ (s : Point), Lies_on s L ∧ p = reflection_point_point s a}, by{
+    obtain ⟨S,u,v,uv,hS⟩ := L
+    use reflection_point_point u a
+    use reflection_point_point v a
+
+    constructor
+    contrapose uv
+    simp at *
+    rw[← reflection_point_point_twice u a, ← reflection_point_point_twice v a, uv]
+
+    ext r
+    simp
+    constructor
+    intro h
+    obtain ⟨s,hs1,hs2⟩ := h
+    rw[hs2]
+    apply reflection_point_point_colinear2
+    unfold Lies_on at hs1
+    simp at hs1
+    rw[hS] at hs1
+    simp at hs1
+    assumption
+
+    intro h
+    use reflection_point_point r a
+    constructor
+    unfold Lies_on
+    simp
+    rw[hS]
+    simp
+    rw[← reflection_point_point_twice u a, ← reflection_point_point_twice v a]
+    apply reflection_point_point_colinear2
+    assumption
+
+    simp
+  }⟩
+
+  /-same properties as usual:-/
+
+lemma reflection_line_point_twice (L : Line)(a : Point): reflection_line_point (reflection_line_point L a) a = L := by{
+  sorry
 }
