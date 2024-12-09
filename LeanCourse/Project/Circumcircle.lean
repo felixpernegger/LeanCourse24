@@ -27,6 +27,6 @@ lemma pmidpoint_lies_on_perp_bisector{a b : Point}(ab : a ≠ b): Lies_on (pmidp
 theorem perp_bisector_def (a b p : Point)(ab : a ≠ b): (point_abs p a = point_abs p b) ↔ (Lies_on p (perp_bisector ab)) := by{
   constructor
   intro h
-  --recap
-  have
+  #check perp_foot
+  sorry
 }
