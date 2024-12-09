@@ -182,3 +182,5 @@ def reflection_line_point : Line → Point → Line :=
 lemma reflection_line_point_twice (L : Line)(a : Point): reflection_line_point (reflection_line_point L a) a = L := by{
   sorry
 }
+
+#check Complex.arg
