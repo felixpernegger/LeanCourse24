@@ -563,6 +563,31 @@ lemma foot_point_on_perp{L : Line}{a b : Point}(h: Lies_on b (perp_through L a))
   exact foot_on_perp L b
 }
 
+lemma foot_perp_through(L : Line)(p : Point): perp_through L (foot p L) = perp_through L p := by{
+  have par: Parallel (perp_through L (foot p L)) (perp_through L p) := by{
+    apply perp_perp L
+    exact perp_through_is_perp L (foot p L)
+    exact perp_through_is_perp L p
+  }
+  apply (parallel_def (perp_through L (foot p L)) (perp_through L p)).1 at par
+  obtain h|h := par
+  exfalso
+  have footbad: (foot p L) ∈ (perp_through L (foot p L)).range ∩ (perp_through L p).range := by{
+    suffices : Lies_on (foot p L) (perp_through L p) ∧ Lies_on (foot p L) (perp_through L (foot p L))
+    unfold Lies_on at this
+    tauto
+
+    constructor
+    exact foot_on_perp L p
+    exact point_lies_on_perp_through L (foot p L)
+  }
+  rw[h] at footbad
+  tauto
+
+  ext
+  rw[h]
+}
+
 /-and a nice lemma about perpendiular points with foot:-/
 lemma perp_points_foot{L : Line}(a p : Point)(ha: Lies_on a L): perp_points a (foot p L) p (foot p L) := by{
   apply perp_all (perp_through_is_perp L p) ha (foot_on_line L p) (point_lies_on_perp_through L p) (foot_on_perp L p)
