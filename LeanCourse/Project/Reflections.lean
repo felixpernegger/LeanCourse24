@@ -177,10 +177,99 @@ def reflection_line_point : Line → Point → Line :=
     simp
   }⟩
 
+/-from definitions we get sort of a universal property:-/
+
+lemma reflection_line_point_lies_on (L : Line)(a p : Point): Lies_on (reflection_point_point p a) (reflection_line_point L a) ↔ Lies_on p L := by{
+  obtain ⟨u,v,uv,h1,h2⟩ := ex_points_on_line L
+  have hL: L = Line_through uv := by{
+    apply line_through_unique
+    tauto
+  }
+  have uv2: reflection_point_point u a ≠ reflection_point_point v a := by{
+    by_contra p0
+    have : u = v := by{
+      rw[← reflection_point_point_twice u a, ← reflection_point_point_twice v a]
+      rw[p0]
+    }
+    contradiction
+  }
+  have g: reflection_line_point L a = Line_through uv2 := by{
+    apply line_through_unique
+    constructor
+    unfold reflection_line_point Lies_on
+    simp
+    use u
+    constructor
+    unfold Lies_on at h1
+    assumption
+    rfl
+
+    unfold reflection_line_point Lies_on
+    simp
+    use v
+    constructor
+    unfold Lies_on at h2
+    assumption
+    rfl
+  }
+  constructor
+  intro h
+  rw[g] at h
+  unfold Line_through Lies_on at h
+  simp at h
+  rw[hL]
+  unfold Lies_on Line_through
+  simp
+  rw[← reflection_point_point_twice u a, ← reflection_point_point_twice v a, ← reflection_point_point_twice p a]
+  exact reflection_point_point_colinear2 a h
+
+  intro h
+  rw[hL] at h
+  rw[g]
+  unfold Lies_on Line_through
+  unfold Lies_on Line_through at h
+  simp at *
+  exact reflection_point_point_colinear2 a h
+}
+
   /-same properties as usual:-/
 
 lemma reflection_line_point_twice (L : Line)(a : Point): reflection_line_point (reflection_line_point L a) a = L := by{
-  sorry
+  ext p
+  constructor
+  intro h
+  suffices : Lies_on p L
+  unfold Lies_on at this
+  assumption
+
+  have tt: Lies_on p (reflection_line_point (reflection_line_point L a) a) := by{
+    unfold Lies_on
+    assumption
+  }
+  have zw: Lies_on (reflection_point_point p a) (reflection_line_point L a) := by{
+    rw[← reflection_point_point_twice p a] at tt
+    exact (reflection_line_point_lies_on (reflection_line_point L a) a (reflection_point_point p a)).1 tt
+  }
+  exact (reflection_line_point_lies_on L a p).1 zw
+
+  intro h
+  suffices : Lies_on p (reflection_line_point (reflection_line_point L a) a)
+  unfold Lies_on at this
+  assumption
+
+  have ll: Lies_on p L := by{
+    unfold Lies_on
+    assumption
+  }
+  have zw: Lies_on (reflection_point_point p a) (reflection_line_point L a) := by{
+    exact (reflection_line_point_lies_on L a p).2 ll
+  }
+  rw[← reflection_point_point_twice p a]
+  exact (reflection_line_point_lies_on (reflection_line_point L a) a (reflection_point_point p a)).2 zw
 }
 
-#check Complex.arg
+/-You can do much more with reflections:
+For example show circles reflection are still circles, reflect lines across lines etc.
+However this becomes so repetitive, I skip it, as reflections wont actually be used much at all.
+
+Parallel lines stay parallel, tangents tangents and so on and so forth.-/
