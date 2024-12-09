@@ -424,3 +424,23 @@ lemma go_along_abs2{a b : Point}(ab : a ≠ b)(R : ℝ): point_abs b (go_along a
   rw[go_along_abs1]
   tauto
 }
+
+lemma colinear_go_along {a b c : Point}(ab : a ≠ b)(h : colinear a b c ): ∃R:ℝ, c = go_along a b R := by{
+  apply colinear_perm23 at h
+  apply (colinear_alt2 a c b).1 at h
+  simp [*] at h
+  obtain ⟨t,ht⟩ := h
+  use (t* (point_abs a b))
+  unfold go_along
+  rw[ht]
+  unfold padd p_scal_mul dir
+  ext
+  simp
+  have : (↑(point_abs a b) : ℂ) ≠ 0 := by{
+    contrapose ab
+    simp at *
+    exact abs_zero_imp_same a b ab
+  }
+  field_simp
+  ring
+}
