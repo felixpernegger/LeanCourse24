@@ -76,12 +76,20 @@ lemma reflection_point_point_colinear2 (p : Point){a b c : Point}(h : colinear a
 def reflection_point_line: Point → Line → Point :=
   fun a L ↦ reflection_point_point a (foot a L)
 
-/-Reflection is the same iff it lies on the line. This isnt extremely elementary, so we do it in several steps:-/
+/-Reflection is the same iff it lies on the line:-/
 
-lemma reflection_point_line_lies_on_mpr {a : Point}{L : Line}(h: Lies_on a L): reflection_point_line a L = a := by{
+theorem reflection_point_line_on_line (a : Point)(L : Line): reflection_point_line a L = a ↔ Lies_on a L := by{
+  constructor
+  intro h
+  unfold reflection_point_line at h
+  have : foot a L = a := by{exact Eq.symm (reflection_point_point_same_imp_same (id (Eq.symm h)))}
+  rw[← this]
+  exact foot_on_line L a
+
   have : foot a L = a := by{
     exact foot_point_on_line h
   }
+  intro h
   unfold reflection_point_line
   rw[this]
   exact reflection_point_point_self a
@@ -106,7 +114,8 @@ lemma reflection_point_line_lies_on_mpr {a : Point}{L : Line}(h: Lies_on a L): r
     constructor
     exact perp_through_is_perp L a
     by_cases h0: Lies_on a L
-    rw[reflection_point_line_lies_on_mpr h0]
+    have : reflection_point_line a L = a := by{exact (reflection_point_line_on_line a L).mpr h0}
+    rw[this]
     exact point_lies_on_perp_through L a
     have tt: foot a L ≠ a := by{exact foot_point_not_on_line h0}
     have : perp_through L a = Line_through tt := by{exact Eq.symm (foot_line_through h0)}

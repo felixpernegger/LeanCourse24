@@ -545,6 +545,24 @@ lemma foot_line_through{L : Line}{p : Point}(h: ¬Lies_on p L): Line_through (fo
   exact point_lies_on_perp_through L p
 }
 
+/-The foot is consant in the following sense:-/
+
+lemma foot_point_on_perp{L : Line}{a b : Point}(h: Lies_on b (perp_through L a)): foot b L = foot a L := by{
+  apply foot_unique
+  constructor
+  exact foot_on_line L b
+
+  have p: perp_through L b = perp_through L a := by{
+    symm
+    apply perp_through_unique
+    constructor
+    exact perp_through_is_perp L a
+    assumption
+  }
+  rw[← p]
+  exact foot_on_perp L b
+}
+
 /-Similar to intersections, there is an explicit formula for foots on lines.
 Once again, I dont recommend this fo general usage though.-/
 /-The proof is basically just using perp_through_unique and brute force calculations, nothing particular to add-/
