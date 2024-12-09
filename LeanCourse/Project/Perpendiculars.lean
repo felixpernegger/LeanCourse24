@@ -563,6 +563,11 @@ lemma foot_point_on_perp{L : Line}{a b : Point}(h: Lies_on b (perp_through L a))
   exact foot_on_perp L b
 }
 
+/-and a nice lemma about perpendiular points with foot:-/
+lemma perp_points_foot{L : Line}(a p : Point)(ha: Lies_on a L): perp_points a (foot p L) p (foot p L) := by{
+  apply perp_all (perp_through_is_perp L p) ha (foot_on_line L p) (point_lies_on_perp_through L p) (foot_on_perp L p)
+}
+
 /-Similar to intersections, there is an explicit formula for foots on lines.
 Once again, I dont recommend this fo general usage though.-/
 /-The proof is basically just using perp_through_unique and brute force calculations, nothing particular to add-/
