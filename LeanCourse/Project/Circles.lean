@@ -251,6 +251,13 @@ lemma point_abs_point_lies_on_circle{C : CCircle}(p : Point)(h : Lies_on_circle 
   exact (lies_on_circle_through p (Center C) (Radius C)).1 h
 }
 
+lemma point_on_circle_simp{C : CCircle}{p : Point}(h : point_abs (Center C) p = Radius C): Lies_on_circle p C := by{
+  unfold Lies_on_circle
+  rw[circle_is_circle_through C]
+  unfold Circle_through
+  simpa
+}
+
 /-Sometimes we need the circle to have *strictly* positive Radius:-/
 
 def PosRad(C : CCircle): Prop :=

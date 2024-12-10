@@ -584,5 +584,24 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
   exact circle_same_simp t this
 }
 
-/-Every circle of positive radius is a circimcircle!-/
+/-Every circle of positive radius is a circumcircle/circle_around!-/
+lemma posrad_is_circle_around{C : CCircle}(h : PosRad C): ∃(a b c : Point), (noncolinear a b c) ∧ (Lies_on_circle a C ∧ Lies_on_circle b C ∧ Lies_on_circle c C):= by{
+  use Point.mk ((Center C).x + (Radius C))
+  use Point.mk ((Center C).x - (Radius C))
+  use Point.mk ((Center C).x + {re := 0, im := (Radius C)})
+  constructor
+  contrapose h
+  unfold noncolinear PosRad at *
+  simp at *
+  unfold colinear det conj at *
+  simp at *
+  contrapose h
+  ring_nf
+  contrapose h --lol this works
+  simp at *
+  assumption
+
+  constructor
+  apply point_on_circle_simp
+}
 --do circle around unique, then circle_eq_simp THEN triangles circumcircle
