@@ -263,3 +263,74 @@ lemma copunctal_simp{L R T : Line}(h: lines_not_same L R T)(h': lines_int_nonemp
   rw[hL,hR,hT]
   tauto
 }
+
+/-And a final one with nonparallel lines:-/
+
+lemma lines_not_same_parallel(L R T : Line)(h: ¬Parallel L R): lines_not_same L R T := by{
+  unfold lines_not_same
+  left
+  contrapose h
+  simp at *
+  apply (parallel_def L R).2
+  right
+  rw[h]
+}
+
+/-We make a fancy way to write the intersercion on copunctal lines:-/
+/-for lack of a better word, the intersection if called line_center-/
+
+lemma line_center_ex {L R T : Line}(h : Copunctal L R T): ∃(p : Point), Lies_on p L ∧ Lies_on p R ∧ Lies_on p T := by{
+  unfold Copunctal at h
+  have : (L.range ∩ R.range ∩ T.range).Nonempty := by{
+    apply Set.encard_ne_zero.1
+    rw[h]
+    norm_num
+  }
+  obtain ⟨p,hp⟩ := this
+  use p
+  unfold Lies_on
+  obtain ⟨hp12,hp3⟩ := hp
+  obtain ⟨hp1,hp2⟩ := hp12
+  tauto
+}
+
+def Line_center {L R T : Line}(h : Copunctal L R T) : Point :=
+  (line_center_ex h).choose
+
+/-This lies on all 3 lines:-/
+lemma line_center_on_line {L R T : Line}(h : Copunctal L R T): Lies_on (Line_center h) L ∧ Lies_on (Line_center h) R ∧ Lies_on (Line_center h) T := by{
+  exact (Classical.choose_spec (line_center_ex h))
+}
+
+lemma line_center_on_line1 {L R T : Line}(h : Copunctal L R T): Lies_on (Line_center h) L := by{
+  exact (line_center_on_line h).1
+}
+
+lemma line_center_on_line2 {L R T : Line}(h : Copunctal L R T): Lies_on (Line_center h) R := by{
+  exact (line_center_on_line h).2.1
+}
+
+lemma line_center_on_line3 {L R T : Line}(h : Copunctal L R T): Lies_on (Line_center h) T := by{
+  exact (line_center_on_line h).2.2
+}
+
+/-And of course it is unique-/
+
+theorem line_center_unique {L R T : Line}{p : Point}(h : Copunctal L R T)(hp : Lies_on p L ∧ Lies_on p R ∧ Lies_on p T) : p = Line_center h := by{
+  by_contra p0
+  unfold Copunctal at h
+  have : 1 < (L.range ∩ R.range ∩ T.range).encard := by{
+    apply Set.one_lt_encard_iff.2
+    use p
+    use Line_center h
+    constructor
+    unfold Lies_on at hp
+    tauto
+
+    have : Lies_on (Line_center h) L ∧ Lies_on (Line_center h) R ∧ Lies_on (Line_center h) T := line_center_on_line h
+    unfold Lies_on at this
+    tauto
+  }
+  rw[h] at this
+  tauto
+}
