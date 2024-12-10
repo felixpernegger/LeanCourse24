@@ -1032,6 +1032,16 @@ lemma intersection_mem {L R : Line}(LR : ¬ Parallel L R) : Lies_on (Intersectio
   exact (Classical.choose_spec (lines_intersect LR)).1
 }
 
+/-To simplify usage (so we can use it easier with apply) we split it up:-/
+
+lemma intersection_mem_left {L R : Line}(LR : ¬ Parallel L R) : Lies_on (Intersection LR) L := by{
+  exact (intersection_mem LR).1
+}
+
+lemma intersection_mem_right {L R : Line}(LR : ¬ Parallel L R) : Lies_on (Intersection LR) R := by{
+  exact (intersection_mem LR).2
+}
+
 /-lines_intersect lemma now become nicer:-/
 
 lemma intersection_unique {L R : Line}{a : Point}(LR : ¬ Parallel L R)(ah: Lies_on a L ∧ Lies_on a R) : a = Intersection LR := by{

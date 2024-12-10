@@ -1,5 +1,6 @@
 import LeanCourse.Project.Pythagoras
 import LeanCourse.Project.Circles
+import LeanCourse.Project.Auxiliary
 import Mathlib
 
 open Function Set Classical
@@ -309,6 +310,175 @@ derive the respective results from triangles at the end.-/
 
 lemma noncolinear_imp_pairwise_different{a b c : Point}(h : noncolinear a b c): pairwise_different_point3 a b c := by{
   contrapose h
-  unfold Noncolinear
+  unfold noncolinear pairwise_different_point3 at *
   simp at *
+  apply colinear_self
+  tauto
+}
+
+/-For simplicity sake, we want to grab them directly:-/
+
+lemma noncolinear_imp_pairwise_different12{a b c : Point}(h : noncolinear a b c): a ≠ b := by{
+  contrapose h
+  unfold noncolinear
+  simp at *
+  apply colinear_self
+  tauto
+}
+
+lemma noncolinear_imp_pairwise_different23{a b c : Point}(h : noncolinear a b c): b ≠ c := by{
+  contrapose h
+  unfold noncolinear
+  simp at *
+  apply colinear_self
+  tauto
+}
+
+lemma noncolinear_imp_pairwise_different13{a b c : Point}(h : noncolinear a b c): a ≠ c := by{
+  contrapose h
+  unfold noncolinear
+  simp at *
+  apply colinear_self
+  tauto
+}
+
+/-also you can permutate them:-/
+
+lemma noncolinear_perm12{a b c : Point}(h : noncolinear a b c): noncolinear b a c := by{
+  contrapose h
+  unfold noncolinear at *
+  simp at *
+  apply colinear_perm12
+  assumption
+}
+
+lemma noncolinear_perm13{a b c : Point}(h : noncolinear a b c): noncolinear c b a := by{
+  contrapose h
+  unfold noncolinear at *
+  simp at *
+  apply colinear_perm13
+  assumption
+}
+
+lemma noncolinear_perm23{a b c : Point}(h : noncolinear a b c): noncolinear a c b := by{
+  contrapose h
+  unfold noncolinear at *
+  simp at *
+  apply colinear_perm23
+  assumption
+}
+
+/-Secondly thefore the lines through them are not parallel: We only do this for the first, explicitly, rest follow with permutations:-/
+
+lemma noncolinear_not_parallel1{a b c : Point}(h : noncolinear a b c): ¬Parallel (Line_through (noncolinear_imp_pairwise_different12 h)) (Line_through (noncolinear_imp_pairwise_different13 h)) := by{
+  by_contra h0
+  apply (parallel_def (Line_through (noncolinear_imp_pairwise_different12 h)) (Line_through (noncolinear_imp_pairwise_different13 h))).1 at h0
+  obtain h0|h0 := h0
+  have : a ∈ ∅ := by{
+    rw[← h0]
+    simp
+    constructor
+    have : Lies_on a (Line_through (noncolinear_imp_pairwise_different12 h)) := by{
+      apply line_through_mem_left
+    }
+    unfold Lies_on at this
+    assumption
+
+    have : Lies_on a (Line_through (noncolinear_imp_pairwise_different13 h)) := by{
+      apply line_through_mem_left
+    }
+    unfold Lies_on at this
+    assumption
+  }
+  contradiction
+
+  have : Lies_on b (Line_through (noncolinear_imp_pairwise_different13 h)) := by{
+    unfold Lies_on
+    rw[← h0]
+    apply line_through_mem_right
+  }
+  unfold Lies_on Line_through at this
+  simp at this
+  apply colinear_perm23 at this
+  unfold noncolinear at h
+  contradiction
+}
+
+/-So the perp_bisectors arent parallel, and therefore have an intersection:-/
+lemma perp_bisectors_noncolinear_not_parallel1{a b c : Point}(h : noncolinear a b c): ¬Parallel (perp_bisector (noncolinear_imp_pairwise_different12 h)) (perp_bisector (noncolinear_imp_pairwise_different13 h)) := by{
+  by_contra h0
+  have : Parallel (Line_through (noncolinear_imp_pairwise_different12 h)) (Line_through (noncolinear_imp_pairwise_different13 h)) := by{
+    exact (perp_bisector_parallel (noncolinear_imp_pairwise_different12 h) (noncolinear_imp_pairwise_different13 h)).mp h0
+  }
+  have : ¬Parallel (Line_through (noncolinear_imp_pairwise_different12 h)) (Line_through (noncolinear_imp_pairwise_different13 h)) := by{
+    exact noncolinear_not_parallel1 h
+  }
+  contradiction
+}
+
+/-We can now conclude they are copunctal by using the characterization of the perpendicular bisector:-/
+
+theorem perp_bisectors_copunctal{a b c : Point}(h : noncolinear a b c): Copunctal (perp_bisector (noncolinear_imp_pairwise_different12 h)) (perp_bisector (noncolinear_imp_pairwise_different13 h)) (perp_bisector (noncolinear_imp_pairwise_different23 h)) := by{
+  apply copunctal_simp
+  apply lines_not_same_parallel
+  exact perp_bisectors_noncolinear_not_parallel1 h
+
+  use Intersection (perp_bisectors_noncolinear_not_parallel1 h)
+  have h1: Lies_on (Intersection (perp_bisectors_noncolinear_not_parallel1 h)) (perp_bisector (noncolinear_imp_pairwise_different12 h)) := by{
+    exact (intersection_mem (perp_bisectors_noncolinear_not_parallel1 h)).1
+  }
+  have h2: Lies_on (Intersection (perp_bisectors_noncolinear_not_parallel1 h)) (perp_bisector (noncolinear_imp_pairwise_different13 h)) := by{
+    exact (intersection_mem (perp_bisectors_noncolinear_not_parallel1 h)).2
+  }
+  constructor
+  · exact h1
+  constructor
+  · exact h2
+  apply (perp_bisector_def a b (Intersection (perp_bisectors_noncolinear_not_parallel1 h)) (noncolinear_imp_pairwise_different12 h)).2 at h1
+  apply (perp_bisector_def a c (Intersection (perp_bisectors_noncolinear_not_parallel1 h)) (noncolinear_imp_pairwise_different13 h)).2 at h2
+
+  refine (perp_bisector_def b c (Intersection (perp_bisectors_noncolinear_not_parallel1 h)) (noncolinear_imp_pairwise_different23 h)).mp ?h.right.right.a
+  rw[← h1,h2]
+}
+
+/-Once again by the characterization we can now conclude everything:-/
+
+def pCenter {a b c : Point}(h : noncolinear a b c): Point :=
+  Intersection (perp_bisectors_noncolinear_not_parallel1 h)
+
+def pRadius {a b c : Point}(h : noncolinear a b c): ℝ :=
+  point_abs (pCenter h) a
+
+/-the pcenter lies on everything:-/
+
+lemma pcenter_mem{a b c : Point}(h : noncolinear a b c): Lies_on (pCenter h) (perp_bisector (noncolinear_imp_pairwise_different12 h)) ∧ Lies_on (pCenter h) (perp_bisector (noncolinear_imp_pairwise_different13 h)) ∧ Lies_on (pCenter h) (perp_bisector (noncolinear_imp_pairwise_different23 h)) := by{
+  let u := Line_center (perp_bisectors_copunctal h)
+  have : pCenter h = u := by{
+    symm
+    unfold pCenter
+    apply intersection_unique
+    unfold u
+    constructor
+    exact line_center_on_line1 (perp_bisectors_copunctal h)
+    exact line_center_on_line2 (perp_bisectors_copunctal h)
+  }
+  rw[this]
+  unfold u
+  exact line_center_on_line (perp_bisectors_copunctal h)
+}
+
+/-So the radii are all the same:-/
+
+lemma pradius_is_radius{a b c : Point}(h : noncolinear a b c): point_abs (pCenter h) a = pRadius h ∧ point_abs (pCenter h) b = pRadius h ∧ point_abs (pCenter h) c = pRadius h := by{
+  constructor
+  unfold pRadius
+  rfl
+
+  constructor
+  unfold pRadius
+  symm
+  refine (perp_bisector_def a b (pCenter h) (noncolinear_imp_pairwise_different12 h)).mpr ?right.left.a
+  unfold pCenter
+  #check intersction_mem
+  apply intersection_mem (pe).1
 }
