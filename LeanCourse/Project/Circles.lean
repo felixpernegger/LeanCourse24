@@ -246,6 +246,10 @@ lemma circle_same_simp{C O : CCircle}(h: Center C = Center O)(h': Radius C = Rad
   rw[circle_is_circle_through C, circle_is_circle_through O, h, h']
 }
 
+lemma point_abs_point_lies_on_circle{C : CCircle}(p : Point)(h : Lies_on_circle p C): point_abs (Center C) p = Radius C := by{
+  rw[circle_is_circle_through C] at h
+  exact (lies_on_circle_through p (Center C) (Radius C)).1 h
+}
 
 /-Sometimes we need the circle to have *strictly* positive Radius:-/
 
@@ -255,5 +259,15 @@ def PosRad(C : CCircle): Prop :=
 /-if a point contain two different points, it has positive radius:-/
 
 lemma posrad_point{C : CCircle}(h : ∃(a b : Point), a ≠ b ∧ Lies_on_circle a C ∧ Lies_on_circle b C): PosRad C := by{
-  sorry
+  obtain ⟨a,b,ab,ah,bh⟩ := h
+  contrapose ab
+  unfold PosRad at ab
+  simp at *
+  have ah': point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle a ah}
+  have bh': point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle b bh}
+  rw[ab] at ah' bh'
+  simp at ah' bh'
+  have a0: (Center C) = a := by{exact abs_zero_imp_same (Center C) a ah'}
+  have b0: (Center C) = b := by{exact abs_zero_imp_same (Center C) b bh'}
+  rw[← a0,← b0]
 }
