@@ -55,7 +55,7 @@ lemma same_side_trans{L : Line}{a b c : Point}(ab : same_side L a b)(bc : same_s
   by_contra h
   simp at h
   obtain ⟨t,ht1,ht2,r⟩ := h
-  sorry -- note this is equivalent to this triangle axiom thing, therefore quite complicated
+  sorry -- note this is equivalent to this triangle axiom thing, therefore quite complicated (axiom von pasch)
 }
 
 /-If a doesnt lie on the same side as b and c, b and c lie on the same side:
@@ -141,21 +141,21 @@ def inside_circle(a : Point)(C : CCircle) : Prop :=
 
 /-Now we do some tautological stuff, to simplify proving Lines are Copunctual and stuff-/
 
-def pairwise_different_points3 (a b c : Point): Prop :=
+def pairwise_different_point3 (a b c : Point): Prop :=
   (a ≠ b)∧(b ≠ c)∧(c ≠ a)
 
-lemma pairwise_different_points3_perm12 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 b a c := by{
-  unfold pairwise_different_points3 at *
+lemma pairwise_different_point3_perm12 {a b c : Point}(h: pairwise_different_point3 a b c): pairwise_different_point3 b a c := by{
+  unfold pairwise_different_point3 at *
   tauto
 }
 
-lemma pairwise_different_points3_perm13 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 c b a := by{
-  unfold pairwise_different_points3 at *
+lemma pairwise_different_point3_perm13 {a b c : Point}(h: pairwise_different_point3 a b c): pairwise_different_point3 c b a := by{
+  unfold pairwise_different_point3 at *
   tauto
 }
 
-lemma pairwise_different_points3_perm23 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 a c b := by{
-  unfold pairwise_different_points3 at *
+lemma pairwise_different_point3_perm23 {a b c : Point}(h: pairwise_different_point3 a b c): pairwise_different_point3 a c b := by{
+  unfold pairwise_different_point3 at *
   tauto
 }
 

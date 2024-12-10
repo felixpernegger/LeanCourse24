@@ -272,3 +272,43 @@ theorem perp_bisector_def (a b p : Point)(ab : a ≠ b): (point_abs p a = point_
   rw[perp_bisector_foot ab h]
   rw[← pmidpoint_same_abs a b, point_abs_symm a (pmidpoint a b)]
 }
+
+/- perp bisectiors are Parallel iff the respective lines are parallel:-/
+
+lemma perp_bisector_parallel{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): Parallel (perp_bisector ab) (perp_bisector cd) ↔ Parallel (Line_through ab) (Line_through cd) := by{
+  have p1 : Perpendicular (perp_bisector ab) (Line_through ab) := by{
+    apply perp_symm
+    exact perp_bisector_is_perp ab
+  }
+  have p2: Perpendicular (perp_bisector cd) (Line_through cd) := by{
+    apply perp_symm
+    exact perp_bisector_is_perp cd
+  }
+  constructor
+  intro h
+  have s1: Perpendicular (perp_bisector ab) (Line_through cd) := by{
+    apply parallel_symm at h
+    exact parallel_perp (perp_bisector cd) h p2
+  }
+  exact perp_perp (perp_bisector ab) p1 s1
+
+  intro h
+  have s1: Perpendicular (perp_bisector ab) (Line_through cd) := by{
+    apply perp_symm at p1
+    exact perp_parallel (Line_through ab) p1 h
+  }
+  apply perp_symm at s1
+  apply perp_symm at p2
+  exact perp_perp (Line_through cd) s1 p2
+}
+
+/-From now on, we deal with Noncolinear points. As noncolinear points are basically triangles, we will
+derive the respective results from triangles at the end.-/
+
+/-First noncoliear points are pairwise different:-/
+
+lemma noncolinear_imp_pairwise_different{a b c : Point}(h : noncolinear a b c): pairwise_different_point3 a b c := by{
+  contrapose h
+  unfold Noncolinear
+  simp at *
+}
