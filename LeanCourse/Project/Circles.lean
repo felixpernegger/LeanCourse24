@@ -239,3 +239,9 @@ lemma same_center_point{C O : CCircle}{p : Point}(h : Center C = Center O)(hC : 
   ext
   rw[← t1,← t2]
 }
+
+/-So we can check if two circles are the same by simply checking if their radius and center are the same:-/
+
+lemma circle_same_simp{C O : CCircle}(h: Center C = Center O)(h': Radius C = Radius O): C = O := by{
+  rw[circle_is_circle_through C, circle_is_circle_through O, h, h']
+}

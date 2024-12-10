@@ -446,8 +446,8 @@ theorem perp_bisectors_copunctal{a b c : Point}(h : noncolinear a b c): Copuncta
 def pCenter {a b c : Point}(h : noncolinear a b c): Point :=
   Intersection (perp_bisectors_noncolinear_not_parallel1 h)
 
-def pRadius {a b c : Point}(h : noncolinear a b c): ℝ :=
-  point_abs (pCenter h) a
+def pRadius {a b c : Point}(h : noncolinear a b c): PosReal :=
+  ⟨point_abs (pCenter h) a, point_abs_pos (pCenter h) a⟩
 
 /-the pcenter lies on everything:-/
 
@@ -515,18 +515,74 @@ lemma circle_around_radius{a b c : Point}(h : noncolinear a b c): Radius (Circle
 lemma circle_around_lies_on{a b c : Point}(h : noncolinear a b c): Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{
   unfold Circle_around
   constructor
-  apply (lies_on_circle_through a (pCenter h) (⟨pRadius h,pradius_nonneg h⟩)).2
+  apply (lies_on_circle_through a (pCenter h) (pRadius h)).2
   simp
   exact (pradius_is_radius h).1
 
   constructor
-  apply (lies_on_circle_through b (pCenter h) (⟨pRadius h,pradius_nonneg h⟩)).2
+  apply (lies_on_circle_through b (pCenter h) (pRadius h)).2
   simp
   exact (pradius_is_radius h).2.1
 
-  apply (lies_on_circle_through c (pCenter h) (⟨pRadius h,pradius_nonneg h⟩)).2
+  apply (lies_on_circle_through c (pCenter h) (pRadius h)).2
   simp
   exact (pradius_is_radius h).2.2
+}
+
+/-The circle around is the only circle satisfying this!-/
+
+theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(hC: Lies_on_circle a C ∧ Lies_on_circle b C ∧ Lies_on_circle c C): C = Circle_around h := by{
+  let z := Center C
+  let R := Radius C
+  have zdef: z = Center C := rfl
+  have Rdef: R = Radius C := rfl
+  rw[circle_is_circle_through C] at hC
+  rw[circle_is_circle_through C]
+  rw[← zdef] at hC
+  rw[← zdef]
+  rw[← Rdef] at hC
+  rw[← Rdef]
+  clear zdef Rdef
+  obtain ⟨hCa,hCb,hCc⟩ := hC
+  have ab: a ≠ b := by{
+    exact noncolinear_imp_pairwise_different12 h
+  }
+  have bc: b ≠ c := by{
+    exact noncolinear_imp_pairwise_different23 h
+  }
+  have ac: a ≠ c := by{
+    exact noncolinear_imp_pairwise_different13 h
+  }
+  have abperp: Lies_on z (perp_bisector ab) := by{
+    apply (perp_bisector_def a b z ab).1
+    have ah: point_abs z a = R := by{exact hCa}
+    have bh: point_abs z b = R := by{exact hCb}
+    rw[ah,bh]
+  }
+  have acperp: Lies_on z (perp_bisector ac) := by{
+    apply (perp_bisector_def a c z ac).1
+    have ah: point_abs z a = R := by{exact hCa}
+    have ch: point_abs z c = R := by{exact hCc}
+    rw[ah,ch]
+  }
+  have cent: z = pCenter h := by{
+    unfold pCenter
+    apply intersection_unique
+    tauto
+  }
+  have t: Center (Circle_through z R) = Center (Circle_around h) := by{
+    have : Center (Circle_through z R) = z := by{exact Eq.symm (center_unique z R)}
+    rw[this, circle_around_center h]
+    assumption
+  }
+  have ha : Lies_on_circle a (Circle_around h) := by{
+    exact (circle_around_lies_on h).1
+  }
+  #check same_center_point
+  have : Radius (Circle_through z R) = Radius (Circle_around h) := by{
+    exact same_center_point t hCa ha
+  }
+  sorry
 }
 
 --do circle around unique, then circle_eq_simp THEN triangles circumcircle
