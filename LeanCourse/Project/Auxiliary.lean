@@ -138,3 +138,128 @@ def inside_triangle (T : Triangle)(p : Point): Prop :=
 /-The inside of a circle is shorter to define:-/
 def inside_circle(a : Point)(C : CCircle) : Prop :=
   point_abs a (Center C) < Radius C
+
+/-Now we do some tautological stuff, to simplify proving Lines are Copunctual and stuff-/
+
+def pairwise_different_points3 (a b c : Point): Prop :=
+  (a ≠ b)∧(b ≠ c)∧(c ≠ a)
+
+lemma pairwise_different_points3_perm12 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 b a c := by{
+  unfold pairwise_different_points3 at *
+  tauto
+}
+
+lemma pairwise_different_points3_perm13 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 c b a := by{
+  unfold pairwise_different_points3 at *
+  tauto
+}
+
+lemma pairwise_different_points3_perm23 {a b c : Point}(h: pairwise_different_points3 a b c): pairwise_different_points3 a c b := by{
+  unfold pairwise_different_points3 at *
+  tauto
+}
+
+def pairwise_different_lines3 (L R T : Line): Prop :=
+  (L ≠ R)∧(R ≠ T)∧(T ≠ L)
+
+lemma pairwise_different_lines3_perm12 {L R T : Line}(h: pairwise_different_lines3 L R T): pairwise_different_lines3 R L T := by{
+  unfold pairwise_different_lines3 at *
+  tauto
+}
+
+lemma pairwise_different_lines3_perm13 {L R T : Line}(h: pairwise_different_lines3 L R T): pairwise_different_lines3 T R L := by{
+  unfold pairwise_different_lines3 at *
+  tauto
+}
+
+lemma pairwise_different_lines3_perm23 {L R T : Line}(h: pairwise_different_lines3 L R T): pairwise_different_lines3 L T R := by{
+  unfold pairwise_different_lines3 at *
+  tauto
+}
+
+
+def lines_int_nonempty(L R T : Line) : Prop :=
+  ∃p : Point, Lies_on p L ∧ Lies_on p R ∧ Lies_on p T
+
+lemma lines_int_nonempty_perm12{L R T : Line}(h: lines_int_nonempty L R T): lines_int_nonempty R L T := by{
+  unfold lines_int_nonempty at *
+  tauto
+}
+
+lemma lines_int_nonempty_perm13{L R T : Line}(h: lines_int_nonempty L R T): lines_int_nonempty T R L := by{
+  unfold lines_int_nonempty at *
+  tauto
+}
+
+lemma lines_int_nonempty_perm23{L R T : Line}(h: lines_int_nonempty L R T): lines_int_nonempty L T R := by{
+  unfold lines_int_nonempty at *
+  tauto
+}
+
+def lines_not_same(L R T : Line): Prop :=
+  (L ≠ R) ∨ (R ≠ T) ∨ (T ≠ L)
+
+lemma lines_not_same_perm12{L R T : Line}(h: lines_not_same L R T): lines_not_same R L T := by{
+  unfold lines_not_same at *
+  tauto
+}
+
+lemma lines_not_same_perm13{L R T : Line}(h: lines_not_same L R T): lines_not_same T R L := by{
+  unfold lines_not_same at *
+  tauto
+}
+
+lemma lines_not_same_perm23{L R T : Line}(h: lines_not_same L R T): lines_not_same L T R := by{
+  unfold lines_not_same at *
+  tauto
+}
+
+lemma lines_not_same_simp(L R T : Line)(h : ∃(p : Point), Lies_on p L ∧ ¬Lies_on p R): lines_not_same L R T := by{
+  unfold lines_not_same
+  left
+  by_contra p0
+  rw[p0] at h
+  tauto
+}
+
+/-the above get useful here:-/
+
+lemma copunctal_simp{L R T : Line}(h: lines_not_same L R T)(h': lines_int_nonempty L R T): Copunctal L R T := by{
+  unfold Copunctal
+  apply le_antisymm
+  swap
+  refine one_le_encard_iff_nonempty.mpr ?intro.a.a
+  obtain ⟨p,ph⟩ := h'
+  have hp': p ∈ L.range ∩ R.range ∩ T.range := by{
+    unfold Lies_on at ph
+    tauto
+  }
+  use p
+
+  contrapose h
+  unfold lines_not_same
+  simp at *
+  obtain ⟨a,b,ah,bh,ab⟩ := one_lt_encard_iff.mp h
+  simp at ah bh
+  obtain ⟨ah12,ah3⟩ := ah
+  obtain ⟨ah1,ah2⟩ := ah12
+  obtain ⟨bh12,bh3⟩ := bh
+  obtain ⟨bh1,bh2⟩ := bh12
+  have hL: L = Line_through ab := by{
+    apply line_through_unique
+    unfold Lies_on
+    tauto
+  }
+  have hR: R = Line_through ab := by{
+    apply line_through_unique
+    unfold Lies_on
+    tauto
+  }
+  have hT: T = Line_through ab := by{
+    apply line_through_unique
+    unfold Lies_on
+    tauto
+  }
+  rw[hL,hR,hT]
+  tauto
+}

@@ -151,6 +151,7 @@ lemma ex_points_on_line (L : Line): ∃(u v : Point), (u ≠ v) ∧ (Lies_on u L
   use b
   constructor
   exact ab
+
   constructor
   unfold Lies_on
   simp
