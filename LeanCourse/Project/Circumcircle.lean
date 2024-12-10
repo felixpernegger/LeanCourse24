@@ -479,6 +479,18 @@ lemma pradius_is_radius{a b c : Point}(h : noncolinear a b c): point_abs (pCente
   symm
   refine (perp_bisector_def a b (pCenter h) (noncolinear_imp_pairwise_different12 h)).mpr ?right.left.a
   unfold pCenter
-  #check intersction_mem
-  apply intersection_mem (pe).1
+  apply intersection_mem_left
+
+  unfold pRadius
+  symm
+  refine (perp_bisector_def a c (pCenter h) (noncolinear_imp_pairwise_different13 h)).mpr ?right.right.a
+  exact (pcenter_mem h).2.1
 }
+
+/-This finally justifies the Circumcircle. I want to save the predicate Circumcircle for triangles, so
+in this case we call it "Circle_around":-/
+
+def Circle_around{a b c : Point}(h : noncolinear a b c): CCircle :=
+  Circle_through (pCenter h) (pRadius h)
+
+--fuck me
