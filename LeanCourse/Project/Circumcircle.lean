@@ -513,7 +513,9 @@ lemma circle_around_radius{a b c : Point}(h : noncolinear a b c): Radius (Circle
 /-And really contains all points:-/
 
 lemma circle_around_lies_on{a b c : Point}(h : noncolinear a b c): Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{
-  constructor
   unfold Circle_around
-  simp
+  constructor
+  apply lies_on_circle_through
+  constructor
+
 }
