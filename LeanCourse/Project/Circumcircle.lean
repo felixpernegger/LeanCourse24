@@ -578,11 +578,11 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
   have ha : Lies_on_circle a (Circle_around h) := by{
     exact (circle_around_lies_on h).1
   }
-  #check same_center_point
   have : Radius (Circle_through z R) = Radius (Circle_around h) := by{
     exact same_center_point t hCa ha
   }
-  sorry
+  exact circle_same_simp t this
 }
 
+/-Every circle of positive radius is a circimcircle!-/
 --do circle around unique, then circle_eq_simp THEN triangles circumcircle

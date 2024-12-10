@@ -245,3 +245,15 @@ lemma same_center_point{C O : CCircle}{p : Point}(h : Center C = Center O)(hC : 
 lemma circle_same_simp{C O : CCircle}(h: Center C = Center O)(h': Radius C = Radius O): C = O := by{
   rw[circle_is_circle_through C, circle_is_circle_through O, h, h']
 }
+
+
+/-Sometimes we need the circle to have *strictly* positive Radius:-/
+
+def PosRad(C : CCircle): Prop :=
+  0 < Radius C
+
+/-if a point contain two different points, it has positive radius:-/
+
+lemma posrad_point{C : CCircle}(h : ∃(a b : Point), a ≠ b ∧ Lies_on_circle a C ∧ Lies_on_circle b C): PosRad C := by{
+  sorry
+}
