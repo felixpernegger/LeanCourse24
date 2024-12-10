@@ -528,3 +528,5 @@ lemma circle_around_lies_on{a b c : Point}(h : noncolinear a b c): Lies_on_circl
   simp
   exact (pradius_is_radius h).2.2
 }
+
+--do circle around unique, then circle_eq_simp THEN triangles circumcircle
