@@ -204,3 +204,34 @@ theorem center_unique (z : Point)(R : PosReal) : z = Center (Circle_through z R)
   obtain ⟨r,rh⟩  := center_is_center (Circle_through z R)
   exact center_unique_spec rh
 }
+
+/-Therefore every circle can be writte as circle_through center with radius:-/
+lemma circle_is_circle_through(C : CCircle): C = Circle_through (Center C) (Radius C) := by{
+  obtain ⟨z,hz⟩ := radius_is_radius C
+  obtain ⟨R,hR⟩ := center_is_center C
+  rw[hz] at hR
+  have : Radius C = R := by{
+    exact radius_unique_spec hR
+  }
+  rw[← this,← hz] at hR
+  assumption
+}
+
+/-A quick way to check if a point is on a circle:-/
+
+lemma lies_on_circle_through(z p : Point)(R : PosReal): Lies_on_circle p (Circle_through z R) ↔ point_abs z p = R := by{
+  unfold Lies_on_circle Circle_through
+  simp
+}
+
+/-Therefore if two circles with same center contain the same point, they are equal-/
+
+lemma same_center_point{C O : CCircle}{p : Point}(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): Radius C = Radius O := by{
+  rw[circle_is_circle_through C] at hC
+  rw[circle_is_circle_through O] at hO
+  have t1: point_abs (Center C) p = Radius C := by{exact hC}
+  have t2: point_abs (Center O) p = Radius O := by{exact hO}
+  rw[h] at t1
+  ext
+  rw[← t1,← t2]
+}

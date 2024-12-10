@@ -487,10 +487,33 @@ lemma pradius_is_radius{a b c : Point}(h : noncolinear a b c): point_abs (pCente
   exact (pcenter_mem h).2.1
 }
 
+lemma pradius_nonneg{a b c : Point}(h : noncolinear a b c): 0 ≤ pRadius h := by{
+  unfold pRadius
+  exact point_abs_pos (pCenter h) a
+}
+
 /-This finally justifies the Circumcircle. I want to save the predicate Circumcircle for triangles, so
 in this case we call it "Circle_around":-/
 
 def Circle_around{a b c : Point}(h : noncolinear a b c): CCircle :=
-  Circle_through (pCenter h) (pRadius h)
+  Circle_through (pCenter h) (⟨pRadius h,pradius_nonneg h⟩)
 
---fuck me
+/-This has raiuds pRadius and center pCenter-/
+
+lemma circle_around_center{a b c : Point}(h : noncolinear a b c): Center (Circle_around h) = pCenter h := by{
+  unfold Circle_around
+  exact Eq.symm (center_unique (pCenter h) ⟨pRadius h, pradius_nonneg h⟩)
+}
+
+lemma circle_around_radius{a b c : Point}(h : noncolinear a b c): Radius (Circle_around h) = pRadius h := by{
+  unfold Circle_around
+  rw [← radius_unique]
+}
+
+/-And really contains all points:-/
+
+lemma circle_around_lies_on{a b c : Point}(h : noncolinear a b c): Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{
+  constructor
+  unfold Circle_around
+  simp
+}

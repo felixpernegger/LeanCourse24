@@ -517,7 +517,6 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
 
 
 /-The alternative (nonsymmetric) notion of colinear is now the following:-/
-/-Dont use fucking cyclyic rotation you weirdo-/
 lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
   by_cases p : a=c
   rw[p]
