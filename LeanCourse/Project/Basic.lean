@@ -38,6 +38,31 @@ open Classical -- In order to take intersections and stuff
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1
 
+/-Tangential implies nonempty:-/
+
+lemma tangential_nonempty{s v : Set Point}(h : Tangential s v): (s ∩ v).Nonempty := by{
+  contrapose h
+  unfold Tangential
+  simp at *
+  rw[not_nonempty_iff_eq_empty.mp h]
+  simp
+}
+
+/-So given tangential sets we can choose a point on both of them, which is unique:-/
+
+def Tangential_point{s v : Set Point}(h : Tangential s v) : Point :=
+  (tangential_nonempty h).choose
+
+/-This point lies in both sets:-/
+
+lemma tangential_point_is_in_sets{s v : Set Point}(h : Tangential s v): Tangential_point h ∈ s ∧ Tangential_point h ∈ v := by{
+  have : Tangential_point h ∈ s ∩ v := by{
+    unfold Tangential_point
+    exact Exists.choose_spec (tangential_nonempty h)
+  }
+  tauto
+}
+
 /-A quick lemma we will use quite often so its nice to have it explicitly, as ring doesnt work on it:-/
 lemma sub_neq_zero {a b : Point}(h: a ≠ b): a.x-b.x ≠ 0 := by{
   contrapose h
