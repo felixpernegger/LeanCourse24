@@ -13,4 +13,5 @@ which is needed for constructing a tangents through a give point to a circle-/
 def Tangent(L : Line)(C : CCircle) : Prop :=
   Tangential L.range C.range
 
-lemma tangent_nonempty{L : Line}{C : CCircle}(h : )
+def Tangent_point{L : Line}{C : CCircle}(h : Tangent L C): Point :=
+  Tangential_point Tangent

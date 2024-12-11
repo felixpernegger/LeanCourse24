@@ -55,12 +55,27 @@ def Tangential_point{s v : Set Point}(h : Tangential s v) : Point :=
 
 /-This point lies in both sets:-/
 
-lemma tangential_point_is_in_sets{s v : Set Point}(h : Tangential s v): Tangential_point h ∈ s ∧ Tangential_point h ∈ v := by{
+lemma tangential_point_in_sets{s v : Set Point}(h : Tangential s v): Tangential_point h ∈ s ∧ Tangential_point h ∈ v := by{
   have : Tangential_point h ∈ s ∩ v := by{
     unfold Tangential_point
     exact Exists.choose_spec (tangential_nonempty h)
   }
   tauto
+}
+
+/-And unique-/
+
+lemma tangential_point_unique{s v : Set Point}{p : Point}(h : Tangential s v)(hp: p ∈ s ∧ p ∈ v): p = Tangential_point h := by{
+  have hp': p ∈ s ∩ v := by{tauto}
+  have tweak: (s ∩ v).encard ≤ 1 := by{
+    unfold Tangential at h
+    rw[h]
+  }
+  apply Set.encard_le_one_iff.1 at tweak
+  specialize tweak p (Tangential_point h)
+  apply tweak
+  · assumption
+  exact (tangential_point_in_sets h)
 }
 
 /-A quick lemma we will use quite often so its nice to have it explicitly, as ring doesnt work on it:-/
