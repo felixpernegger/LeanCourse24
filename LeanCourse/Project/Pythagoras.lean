@@ -222,7 +222,7 @@ lemma point_line_abs_leq_point_abs(p a : Point){L : Line}(h : Lies_on a L): poin
   exact pow_two_pos_of_ne_zero this
 }
 
-lemma point_line_abs_eq_point_abs_iff{p : Point}(a : Point){L : Line}(ah : Lies_on a L) : point_abs p a = point_line_abs p L ↔ a = foot p L := by{
+lemma point_line_abs_eq_point_abs_iff(p a : Point)(L : Line)(ah : Lies_on a L) : point_abs p a = point_line_abs p L ↔ a = foot p L := by{
   constructor
   intro h
   contrapose h

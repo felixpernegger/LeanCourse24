@@ -96,7 +96,7 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
     have t2: point_line_abs (Center C) L ≠ point_abs (Center C) a := by{
       contrapose p0
       simp at *
-      sorry
+      #check point_line_abs_eq_point_abs_iff aL
     }
     contrapose t2
     simp at *
