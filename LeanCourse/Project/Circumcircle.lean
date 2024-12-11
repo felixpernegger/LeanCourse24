@@ -766,8 +766,8 @@ lemma circle_eq_points{C O : CCircle}(a b c : Point)(h : pairwise_different_poin
 
 /-Now we state some of the presented theorems for triangles, starting with:-/
 
-def Circumcircle(T : Triangle): CCircle :=
-  Circle_around T.noncolinear
+def Circumcircle: Triangle → CCircle :=
+  fun T ↦ Circle_around T.noncolinear
 
 /-We now restate some of the stuff we proved with the Circumcircle. Nothing too exciting.-/
 
@@ -798,11 +798,11 @@ lemma circumcircle_unique{T : Triangle}{C : CCircle}(h: Lies_on_circle T.a C ∧
   exact lies_on_circumcircle T
 }
 
-def Circumcenter(T : Triangle) :=
-  Center (Circumcircle T)
+def Circumcenter: Triangle → Point :=
+  fun T ↦ Center (Circumcircle T)
 
-def Circumradius(T : Triangle) :=
-  Radius (Circumcircle T)
+def Circumradius: Triangle → PosReal :=
+  fun T ↦ Radius (Circumcircle T)
 
 lemma circumcircle_circle_through(T : Triangle): Circumcircle T = Circle_through (Circumcenter T) (Circumradius T) := by{
   unfold Circumcenter Circumradius
@@ -845,6 +845,9 @@ lemma lies_on_circumcircle_iff(T : Triangle)(p : Point): Lies_on_circle p (Circu
   exact lies_on_circle_through p (Circumcenter T) (Circumradius T)
 }
 
+/-We finish off this section by introducing / defining the fuerbach / nine-point-circle:-/
 
+def Nine_point_circle: Triangle → CCircle :=
+  fun T ↦ Circumcircle (Midtriangle T)
 
 --STATE THE MOST IMPORTANT AND BASIC STUFF; FINISH WITH FEUERBACH CIRCLE
