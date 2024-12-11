@@ -68,6 +68,12 @@ lemma pmidpoint_colinear (a b : Point): colinear a b (pmidpoint a b) := by{
   exact in_between_imp_colinear (pmidpoint_in_between a b)
 }
 
+lemma pmidpoint_lies_on {a b : Point}(ab : a ≠ b): Lies_on (pmidpoint a b) (Line_through ab) := by{
+  unfold Lies_on Line_through
+  simp
+  exact pmidpoint_colinear a b
+}
+
 lemma pmidpoint_same_abs (a b : Point): point_abs a (pmidpoint a b) = point_abs (pmidpoint a b) b := by{
   rw[pmidpoint_abs_left, pmidpoint_abs_right]
 }
@@ -603,5 +609,125 @@ lemma posrad_is_circle_around{C : CCircle}(h : PosRad C): ∃(a b c : Point), (n
 
   constructor
   apply point_on_circle_simp
+  unfold point_abs
+  simp
+
+  constructor
+  apply point_on_circle_simp
+  unfold point_abs
+  simp
+
+  apply point_on_circle_simp
+  unfold point_abs
+  simp
+  unfold Complex.abs
+  simp
 }
---do circle around unique, then circle_eq_simp THEN triangles circumcircle
+
+/-Quick interlude : If three disjoint points lie on a circle, they are noncolinear!-/
+lemma pairwise_different_point_lie_on_circle{a b c : Point}{C : CCircle}(hp : pairwise_different_point3 a b c)(ha : Lies_on_circle a C)(hb : Lies_on_circle b C)(hc : Lies_on_circle c C): noncolinear a b c := by{
+  by_contra h0
+  unfold noncolinear at h0
+  simp at h0
+  unfold pairwise_different_point3 at hp
+  obtain ⟨ab,bc,ca⟩ := hp
+  have sab: Lies_on (Center C) (perp_bisector ab) := by{
+    apply (perp_bisector_def a b (Center C) ab).1
+    rw[point_abs_point_lies_on_circle a ha, point_abs_point_lies_on_circle b hb]
+  }
+  have sbc: Lies_on (Center C) (perp_bisector bc) := by{
+    apply (perp_bisector_def b c (Center C) bc).1
+    rw[point_abs_point_lies_on_circle b hb, point_abs_point_lies_on_circle c hc]
+  }
+  have cool: Parallel (perp_bisector ab) (perp_bisector bc) := by{
+    refine (perp_bisector_parallel ab bc).mpr ?_
+    refine (parallel_quot ab bc).mpr ?_
+    apply colinear_perm12 at h0
+    apply (colinear_alt b a c).1 at h0
+    obtain ⟨a1,a2⟩ := a
+    obtain ⟨b1,b2⟩ := b
+    obtain ⟨c1,c2⟩ := c
+    simp at *
+    obtain h0|h0 := h0
+    · left
+      linarith
+    right
+    assumption
+  }
+  apply (parallel_def (perp_bisector ab) (perp_bisector bc)).1 at cool
+
+  obtain p0|p0 := cool
+  have : Center C ∈ (perp_bisector ab).range ∩ (perp_bisector bc).range := by{
+    unfold Lies_on at *
+    tauto
+  }
+  rw[p0] at this
+  contradiction
+
+  have hm: perp_bisector ab = perp_bisector bc := by{
+    ext
+    rw[p0]
+  }
+  unfold perp_bisector at hm
+  have : Line_through bc = Line_through ab := by{
+    apply line_through_unique
+    unfold Line_through Lies_on
+    simp
+    constructor
+    apply colinear_perm12; apply colinear_perm13
+    assumption
+
+    apply colinear_self
+    tauto
+  }
+  rw[this] at hm
+  clear this
+
+  have mids: pmidpoint a b = pmidpoint b c := by{
+    have t: ¬Parallel (Line_through ab) (perp_through (Line_through ab) (pmidpoint a b)) := by{exact perp_through_not_parallel (Line_through ab) (pmidpoint a b)}
+    have s1: pmidpoint a b = Intersection t := by{
+      apply intersection_unique
+      constructor
+      · exact pmidpoint_lies_on ab
+      exact point_lies_on_perp_through (Line_through ab) (pmidpoint a b)
+    }
+    have s2: pmidpoint b c = Intersection t := by{
+      apply intersection_unique
+      have : Line_through bc = Line_through ab := by{
+      apply line_through_unique
+      unfold Line_through Lies_on
+      simp
+      constructor
+      apply colinear_perm12; apply colinear_perm13
+      assumption
+
+      apply colinear_self
+      tauto
+      }
+      nth_rw 1[← this]
+      constructor
+      · exact pmidpoint_lies_on bc
+      nth_rw 2[← this] at hm
+      rw[hm]
+      exact point_lies_on_perp_through (Line_through bc) (pmidpoint b c)
+    }
+    rw[s1,s2]
+  }
+  have : c = a := by{
+    ext
+    unfold pmidpoint at mids
+    simp at mids
+    field_simp at mids
+    calc
+      c.x = -b.x + (b.x + c.x) := by{ring}
+        _= -b.x + (a.x + b.x) := by{rw[mids]}
+        _= a.x := by{ring}
+  }
+  contradiction
+}
+
+/-So two circles are already the same if they share three common points-/
+
+
+---DO THIS
+--do circle_eq_simp THEN triangles circumcircle
