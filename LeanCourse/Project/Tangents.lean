@@ -39,7 +39,7 @@ theorem tangent_point_unique{L : Line}{C : CCircle}(p : Point)(h : Tangent L C)(
 
 /-therefore the distance on the tangent point is the radius of the circle to the center:-/
 
-lemma point_abs_tangent_point{L : Line}(C : CCircle) : 0 = 0 := by{
+lemma point_abs_tangent_point{L : Line}{C : CCircle}(h : Tangent L C) : 0=0 := by{
   sorry
 }
 
