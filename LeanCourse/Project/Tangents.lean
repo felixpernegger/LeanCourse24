@@ -13,5 +13,42 @@ which is needed for constructing a tangents through a give point to a circle-/
 def Tangent(L : Line)(C : CCircle) : Prop :=
   Tangential L.range C.range
 
-def Tangent_point{L : Line}{C : CCircle}(h : Tangent L C): Point :=
-  Tangential_point Tangent
+def Tangent_point{L : Line}{C : CCircle}(h : Tangent L C): Point := by{
+  unfold Tangent at h
+  exact (Tangential_point h)
+}
+
+/-This does what we want:-/
+
+lemma tangent_point_on_line{L : Line}{C : CCircle}(h : Tangent L C): Lies_on (Tangent_point h) L := by{
+  unfold Lies_on Tangent_point
+  exact (tangential_point_in_sets h).1
+}
+
+lemma tangent_point_on_circle{L : Line}{C : CCircle}(h : Tangent L C): Lies_on_circle (Tangent_point h) C := by{
+  unfold Lies_on_circle Tangent_point
+  exact (tangential_point_in_sets h).2
+}
+
+/-And it's unique:-/
+
+theorem tangent_point_unique{L : Line}{C : CCircle}(p : Point)(h : Tangent L C)(hp: Lies_on p L ∧ Lies_on_circle p C): p = Tangent_point h := by{
+  unfold Lies_on Tangent_point Lies_on_circle Tangent at *
+  exact tangential_point_unique h hp
+}
+
+/-therefore the distance on the tangent point is the radius of the circle to the center:-/
+
+lemma point_abs_tangent_point{L : Line}(C : CCircle) : 0 = 0 := by{
+  sorry
+}
+
+/-Now an important theorem:
+
+A line is tangent to a circle, iff the foot of the center of the Circle lies on the Circle: (if this isnt clear, draw a picture):-/
+
+theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle (foot (Center C) L) C := by{
+  constructor
+  intro h
+  have
+}
