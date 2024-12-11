@@ -187,7 +187,8 @@ example : area_points (Point.mk (0:ℂ)) (Point.mk (1:ℂ)) (Point.mk (Complex.I
 def perimiter_points : Point → Point → Point → ℝ :=
   fun a b c ↦ point_abs a b + point_abs b c + point_abs c a
 
-lemma midtriangle_noncolinear (T : Triangle): noncolinear (Point.mk ((T.b.x+T.c.x)/2)) (Point.mk ((T.c.x+T.a.x)/2)) (Point.mk ((T.a.x + T.b.x)/2)) := by{
+lemma midtriangle_noncolinear (T : Triangle): noncolinear (pmidpoint T.b T.c) (pmidpoint T.c T.a) (pmidpoint T.a T.b) := by{
+  unfold pmidpoint at *
   obtain ⟨a,b,c,h⟩ := T
   obtain ⟨a1,a2⟩ := a
   obtain ⟨b1,b2⟩ := b
@@ -204,8 +205,8 @@ lemma midtriangle_noncolinear (T : Triangle): noncolinear (Point.mk ((T.b.x+T.c.
   linarith
 }
 
-def midtriangle : Triangle → Triangle :=
-  fun T ↦ Triangle.mk (Point.mk ((T.b.x+T.c.x)/2)) (Point.mk ((T.c.x+T.a.x)/2)) (Point.mk ((T.a.x + T.b.x)/2)) (midtriangle_noncolinear T)
+def Midtriangle : Triangle → Triangle :=
+  fun T ↦ Triangle.mk (pmidpoint T.b T.c) (pmidpoint T.c T.a) (pmidpoint T.a T.b) (midtriangle_noncolinear T)
 
 /- For reasons of compactness we introduce an unnecessary variable here-/
 /-This has very low priority, so i leave it here

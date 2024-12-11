@@ -322,6 +322,12 @@ lemma noncolinear_imp_pairwise_different{a b c : Point}(h : noncolinear a b c): 
   tauto
 }
 
+/-In particular the vetrices of a Triagle are pairwise different:-/
+
+lemma triangle_pairwise_different(T : Triangle): pairwise_different_point3 T.a T.b T.c := by{
+  exact noncolinear_imp_pairwise_different T.noncolinear
+}
+
 /-For simplicity sake, we want to grab them directly:-/
 
 lemma noncolinear_imp_pairwise_different12{a b c : Point}(h : noncolinear a b c): a ≠ b := by{
@@ -624,8 +630,25 @@ lemma posrad_is_circle_around{C : CCircle}(h : PosRad C): ∃(a b c : Point), (n
   simp
 }
 
+lemma circle_around_is_posrad{a b c : Point}(h : noncolinear a b c): PosRad (Circle_around h) := by{
+  apply posrad_point
+  use a
+  use b
+  constructor
+  have abc: pairwise_different_point3 a b c := by{
+    exact noncolinear_imp_pairwise_different h
+  }
+  unfold pairwise_different_point3 at abc
+  tauto
+
+  constructor
+  · exact (circle_around_lies_on h).1
+  exact (circle_around_lies_on h).2.1
+}
+
 /-Quick interlude : If three disjoint points lie on a circle, they are noncolinear!-/
-lemma pairwise_different_point_lie_on_circle{a b c : Point}{C : CCircle}(hp : pairwise_different_point3 a b c)(ha : Lies_on_circle a C)(hb : Lies_on_circle b C)(hc : Lies_on_circle c C): noncolinear a b c := by{
+lemma pairwise_different_point_lie_on_circle{a b c : Point}{C : CCircle}(hp : pairwise_different_point3 a b c)(h : Lies_on_circle a C ∧ Lies_on_circle b C ∧ Lies_on_circle c C): noncolinear a b c := by{
+  obtain ⟨ha,hb,hc⟩ := h
   by_contra h0
   unfold noncolinear at h0
   simp at h0
@@ -728,6 +751,100 @@ lemma pairwise_different_point_lie_on_circle{a b c : Point}{C : CCircle}(hp : pa
 
 /-So two circles are already the same if they share three common points-/
 
+lemma circle_eq_points{C O : CCircle}(a b c : Point)(h : pairwise_different_point3 a b c)(hC : Lies_on_circle a C ∧ Lies_on_circle b C ∧ Lies_on_circle c C)(hO : Lies_on_circle a O ∧ Lies_on_circle b O ∧ Lies_on_circle c O): C = O := by{
+  have abc: noncolinear a b c := by{
+    exact pairwise_different_point_lie_on_circle h hC
+  }
+  have s1: C = Circle_around abc := by{
+    exact circle_around_unique abc hC
+  }
+  have s2: O = Circle_around abc := by{
+    exact circle_around_unique abc hO
+  }
+  rw[s1,s2]
+}
 
----DO THIS
---do circle_eq_simp THEN triangles circumcircle
+/-Now we state some of the presented theorems for triangles, starting with:-/
+
+def Circumcircle(T : Triangle): CCircle :=
+  Circle_around T.noncolinear
+
+/-We now restate some of the stuff we proved with the Circumcircle. Nothing too exciting.-/
+
+lemma lies_on_circumcircle(T : Triangle): Lies_on_circle T.a (Circumcircle T) ∧ Lies_on_circle T.b (Circumcircle T) ∧ Lies_on_circle T.c (Circumcircle T):= by{
+  unfold Circumcircle
+  exact (circle_around_lies_on T.noncolinear)
+}
+
+lemma a_lies_on_circumcircle(T : Triangle): Lies_on_circle (T.a) (Circumcircle T) := by{
+  unfold Circumcircle
+  exact (circle_around_lies_on T.noncolinear).1
+}
+
+lemma b_lies_on_circumcircle(T : Triangle): Lies_on_circle (T.b) (Circumcircle T) := by{
+  unfold Circumcircle
+  exact (circle_around_lies_on T.noncolinear).2.1
+}
+
+lemma c_lies_on_circumcircle(T : Triangle): Lies_on_circle (T.c) (Circumcircle T) := by{
+  unfold Circumcircle
+  exact (circle_around_lies_on T.noncolinear).2.2
+}
+
+lemma circumcircle_unique{T : Triangle}{C : CCircle}(h: Lies_on_circle T.a C ∧ Lies_on_circle T.b C ∧ Lies_on_circle T.c C): C = Circumcircle T := by{
+  apply circle_eq_points T.a T.b T.c
+  exact triangle_pairwise_different T
+  assumption
+  exact lies_on_circumcircle T
+}
+
+def Circumcenter(T : Triangle) :=
+  Center (Circumcircle T)
+
+def Circumradius(T : Triangle) :=
+  Radius (Circumcircle T)
+
+lemma circumcircle_circle_through(T : Triangle): Circumcircle T = Circle_through (Circumcenter T) (Circumradius T) := by{
+  unfold Circumcenter Circumradius
+  exact circle_is_circle_through (Circumcircle T)
+}
+
+lemma point_abs_circumcenter(T : Triangle): point_abs (Circumcenter T) T.a = Circumradius T ∧ point_abs (Circumcenter T) T.b = Circumradius T ∧ point_abs (Circumcenter T) T.c = Circumradius T := by{
+  unfold Circumcenter Circumradius
+  constructor
+  apply point_abs_point_lies_on_circle
+  exact a_lies_on_circumcircle T
+
+  constructor
+  apply point_abs_point_lies_on_circle
+  exact b_lies_on_circumcircle T
+
+  apply point_abs_point_lies_on_circle
+  exact c_lies_on_circumcircle T
+}
+
+lemma a_abs_circumcenter(T : Triangle): point_abs (Circumcenter T) T.a = Circumradius T := by{
+  exact (point_abs_circumcenter T).1
+}
+
+lemma b_abs_circumcenter(T : Triangle): point_abs (Circumcenter T) T.b = Circumradius T := by{
+  exact (point_abs_circumcenter T).2.1
+}
+
+lemma c_abs_circumcenter(T : Triangle): point_abs (Circumcenter T) T.c = Circumradius T := by{
+  exact (point_abs_circumcenter T).2.2
+}
+
+lemma circumcircle_posrad(T : Triangle) : PosRad (Circumcircle T) := by{
+  unfold Circumcircle
+  exact circle_around_is_posrad T.noncolinear
+}
+
+lemma lies_on_circumcircle_iff(T : Triangle)(p : Point): Lies_on_circle p (Circumcircle T) ↔ point_abs (Circumcenter T) p = Circumradius T := by{
+  rw[circumcircle_circle_through T]
+  exact lies_on_circle_through p (Circumcenter T) (Circumradius T)
+}
+
+
+
+--STATE THE MOST IMPORTANT AND BASIC STUFF; FINISH WITH FEUERBACH CIRCLE
