@@ -2778,3 +2778,9 @@ lemma ex_circumcircle {a b c : Point} (h : noncolinear a b c) :
   --else by
     --{let z := ex_circumcircle a b c (by { unfold noncolinear; assumption }) sorry --???? Circle1 z.1 z.2
 -/-/
+
+/-
+theorem fermat(x y z n: ℕ)(hn : 2 < n)(h : x^n+y^n=z^n): x=0 ∨ y=0 := by{
+  sorry
+}
+-/
