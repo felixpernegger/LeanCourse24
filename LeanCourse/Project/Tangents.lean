@@ -66,5 +66,45 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
   exact point_abs_tangent_point h
 
   intro h
+  by_contra h0
+  unfold Tangent at h0
+  unfold Tangential at h0
+  have : 1 < (L.range ∩ C.range).encard  ∨ (L.range ∩ C.range).encard < 1 := by{exact lt_or_gt_of_ne fun a ↦ h0 (id (Eq.symm a))}
+  clear h0
+  obtain h0|h0 := this
+  simp at h0
+  obtain ⟨a,b,ah,bh,ab⟩ := Set.one_lt_encard_iff.1 h0
+  have ac: Lies_on_circle a C := by{
+    unfold Lies_on_circle
+    exact mem_of_mem_inter_right ah
+  }
+  have bc: Lies_on_circle b C := by{
+    unfold Lies_on_circle
+    exact mem_of_mem_inter_right bh
+  }
+  have ad: point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle a ac}
+  have bd: point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle b bc}
+  have g: point_abs (Center C) (foot (Center C) L) = Radius C := by{exact point_abs_point_lies_on_circle (foot (Center C) L) h}
+  have aL : Lies_on a L := by{unfold Lies_on; exact mem_of_mem_inter_left ah}
+  have bL : Lies_on b L := by{unfold Lies_on; exact mem_of_mem_inter_left bh}
+  have eor: a ≠ Center C ∨ b ≠ Center C := by{exact Ne.ne_or_ne (Center C) ab}
+  obtain p0|p0 := eor
+  have : point_line_abs (Center C) L < point_abs (Center C) a := by{
+    have t1: point_line_abs (Center C) L ≤ point_abs (Center C) a := by{
+      exact point_line_abs_leq_point_abs (Center C) a aL
+    }
+    have t2: point_line_abs (Center C) L ≠ point_abs (Center C) a := by{
+      contrapose p0
+      simp at *
+      sorry
+    }
+    contrapose t2
+    simp at *
+    linarith
+  }
+  unfold point_line_abs at this
+  rw[g, ad] at this
+  linarith
+
   sorry
 }

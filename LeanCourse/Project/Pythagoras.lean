@@ -222,6 +222,37 @@ lemma point_line_abs_leq_point_abs(p a : Point){L : Line}(h : Lies_on a L): poin
   exact pow_two_pos_of_ne_zero this
 }
 
+lemma point_line_abs_eq_point_abs_iff{p : Point}(a : Point){L : Line}(ah : Lies_on a L) : point_abs p a = point_line_abs p L ↔ a = foot p L := by{
+  constructor
+  intro h
+  contrapose h
+  simp at *
+  unfold point_line_abs
+  suffices : (point_abs p a)^2 ≠ (point_abs p (foot p L))^2
+  contrapose this
+  simp at *
+  rw[this]
+  have goal: perp_points (foot p L) a (foot p L) p :=by{
+    have pl: Perpendicular L (perp_through L p) := by{
+      exact perp_through_is_perp L p
+    }
+    apply perp_all pl
+    exact foot_on_line L p
+    exact ah
+    exact foot_on_perp L p
+    exact point_lies_on_perp_through L p
+  }
+  rw[point_abs_symm p a, pythagoras_points goal]
+  simp
+  contrapose h
+  simp at *
+  symm
+  exact abs_zero_imp_same (foot p L) a h
+
+  intro h
+  unfold point_line_abs
+  rw[h]
+}
 
 /-Another use case is the promised reversion of colinear_imp_in_between-/
 
