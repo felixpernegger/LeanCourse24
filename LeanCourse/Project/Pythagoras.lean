@@ -115,6 +115,7 @@ theorem pythagoras {T : Triangle}(h : RightTriangle T): (abs_tri_bc T)^2 = (abs_
 of a circumcircle purely geomtrically using it.
 First though, as promised in the file "Triangles", we prove that "in_between" implies colinear-/
 
+--Maybe actually remove this bruh
 lemma foot_abs_less{a p : Point}{L : Line}(ha: Lies_on a L)(hp: ¬Lies_on p L): point_abs a (foot p L) < point_abs a p := by{
   suffices : (point_abs a (foot p L))^2 < (point_abs a p)^2
   contrapose this
@@ -195,9 +196,30 @@ lemma point_line_abs_leq_point_abs(p a : Point){L : Line}(h : Lies_on a L): poin
 
   suffices : point_abs p (foot p L) < point_abs p a
   · linarith
-  apply foot_abs_less h hp
-  sorry
-
+  have goal: perp_points (foot p L) a (foot p L) p :=by{
+    have pl: Perpendicular L (perp_through L p) := by{
+      exact perp_through_is_perp L p
+    }
+    apply perp_all pl
+    exact foot_on_line L p
+    exact h
+    exact foot_on_perp L p
+    exact point_lies_on_perp_through L p
+  }
+  suffices : (point_abs p (foot p L))^2 < (point_abs p a)^2
+  contrapose this
+  simp at *
+  have tt: 0 ≤ point_abs p a := by{exact point_abs_pos p a}
+  nlinarith
+  rw[point_abs_symm p a, pythagoras_points goal]
+  simp
+  have : point_abs (foot p L) a ≠ 0 := by{
+    contrapose ha
+    simp at *
+    symm
+    exact abs_zero_imp_same (foot p L) a ha
+  }
+  exact pow_two_pos_of_ne_zero this
 }
 
 
