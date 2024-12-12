@@ -246,7 +246,7 @@ lemma circle_same_simp{C O : CCircle}(h: Center C = Center O)(h': Radius C = Rad
   rw[circle_is_circle_through C, circle_is_circle_through O, h, h']
 }
 
-lemma point_abs_point_lies_on_circle{C : CCircle}(p : Point)(h : Lies_on_circle p C): point_abs (Center C) p = Radius C := by{
+lemma point_abs_point_lies_on_circle{C : CCircle}{p : Point}(h : Lies_on_circle p C): point_abs (Center C) p = Radius C := by{
   rw[circle_is_circle_through C] at h
   exact (lies_on_circle_through p (Center C) (Radius C)).1 h
 }
@@ -270,11 +270,24 @@ lemma posrad_point{C : CCircle}(h : ∃(a b : Point), a ≠ b ∧ Lies_on_circle
   contrapose ab
   unfold PosRad at ab
   simp at *
-  have ah': point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle a ah}
-  have bh': point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle b bh}
+  have ah': point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle ah}
+  have bh': point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle bh}
   rw[ab] at ah' bh'
   simp at ah' bh'
   have a0: (Center C) = a := by{exact abs_zero_imp_same (Center C) a ah'}
   have b0: (Center C) = b := by{exact abs_zero_imp_same (Center C) b bh'}
   rw[← a0,← b0]
+}
+
+/-And the points on a posrad circle are different to the center:-/
+
+lemma posrad_not_center{C : CCircle}{p : Point}(hC: PosRad C)(hp : Lies_on_circle p C) : p ≠ Center C := by{
+  contrapose hC
+  unfold PosRad
+  simp at *
+  have : point_abs (Center C) p = ↑(Radius C) := by{exact point_abs_point_lies_on_circle hp}
+  rw[hC] at this
+  rw[point_abs_self] at this
+  ext
+  tauto
 }

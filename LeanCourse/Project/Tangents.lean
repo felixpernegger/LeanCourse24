@@ -239,7 +239,7 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
     unfold q
     have : foot (Center C) L ≠ a := by{exact id (Ne.symm ah2)}
     rw[point_abs_symm (foot (Center C) L) (Center C)]
-    rw[go_along_abs1 this u]
+    rw[go_along_abs1 this (-u)]
     unfold u
     simp [*]
     symm
@@ -418,3 +418,7 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
   simp
   use foot (Center C) L
 }
+
+/-From this we can deduce that all lines are perpendicular to the radius, this howver only makes sense when we have positive radius.-/
+
+theorem tangent_is_perp{C : CCircle}{L : Line}(h : Tangent L C): Perpendicular L (qLine_through (Center C) )
