@@ -474,4 +474,13 @@ lemma go_along_lies_on{a b : Point}{L : Line}(R : ℝ)(h : Lies_on a L ∧ Lies_
   rw[ab]
   simp
   tauto
+
+  have hL: L = Line_through ab := by{
+    apply line_through_unique
+    assumption
+  }
+  rw[hL]
+  unfold Lies_on Line_through
+  simp
+  exact go_along_colinear a b R
 }
