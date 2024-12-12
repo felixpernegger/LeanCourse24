@@ -764,3 +764,33 @@ lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through 
 
 /-This is pretty much all there is to say about perpendicular lines in general, so in the next file we
 focus on triangles (3 noncolinear points) and perpendicular lines, in particular the orthocenter!-/
+
+/-This motivates following definition:-/
+
+def point_line_abs : Point → Line → ℝ :=
+  fun p L ↦ point_abs p (foot p L)
+
+/-This is nonneg:-/
+
+lemma point_line_abs_nonneg{p : Point}{L : Line}: 0 ≤ point_line_abs p L := by{
+  unfold point_line_abs
+  exact point_abs_pos p (foot p L)
+}
+
+/-And its zero iff p lies on the line:-/
+
+lemma point_line_abs_zero_iff{p : Point}{L : Line} : point_line_abs p L = 0 ↔ Lies_on p L := by{
+  constructor
+  intro h
+  unfold point_line_abs at h
+  have hp: p = foot p L := by{exact abs_zero_imp_same p (foot p L) h}
+  rw[hp]
+  exact foot_on_line L p
+
+  intro h
+  have hp: p = foot p L := by{
+    exact Eq.symm (foot_point_on_line h)
+  }
+  unfold point_line_abs
+  nth_rw 1[hp, point_abs_self (foot p L)]
+}

@@ -156,6 +156,43 @@ theorem reflection_point_line_on_line (a : Point)(L : Line): reflection_point_li
   exact reflection_point_point_twice a (foot a L)
 }
 
+lemma reflection_point_line_pmidpoint(a : Point)(L : Line): pmidpoint (reflection_point_line a L) a = foot a L := by{
+  unfold reflection_point_line
+  exact reflection_point_point_pmidpoint
+}
+#check point_line_abs_nonneg
+lemma reflection_point_line_abs(a : Point)(L : Line): point_line_abs (reflection_point_line a L) L = point_line_abs a L := by{
+
+}
+
+/-this is perp in the following sense:-/
+
+lemma reflection_point_line_perp_through{a : Point}{L : Line}(h: ¬Lies_on a L): qLine_through (reflection_point_line a L) a = perp_through L a := by{
+  have s1: (reflection_point_line a L) ≠ a := by{
+    contrapose h
+    simp at *
+    exact (reflection_point_line_on_line a L).mp h
+  }
+  have s2: qLine_through (reflection_point_line a L) a = Line_through s1 := by{
+    apply line_through_unique
+    constructor
+    exact qline_through_mem_left (reflection_point_line a L) a
+    exact qline_through_mem_right (reflection_point_line a L) a
+  }
+  rw[s2, ← foot_line_through h]
+  apply line_through_unique
+  constructor
+  unfold Lies_on Line_through
+  simp
+  unfold reflection_point_line reflection_point_point p_scal_mul pneg padd colinear det conj
+  simp
+  ring
+
+  exact line_through_mem_right s1
+}
+
+lemma reflection_point_line_perp{a : Point}{L : Line}
+
 /-Now lets define the reflection_line_point-/
 
 def reflection_line_point : Line → Point → Line :=

@@ -149,37 +149,7 @@ lemma foot_abs_less{a p : Point}{L : Line}(ha: Lies_on a L)(hp: ¬Lies_on p L): 
   exact pow_two_pos_of_ne_zero this
 }
 
-/-This motivates following definition:-/
-
-def point_line_abs : Point → Line → ℝ :=
-  fun p L ↦ point_abs p (foot p L)
-
-/-This is nonneg:-/
-
-lemma point_line_abs_nonneg{p : Point}{L : Line}: 0 ≤ point_line_abs p L := by{
-  unfold point_line_abs
-  exact point_abs_pos p (foot p L)
-}
-
-/-And its zero iff p lies on the line:-/
-
-lemma point_line_abs_zero_iff{p : Point}{L : Line} : point_line_abs p L = 0 ↔ Lies_on p L := by{
-  constructor
-  intro h
-  unfold point_line_abs at h
-  have hp: p = foot p L := by{exact abs_zero_imp_same p (foot p L) h}
-  rw[hp]
-  exact foot_on_line L p
-
-  intro h
-  have hp: p = foot p L := by{
-    exact Eq.symm (foot_point_on_line h)
-  }
-  unfold point_line_abs
-  nth_rw 1[hp, point_abs_self (foot p L)]
-}
-
-/-So as proven before it is the infimum of distances, or in language not too make it too complicated:-/
+/-So as proven before point_line_abs is the infimum of distances, or in language not too make it too complicated:-/
 
 lemma point_line_abs_leq_point_abs(p a : Point){L : Line}(h : Lies_on a L): point_line_abs p L ≤ point_abs p a := by{
   by_cases ha: a = foot p L
