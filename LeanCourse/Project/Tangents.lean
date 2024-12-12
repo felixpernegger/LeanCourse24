@@ -51,7 +51,47 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
   constructor
   · exact foot_on_line L (Center C)
   refine point_on_circle_simp ?hp.right.h
-  sorry
+  apply le_antisymm
+  by_contra p0
+  simp at *
+  have s1: point_line_abs (Center C) L < point_abs (Center C) (Tangent_point h) := by{
+    have t1: point_line_abs (Center C) L ≤ point_abs (Center C) (Tangent_point h) := by{
+      exact point_line_abs_leq_point_abs (Center C) (Tangent_point h) (tangent_point_on_line h)
+    }
+    have t2: point_line_abs (Center C) L ≠ point_abs (Center C) (Tangent_point h) := by{
+      contrapose p0
+      simp at *
+      symm at p0
+      have : Tangent_point h = foot (Center C) L := by{
+        exact (point_line_abs_eq_point_abs_iff (Center C) (Tangent_point h) L (tangent_point_on_line h)).1 p0
+      }
+      rw[← this, @point_abs_tangent_point]
+      rfl
+    }
+    contrapose t2
+    simp at *
+    linarith
+  }
+  have s2: point_abs (Center C) (Tangent_point h) = Radius C := by{
+    exact point_abs_tangent_point h
+  }
+  rw[s2] at s1
+  unfold point_line_abs at s1
+  have : ↑(Radius C) < ↑(Radius C) := by{exact gt_trans s1 p0}
+  contrapose this
+  simp
+
+  by_contra h0
+  simp at *
+  let u := √(↑(Radius C)^2 -(point_abs (Center C) (foot (Center C) L))^2)
+  have upos : 0 < u := by{
+    unfold u
+    simp
+    have : 0 ≤ point_abs (Center C) (foot (Center C) L) := by{exact point_abs_pos (Center C) (foot (Center C) L)}
+    nlinarith
+  }
+  obtain ⟨a,b,ah,bh,ab⟩ := ex_points_on_li
+  let p := go_along
 }
 
 /-Now an important theorem:
@@ -94,9 +134,27 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
       exact point_line_abs_leq_point_abs (Center C) a aL
     }
     have t2: point_line_abs (Center C) L ≠ point_abs (Center C) a := by{
-      contrapose p0
-      simp at *
-      #check point_line_abs_eq_point_abs_iff aL
+      by_contra q0
+      symm at q0
+      apply (point_line_abs_eq_point_abs_iff (Center C) a L aL).1 at q0
+      rw[q0] at ab ad
+      have : point_line_abs (Center C) L < point_abs (Center C) b := by{
+        have s1:  point_line_abs (Center C) L ≤ point_abs (Center C) b := by{
+          exact point_line_abs_leq_point_abs (Center C) b bL
+        }
+        have s2: point_abs (Center C) b ≠ point_line_abs (Center C) L := by{
+          contrapose ab
+          simp at *
+          symm
+          exact (point_line_abs_eq_point_abs_iff (Center C) b L bL).mp ab
+        }
+        contrapose s2
+        simp at *
+        linarith
+      }
+      unfold point_line_abs at this
+      rw[bd, ad] at this
+      linarith
     }
     contrapose t2
     simp at *
@@ -106,5 +164,51 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
   rw[g, ad] at this
   linarith
 
-  sorry
+  have : point_line_abs (Center C) L < point_abs (Center C) b := by{
+    have t1: point_line_abs (Center C) L ≤ point_abs (Center C) b := by{
+      exact point_line_abs_leq_point_abs (Center C) b bL
+    }
+    have t2: point_line_abs (Center C) L ≠ point_abs (Center C) b := by{
+      by_contra q0
+      symm at q0
+      apply (point_line_abs_eq_point_abs_iff (Center C) b L bL).1 at q0
+      rw[q0] at ab bd
+      have : point_line_abs (Center C) L < point_abs (Center C) a := by{
+        have s1:  point_line_abs (Center C) L ≤ point_abs (Center C) a := by{
+          exact point_line_abs_leq_point_abs (Center C) a aL
+        }
+        have s2: point_abs (Center C) a ≠ point_line_abs (Center C) L := by{
+          contrapose ab
+          simp at *
+          exact (point_line_abs_eq_point_abs_iff (Center C) a L aL).mp ab
+        }
+        contrapose s2
+        simp at *
+        linarith
+      }
+      unfold point_line_abs at this
+      rw[bd, ad] at this
+      linarith
+    }
+    contrapose t2
+    simp at *
+    linarith
+  }
+  unfold point_line_abs at this
+  rw[g, bd] at this
+  linarith
+
+  have footbad: (foot (Center C) L) ∈ (L.range ∩ C.range) := by{
+    constructor
+    suffices : Lies_on (foot (Center C) L) L
+    · unfold Lies_on at this
+      assumption
+    exact foot_on_line L (Center C)
+
+    unfold Lies_on_circle at h
+    assumption
+  }
+  contrapose h0
+  simp
+  use foot (Center C) L
 }

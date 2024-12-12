@@ -178,6 +178,20 @@ lemma ex_point_on_line(L:Line): ∃(a : Point), Lies_on a L := by{
   use u
 }
 
+/-And sometimes this point has two be different to another point:-/
+lemma ex_different_point_on_line(p : Point)(L : Line): ∃(a : Point), Lies_on a L ∧ a ≠ p := by{
+  obtain ⟨a,b,ab,ah,bh⟩ := ex_points_on_line L
+  by_cases a0: a = p
+  use b
+  constructor
+  assumption
+  contrapose ab
+  simp at *
+  rw[a0,ab]
+
+  use a
+}
+
 /-We can also conjugate lines:-/
 def line_conj : Line → Line :=
   fun L ↦ ⟨set_conj L.range, by{
