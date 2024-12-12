@@ -171,30 +171,92 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
         apply perp_symm
         exact perp_through_is_perp L (Center C)
       }
-      #check perp_line_points_is_perp
+      exact perp_line_through_points this
     }
     rw[pythagoras_points_bc pperp]
     rw[point_abs_symm p (foot (Center C) L)]
     unfold p
     have : foot (Center C) L ≠ a := by{exact id (Ne.symm ah2)}
-    --#check pythagoras_points_bc perp
-    --unfold p
-    #check go_along_abs1 this u
     rw[point_abs_symm (foot (Center C) L) (Center C)]
     rw[go_along_abs1 this u]
     unfold u
     simp [*]
-    have : √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) := by{
-      exact Real.sq_sqrt weirdnonneg
-    }
-    --have test: √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 := by{exact rfl}
-    --rw[← test]
-    rw[this]
-    --ahhhh
-    sorry
+    symm
+    calc
+      ↑(Radius C) = √(↑(Radius C)^2) := by{
+        have : 0 ≤ ↑(Radius C) := by{exact zero_le (Radius C)}
+        exact Eq.symm (Real.sqrt_sq this)
+      }
+        _= √(point_abs (Center C) (foot (Center C) L) ^ 2 +
+      (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2)) := by{ring_nf}
+        _= √(point_abs (Center C) (foot (Center C) L) ^ 2 +
+      √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2) := by{
+        have : √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) := by{
+          exact Real.sq_sqrt weirdnonneg
+        }
+        rw[this]
+      }
   }
   have hq : Lies_on_circle q C := by{
-    sorry
+    apply point_on_circle_simp
+    have qperp: perp_points (foot (Center C) L) (Center C) (foot (Center C) L) q := by{
+      by_cases z: (foot (Center C) L) = Center C
+      apply perp_points_self
+      tauto
+
+      by_cases i: (foot (Center C) L) = q
+      apply perp_points_self
+      tauto
+
+      have : Perpendicular (Line_through z) (Line_through i) := by{
+        have : L = Line_through i := by{
+          apply line_through_unique
+          constructor
+          exact foot_on_line L (Center C)
+          unfold q
+          apply go_along_lies_on
+          constructor
+          exact foot_on_line L (Center C)
+          assumption
+        }
+        rw[← this]
+        have : Line_through z = perp_through L (Center C) := by{
+          have : ¬Lies_on (Center C) L := by{
+            contrapose z
+            simp at *
+            exact foot_point_on_line z
+          }
+          rw[← foot_line_through this]
+        }
+        rw[this]
+        apply perp_symm
+        exact perp_through_is_perp L (Center C)
+      }
+      exact perp_line_through_points this
+    }
+    rw[pythagoras_points_bc qperp]
+    rw[point_abs_symm q (foot (Center C) L)]
+    unfold q
+    have : foot (Center C) L ≠ a := by{exact id (Ne.symm ah2)}
+    rw[point_abs_symm (foot (Center C) L) (Center C)]
+    rw[go_along_abs1 this u]
+    unfold u
+    simp [*]
+    symm
+    calc
+      ↑(Radius C) = √(↑(Radius C)^2) := by{
+        have : 0 ≤ ↑(Radius C) := by{exact zero_le (Radius C)}
+        exact Eq.symm (Real.sqrt_sq this)
+      }
+        _= √(point_abs (Center C) (foot (Center C) L) ^ 2 +
+      (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2)) := by{ring_nf}
+        _= √(point_abs (Center C) (foot (Center C) L) ^ 2 +
+      √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2) := by{
+        have : √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) := by{
+          exact Real.sq_sqrt weirdnonneg
+        }
+        rw[this]
+      }
   }
   have ph2: p = Tangent_point h := by{
     apply tangent_point_unique
