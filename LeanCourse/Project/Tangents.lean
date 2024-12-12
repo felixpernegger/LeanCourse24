@@ -487,6 +487,29 @@ lemma posrad_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C)(hC : P
   exact line_through_symm (posrad_not_center hC hp)
 }
 
+lemma tangent_point_on_center_line{C : CCircle}{L : Line}(h : Tangent L C) : Lies_on (Tangent_point h) (Center_line (tangent_point_on_circle h)) := by{
+  exact point_on_center_line (tangent_point_on_circle h)
+}
+
+lemma tangent_is_perp_center_line{C : CCircle}{L : Line}(hC : PosRad C)(h : Tangent L C): Perpendicular L (Center_line (tangent_point_on_circle h)) := by{
+  rw[posrad_center_line (tangent_point_on_circle h) hC]
+  have : Line_through (posrad_not_center hC (tangent_point_on_circle h)) = Line_through (tangent_point_not_center hC h) := by{
+    apply line_through_unique
+    constructor
+    exact line_through_mem_left (posrad_not_center hC (tangent_point_on_circle h))
+    exact line_through_mem_right (posrad_not_center hC (tangent_point_on_circle h))
+  }
+  rw[this]
+  exact tangent_is_perp hC h
+}
+
+lemma center_line_unique{C : CCircle}{p : Point}{L : Line}(hC : PosRad C)(hp : Lies_on_circle p C)(hL : Lies_on (Center C) L ∧ Lies_on p L): L = Center_line hp := by{
+  rw[posrad_center_line hp hC]
+  apply line_through_unique
+  symm
+  assumption
+}
+
 /-The reveserse also holds, given a point on a circle, the perp through it is a tangent:-/
 lemma perp_is_tangent{C : CCircle}{p : Point}(hp : Lies_on_circle p C) : Tangent (perp_through (Center_line hp) p) C := by{
   by_cases hC : PosRad C
@@ -558,8 +581,39 @@ lemma tangent_through_is_perp{C : CCircle}{p : Point}(h : Lies_on_circle p C)(hC
 /-And indeed unique for posrad!-/
 
 theorem tangent_through_unique{C : CCircle}{p : Point}{L : Line}(h : Lies_on_circle p C)(hC : PosRad C)(hp : Lies_on p L)(hL : Tangent L C) : L = Tangent_through h := by{
-  have goal : Parallel L (Tangent_through h) := by{
+  apply lines_eq_parallel_point p
+  constructor
+  · assumption
+  exact point_lies_on_tangent_through h
+
+  apply perp_perp (Center_line h)
+  apply perp_symm
+  have : Center_line (tangent_point_on_circle hL) = Center_line h := by{
+    symm
+    apply center_line_unique hC
+    constructor
+    exact center_on_center_line h
+    have : p = Tangent_point hL := by{
+      apply tangent_point_unique
+      constructor
+      assumption
+      assumption
+    }
+    rw[← this]
+    exact point_on_center_line h
+  }
+  rw[← this]
+  exact tangent_is_perp_center_line hC hL
+  have : Center_line h = Center_line (tangent_point_on_circle hL) := by{
+    apply center_line_unique hC
+    constructor
+    exact center_on_center_line h
     sorry
   }
-
+  rw[this]
+  #check tangent_is_perp_center_line hC hL
+  apply perp_symm
+  rw[← this]
+  sorry
+  exact tangent_is_perp_center_line hC hL
 }
