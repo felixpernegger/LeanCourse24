@@ -220,6 +220,14 @@ lemma perp_all {L R : Line}{a b c d : Point}(LR: Perpendicular L R)(ah: Lies_on 
   exact perp_on_line rcab rc rcd
 }
 
+lemma perp_line_through_points{a b c d}{ab : a ≠ b}{cd : c ≠ d}(h : Perpendicular (Line_through ab) (Line_through cd)): perp_points a b c d := by{
+  apply perp_all h
+  exact line_through_mem_left ab
+  exact line_through_mem_right ab
+  exact line_through_mem_left cd
+  exact line_through_mem_right cd
+}
+
 lemma perp_quot{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): Perpendicular (Line_through ab) (Line_through cd) ↔ perp_points a b c d := by{
   constructor
   intro h

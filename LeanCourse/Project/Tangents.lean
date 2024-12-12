@@ -114,10 +114,23 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
         symm
         exact (dir_zero (foot (Center C) L) a).1 this
       }
-      have br: -(↑u * (dir (foot (Center C) L) a).x) = -↑u * ((dir (foot (Center C) L) a)).x := by{ring}
+      have br: -(↑u * (dir (foot (Center C) L) a).x) = ↑u*(-1) * ((dir (foot (Center C) L) a)).x := by{ring}
       rw[br] at p0
       clear br
-      sorry
+      have : (↑u : ℂ) = 0 := by{
+        by_contra z0
+        have : (dir (foot (Center C) L) a).x = -(dir (foot (Center C) L) a).x :=by{
+          calc
+            (dir (foot (Center C) L) a).x = (1/(↑u))*(↑u*(dir (foot (Center C) L) a).x) := by{field_simp}
+              _= (1/(↑u))*(↑u * -1 * (dir (foot (Center C) L) a).x) := by{rw[p0]}
+              _= -(dir (foot (Center C) L) a).x := by{field_simp;ring}
+        }
+        have : (dir (foot (Center C) L) a).x = 0 := by{
+          exact CharZero.eq_neg_self_iff.mp this
+        }
+        contradiction
+      }
+      norm_cast at this
     }
     rw[this] at upos
     contrapose upos
@@ -140,11 +153,25 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
           constructor
           exact foot_on_line L (Center C)
           unfold p
-          #check go_along
-          have : L = Line_through
+          apply go_along_lies_on
+          constructor
+          exact foot_on_line L (Center C)
+          assumption
         }
+        rw[← this]
+        have : Line_through z = perp_through L (Center C) := by{
+          have : ¬Lies_on (Center C) L := by{
+            contrapose z
+            simp at *
+            exact foot_point_on_line z
+          }
+          rw[← foot_line_through this]
+        }
+        rw[this]
+        apply perp_symm
+        exact perp_through_is_perp L (Center C)
       }
-      sorry
+      #check perp_line_points_is_perp
     }
     rw[pythagoras_points_bc pperp]
     rw[point_abs_symm p (foot (Center C) L)]
