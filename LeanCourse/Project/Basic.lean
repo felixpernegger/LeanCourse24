@@ -234,7 +234,7 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
       _= Complex.abs (a.x-c.x) := by ring_nf
 }
 
-lemma point_abs_midpoint(a b : Point): point_abs a (pmidpoint a b) = 1/2 * point_abs a b := by{
+lemma point_abs_pmidpoint(a b : Point): point_abs a (pmidpoint a b) = 1/2 * point_abs a b := by{
   unfold pmidpoint point_abs Complex.abs Complex.normSq
   simp
   have : ((a.x.re - (a.x.re + b.x.re) / 2) * (a.x.re - (a.x.re + b.x.re) / 2) +
