@@ -596,6 +596,25 @@ lemma foot_perp_through(L : Line)(p : Point): perp_through L (foot p L) = perp_t
   rw[h]
 }
 
+/-We finish off with a confusing but occassionally useful lemma:-/
+
+lemma foot_perp_through2{a b : Point}(ab : a ≠ b): foot a (perp_through (Line_through ab) b) = b := by{
+  symm
+  apply foot_unique
+  constructor
+  exact point_lies_on_perp_through (Line_through ab) b
+  have : perp_through (perp_through (Line_through ab) b) a = Line_through ab := by{
+    symm
+    apply perp_through_unique
+    constructor
+    apply perp_symm
+    exact perp_through_is_perp (Line_through ab) b
+    exact line_through_mem_left ab
+  }
+  rw[this]
+  exact line_through_mem_right ab
+}
+
 /-and a nice lemma about perpendiular points with foot:-/
 lemma perp_points_foot{L : Line}(a p : Point)(ha: Lies_on a L): perp_points a (foot p L) p (foot p L) := by{
   apply perp_all (perp_through_is_perp L p) ha (foot_on_line L p) (point_lies_on_perp_through L p) (foot_on_perp L p)

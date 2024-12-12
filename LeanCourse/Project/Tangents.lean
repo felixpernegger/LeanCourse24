@@ -484,14 +484,27 @@ lemma posrad_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C)(hC : P
     exact posrad_not_center hC hp
   }
   simp [*]
-  apply line_through_unique
-  constructor
-  exact line_through_mem_right (of_eq_true (Eq.trans (congrArg Not (eq_false this)) not_false_eq_true))
-  exact?
+  exact line_through_symm (posrad_not_center hC hp)
 }
 
 /-The reveserse also holds, given a point on a circle, the perp through it is a tangent:-/
-lemma perp_is_tangent{C : CCircle}{p : Point}(hC : PosRad C)(hp : Lies_on p C) : perp_through
+lemma perp_is_tangent{C : CCircle}{p : Point}(hC : PosRad C)(hp : Lies_on_circle p C) : Tangent (perp_through (Center_line hp) p) C := by{
+  apply (line_tangent_iff (perp_through (Center_line hp) p) C).2
+  have goal: foot (Center C) (perp_through (Center_line hp) p) = p := by{
+    have : Center_line hp = Line_through (posrad_not_center hC hp) := by{
+      exact posrad_center_line hp hC
+    }
+    rw[this]
+    clear this
+    have : Lies_on (Center C) (Line_through (posrad_not_center hC hp)) := by{
+      exact line_through_mem_right (posrad_not_center hC hp)
+    }
+    #check foot
+    sorry
+  }
+  rw[goal]
+  assumption
+}
 
 
 /-Show that the reverse holds next-/
