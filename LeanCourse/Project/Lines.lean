@@ -376,11 +376,12 @@ lemma mem_line_shift (a p : Point)(L : Line)(h: Lies_on a L): Lies_on (padd a p)
 def go_along : Point → Point → ℝ → Point :=
   fun a b R ↦ padd a (p_scal_mul R (dir a b))
 
-/-This is always colinear:-/
-#check dir
-def go_along_self(a : Point)(R : ℝ) : go_along a a R = a := by{
-  sorry
+/-Going along yourself does nothing:-/
+@[simp] lemma go_along_self(a : Point)(R : ℝ) : go_along a a R = a := by{
+
 }
+
+/-This is always colinear:-/
 
 lemma go_along_colinear (a b : Point)(R : ℝ): colinear a b (go_along a b R) := by{
   apply colinear_perm23

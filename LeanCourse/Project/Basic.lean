@@ -249,7 +249,7 @@ lemma pabs_zero (a : Point) : pabs a = 0 ↔ a = Point.mk 0 := by{
 def dir: Point → Point → Point :=
   fun a b ↦ Point.mk ((b.x-a.x)/ (point_abs a b))
 
-lemma dir_self(a : Point): dir a a = zero := by{
+@[simp] lemma dir_self(a : Point): dir a a = zero := by{
   unfold dir zero
   simp
 }
