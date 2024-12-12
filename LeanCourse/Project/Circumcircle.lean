@@ -656,11 +656,11 @@ lemma pairwise_different_point_lie_on_circle{a b c : Point}{C : CCircle}(hp : pa
   obtain ⟨ab,bc,ca⟩ := hp
   have sab: Lies_on (Center C) (perp_bisector ab) := by{
     apply (perp_bisector_def a b (Center C) ab).1
-    rw[point_abs_point_lies_on_circle a ha, point_abs_point_lies_on_circle b hb]
+    rw[point_abs_point_lies_on_circle ha, point_abs_point_lies_on_circle hb]
   }
   have sbc: Lies_on (Center C) (perp_bisector bc) := by{
     apply (perp_bisector_def b c (Center C) bc).1
-    rw[point_abs_point_lies_on_circle b hb, point_abs_point_lies_on_circle c hc]
+    rw[point_abs_point_lies_on_circle hb, point_abs_point_lies_on_circle hc]
   }
   have cool: Parallel (perp_bisector ab) (perp_bisector bc) := by{
     refine (perp_bisector_parallel ab bc).mpr ?_
