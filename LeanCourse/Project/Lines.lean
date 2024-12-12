@@ -472,5 +472,6 @@ lemma colinear_go_along {a b c : Point}(ab : a ≠ b)(h : colinear a b c ): ∃R
 lemma go_along_lies_on{a b : Point}{L : Line}(R : ℝ)(h : Lies_on a L ∧ Lies_on b L): Lies_on (go_along a b R) L := by{
   by_cases ab : a=b
   rw[ab]
-
+  simp
+  tauto
 }
