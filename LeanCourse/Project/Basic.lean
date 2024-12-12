@@ -147,6 +147,13 @@ def pmidpoint : Point → Point → Point :=
   ring
 }
 
+lemma pmidpoint_symm(a b : Point) : pmidpoint b a = pmidpoint a b := by{
+  unfold pmidpoint
+  ext
+  simp
+  ring
+}
+
 def conj : ℂ → ℂ :=
   fun z ↦ (starRingEnd ℂ) z
 
