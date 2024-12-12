@@ -15,11 +15,6 @@ The downside of this approach is, we may lose trivial edge cases of theorems bec
 So therefore in this sections  we introduce quick Line_throuhg's etc., for which we also allow a = b.
 -/
 
-/-As an "aribitrary point, we use the point zero:"-/
-
-def zero : Point
-  := Point.mk 0
-
 /-If a = b, we choose the pparallel_line_to the real line-/
 
 def real_line : Line where

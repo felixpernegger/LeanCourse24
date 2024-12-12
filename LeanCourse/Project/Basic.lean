@@ -34,6 +34,11 @@ open Classical -- In order to take intersections and stuff
 @[ext] structure Point where
   x : ℂ
 
+/-As an "aribitrary point, we use the point zero:"-/
+
+def zero : Point
+  := Point.mk 0
+
 /- Natural definition for tangential of sets in a general manner-/
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1
@@ -243,6 +248,11 @@ lemma pabs_zero (a : Point) : pabs a = 0 ↔ a = Point.mk 0 := by{
 /-The "direction" two point is the normed vector between them:-/
 def dir: Point → Point → Point :=
   fun a b ↦ Point.mk ((b.x-a.x)/ (point_abs a b))
+
+lemma dir_self(a : Point): dir a a = zero := by{
+  unfold dir zero
+  simp
+}
 
 /-The direction is zero iff a = b:-/
 lemma dir_zero (a b : Point): pabs (dir a b) = 0 ↔ a = b := by{

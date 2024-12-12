@@ -84,14 +84,131 @@ lemma tangent_point_foot{L : Line}{C : CCircle}(h : Tangent L C) : Tangent_point
   by_contra h0
   simp at *
   let u := √(↑(Radius C)^2 -(point_abs (Center C) (foot (Center C) L))^2)
+  have weirdnonneg: 0 ≤ ↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2 := by{
+    have : 0 ≤ point_abs (Center C) (foot (Center C) L) := by{exact point_abs_pos (Center C) (foot (Center C) L)}
+    simp [*]
+    nlinarith
+  }
   have upos : 0 < u := by{
     unfold u
     simp
     have : 0 ≤ point_abs (Center C) (foot (Center C) L) := by{exact point_abs_pos (Center C) (foot (Center C) L)}
     nlinarith
   }
-  obtain ⟨a,b,ah,bh,ab⟩ := ex_points_on_li
-  let p := go_along
+  obtain ⟨a,ah1,ah2⟩ := ex_different_point_on_line (foot (Center C) L) L
+  let p := go_along (foot (Center C) L) a u
+  let q := go_along (foot (Center C) L) a (-u)
+  have pq: p ≠ q := by{
+    by_contra p0
+    have : u = 0 := by{
+      unfold p q go_along p_scal_mul padd at p0
+      simp at p0
+      have : (dir (foot (Center C) L) a).x ≠ (0:ℂ) := by{
+        contrapose ah2
+        simp at *
+        have : pabs (dir (foot (Center C) L) a) = 0 := by{
+          unfold pabs
+          rw[ah2]
+          simp
+        }
+        symm
+        exact (dir_zero (foot (Center C) L) a).1 this
+      }
+      have br: -(↑u * (dir (foot (Center C) L) a).x) = -↑u * ((dir (foot (Center C) L) a)).x := by{ring}
+      rw[br] at p0
+      clear br
+      sorry
+    }
+    rw[this] at upos
+    contrapose upos
+    simp
+  }
+  have hp : Lies_on_circle p C := by{
+    refine point_on_circle_simp ?h
+    have pperp: perp_points (foot (Center C) L) (Center C) (foot (Center C) L) p := by{
+      by_cases z: (foot (Center C) L) = Center C
+      apply perp_points_self
+      tauto
+
+      by_cases i: (foot (Center C) L) = p
+      apply perp_points_self
+      tauto
+
+      have : Perpendicular (Line_through z) (Line_through i) := by{
+        have : L = Line_through i := by{
+          apply line_through_unique
+          constructor
+          exact foot_on_line L (Center C)
+          unfold p
+          #check go_along
+          have : L = Line_through
+        }
+      }
+      sorry
+    }
+    rw[pythagoras_points_bc pperp]
+    rw[point_abs_symm p (foot (Center C) L)]
+    unfold p
+    have : foot (Center C) L ≠ a := by{exact id (Ne.symm ah2)}
+    --#check pythagoras_points_bc perp
+    --unfold p
+    #check go_along_abs1 this u
+    rw[point_abs_symm (foot (Center C) L) (Center C)]
+    rw[go_along_abs1 this u]
+    unfold u
+    simp [*]
+    have : √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = (↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) := by{
+      exact Real.sq_sqrt weirdnonneg
+    }
+    --have test: √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 = √(↑(Radius C) ^ 2 - point_abs (Center C) (foot (Center C) L) ^ 2) ^ 2 := by{exact rfl}
+    --rw[← test]
+    rw[this]
+    --ahhhh
+    sorry
+  }
+  have hq : Lies_on_circle q C := by{
+    sorry
+  }
+  have ph2: p = Tangent_point h := by{
+    apply tangent_point_unique
+    constructor
+    unfold p
+    have ha2: foot (Center C) L ≠ a := by{tauto}
+    have : L = Line_through ha2 := by{
+      apply line_through_unique
+      constructor
+      exact foot_on_line L (Center C)
+      assumption
+    }
+    nth_rw 2[this]
+    unfold Lies_on
+    nth_rw 1[Line_through]
+    simp
+    exact go_along_colinear (foot (Center C) L) a u
+
+    assumption
+  }
+  have qh2: q = Tangent_point h := by{
+    apply tangent_point_unique
+    constructor
+    unfold q
+    have ha2: foot (Center C) L ≠ a := by{tauto}
+    have : L = Line_through ha2 := by{
+      apply line_through_unique
+      constructor
+      exact foot_on_line L (Center C)
+      assumption
+    }
+    nth_rw 2[this]
+    unfold Lies_on
+    nth_rw 1[Line_through]
+    simp
+    exact go_along_colinear (foot (Center C) L) a (-u)
+
+    assumption
+  }
+  rw[ph2,qh2] at pq
+  contradiction
 }
 
 /-Now an important theorem:

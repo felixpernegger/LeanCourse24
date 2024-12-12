@@ -377,6 +377,10 @@ def go_along : Point → Point → ℝ → Point :=
   fun a b R ↦ padd a (p_scal_mul R (dir a b))
 
 /-This is always colinear:-/
+#check dir
+def go_along_self(a : Point)(R : ℝ) : go_along a a R = a := by{
+  sorry
+}
 
 lemma go_along_colinear (a b : Point)(R : ℝ): colinear a b (go_along a b R) := by{
   apply colinear_perm23
@@ -458,4 +462,10 @@ lemma colinear_go_along {a b c : Point}(ab : a ≠ b)(h : colinear a b c ): ∃R
   }
   field_simp
   ring
+}
+
+lemma go_along_lies_on{a b : Point}{L : Line}(R : ℝ)(h : Lies_on a L ∧ Lies_on b L): Lies_on (go_along a b R) L := by{
+  by_cases ab : a=b
+  rw[ab]
+
 }
