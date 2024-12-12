@@ -291,3 +291,12 @@ lemma posrad_not_center{C : CCircle}{p : Point}(hC: PosRad C)(hp : Lies_on_circl
   ext
   tauto
 }
+
+/-If a point lies on a circle with Radius zero, it is the center-/
+
+lemma lies_on_radius_zero{C : CCircle}{p : Point}(hC : Radius C = 0)(hp : Lies_on_circle p C): p = Center C := by{
+  apply point_abs_point_lies_on_circle at hp
+  rw[hC] at hp
+  symm
+  exact abs_zero_imp_same (Center C) p hp
+}
