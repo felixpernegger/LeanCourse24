@@ -579,6 +579,7 @@ lemma tangent_through_is_perp{C : CCircle}{p : Point}(h : Lies_on_circle p C)(hC
 }
 
 /-And indeed unique for posrad!-/
+/-(I got a bit lost on the this proof, its probably way longer than it has to be, but whatever)-/
 
 theorem tangent_through_unique{C : CCircle}{p : Point}{L : Line}(h : Lies_on_circle p C)(hC : PosRad C)(hp : Lies_on p L)(hL : Tangent L C) : L = Tangent_through h := by{
   apply lines_eq_parallel_point p
@@ -608,12 +609,42 @@ theorem tangent_through_unique{C : CCircle}{p : Point}{L : Line}(h : Lies_on_cir
     apply center_line_unique hC
     constructor
     exact center_on_center_line h
-    sorry
+    have : p = Tangent_point hL := by{
+      apply tangent_point_unique
+      constructor
+      · assumption
+      assumption
+    }
+    rw[←  this]
+    exact point_on_center_line h
   }
   rw[this]
-  #check tangent_is_perp_center_line hC hL
+  clear this
+  have t1: Tangent (Tangent_through h) C := by{exact tangent_through_is_tangent h}
+  have t2: Center_line (tangent_point_on_circle t1) = Center_line (tangent_point_on_circle hL) := by{
+    apply center_line_unique hC
+    constructor
+    · exact center_on_center_line (tangent_point_on_circle t1)
+    have s1: p = Tangent_point hL := by{
+      apply tangent_point_unique
+      constructor
+      assumption
+      assumption
+    }
+    have s2: p = Tangent_point t1 := by{
+      apply tangent_point_unique
+      constructor
+      exact point_lies_on_tangent_through h
+      assumption
+    }
+    have : Tangent_point hL = Tangent_point t1 := by{
+      rw[← s1]
+      assumption
+    }
+    rw[this]
+    exact tangent_point_on_center_line t1
+  }
+  rw[← t2]
   apply perp_symm
-  rw[← this]
-  sorry
-  exact tangent_is_perp_center_line hC hL
+  exact tangent_is_perp_center_line hC t1
 }
