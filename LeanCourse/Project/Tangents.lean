@@ -491,26 +491,10 @@ lemma posrad_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C)(hC : P
 lemma perp_is_tangent{C : CCircle}{p : Point}(hC : PosRad C)(hp : Lies_on_circle p C) : Tangent (perp_through (Center_line hp) p) C := by{
   apply (line_tangent_iff (perp_through (Center_line hp) p) C).2
   have goal: foot (Center C) (perp_through (Center_line hp) p) = p := by{
-    have : Center_line hp = Line_through (posrad_not_center hC hp) := by{
-      exact posrad_center_line hp hC
-    }
-    rw[this]
-    clear this
-    have : Lies_on (Center C) (Line_through (posrad_not_center hC hp)) := by{
-      exact line_through_mem_right (posrad_not_center hC hp)
-    }
-    have rev: Center C ≠ p := by{
-      have : p ≠ Center C := by{
-        exact (posrad_not_center hC hp)
-      }
-      exact id (Ne.symm this)
-    }
-    have : Line_through (posrad_not_center hC hp) = Line_through rev := by{exact line_through_symm rev}
-    rw[this]
-    exact foot_perp_through2 rev
+    rw[posrad_center_line hp hC,line_through_symm (Ne.symm (posrad_not_center hC hp))]
+    exact foot_perp_through2 (Ne.symm (posrad_not_center hC hp))
   }
-  rw[goal]
-  assumption
+  rwa[goal]
 }
 
 /-Therefore we can define the tangent through any given point!-/

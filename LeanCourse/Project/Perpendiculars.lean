@@ -762,5 +762,5 @@ lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through 
   rfl
   }
 
-/-This is pretty much all there is to say about perpendicul lines in general, so in the next file we
+/-This is pretty much all there is to say about perpendicular lines in general, so in the next file we
 focus on triangles (3 noncolinear points) and perpendicular lines, in particular the orthocenter!-/
