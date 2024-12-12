@@ -1,4 +1,4 @@
-import LeanCourse.Project.Circumcircle
+import LeanCourse.Project.Parallels
 import Mathlib
 
 open Function Set Classical

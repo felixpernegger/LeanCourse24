@@ -1,4 +1,5 @@
 import LeanCourse.Project.Auxiliary
+import LeanCourse.Project.qObject
 import Mathlib
 
 open Function Set Classical
