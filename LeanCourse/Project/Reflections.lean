@@ -162,7 +162,10 @@ lemma reflection_point_line_pmidpoint(a : Point)(L : Line): pmidpoint (reflectio
 }
 #check point_line_abs_nonneg
 lemma reflection_point_line_abs(a : Point)(L : Line): point_line_abs (reflection_point_line a L) L = point_line_abs a L := by{
-
+  unfold point_line_abs
+  simp [*]
+  rw[← reflection_point_line_pmidpoint a L]
+  #check pmidpoint
 }
 
 /-this is perp in the following sense:-/
@@ -190,8 +193,6 @@ lemma reflection_point_line_perp_through{a : Point}{L : Line}(h: ¬Lies_on a L):
 
   exact line_through_mem_right s1
 }
-
-lemma reflection_point_line_perp{a : Point}{L : Line}
 
 /-Now lets define the reflection_line_point-/
 

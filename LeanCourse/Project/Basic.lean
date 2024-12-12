@@ -227,6 +227,26 @@ lemma point_abs_triangle (a b c : Point) : point_abs a b + point_abs b c ≥ poi
       _= Complex.abs (a.x-c.x) := by ring_nf
 }
 
+lemma point_abs_midpoint(a b : Point): point_abs a (pmidpoint a b) = 1/2 * point_abs a b := by{
+  unfold pmidpoint point_abs Complex.abs Complex.normSq
+  simp
+  have : ((a.x.re - (a.x.re + b.x.re) / 2) * (a.x.re - (a.x.re + b.x.re) / 2) +
+      (a.x.im - (a.x.im + b.x.im) / 2) * (a.x.im - (a.x.im + b.x.im) / 2))  = (1/4) * (-2*a.x.re * b.x.re - 2*a.x.im * b.x.im + a.x.re ^ 2 + b.x.re ^ 2 +
+        a.x.im ^ 2 +
+      b.x.im ^ 2) := by{field_simp; ring_nf}
+  rw[this]
+  simp
+  have :  (√4)⁻¹ = 2⁻¹ := by{
+    field_simp
+    refine Eq.symm ((fun {x y} ↦ Real.sqrt_eq_cases.mpr) ?_)
+    left
+    ring_nf
+    simp
+  }
+  rw[this]
+  ring_nf
+}
+
 /-The absolute value of a point is the obvious thing:-/
 def pabs : Point → ℝ :=
   fun a ↦ Complex.abs a.x
