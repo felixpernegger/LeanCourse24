@@ -378,7 +378,11 @@ def go_along : Point → Point → ℝ → Point :=
 
 /-Going along yourself does nothing:-/
 @[simp] lemma go_along_self(a : Point)(R : ℝ) : go_along a a R = a := by{
-
+  ext
+  unfold go_along p_scal_mul padd
+  simp
+  unfold zero
+  simp
 }
 
 /-This is always colinear:-/
