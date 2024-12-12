@@ -25,6 +25,12 @@ def reflection_point_point: Point → Point → Point :=
   ring
 }
 
+lemma reflection_point_point_pmidpoint{a b : Point}: pmidpoint (reflection_point_point a b) a = b := by{
+  unfold pmidpoint reflection_point_point padd pneg p_scal_mul
+  ext
+  simp
+}
+
 lemma reflection_point_point_same_imp_same {a b : Point}(h : a = reflection_point_point a b): a = b := by{
   obtain ⟨a1,a2⟩ := a
   obtain ⟨b1,b2⟩ := b
@@ -69,6 +75,18 @@ lemma reflection_point_point_colinear2 (p : Point){a b c : Point}(h : colinear a
   ext
   unfold reflection_point_point padd pneg p_scal_mul
   simp
+}
+
+lemma reflection_point_abs(a b : Point) : point_abs (reflection_point_point a b) b = point_abs a b := by{
+  unfold reflection_point_point padd pneg p_scal_mul point_abs
+  simp
+  ring_nf
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨b1,b2⟩ := b
+  simp
+  unfold Complex.abs Complex.normSq
+  simp
+  ring_nf
 }
 
 /-Reflecting a point along a line is the same as reflection along the foot-/
@@ -267,7 +285,6 @@ lemma reflection_line_point_twice (L : Line)(a : Point): reflection_line_point (
   rw[← reflection_point_point_twice p a]
   exact (reflection_line_point_lies_on (reflection_line_point L a) a (reflection_point_point p a)).2 zw
 }
-
 /-You can do much more with reflections:
 For example show circles reflection are still circles, reflect lines across lines etc.
 However this becomes so repetitive, I skip it, as reflections wont actually be used much at all.
