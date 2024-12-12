@@ -421,4 +421,12 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
 
 /-From this we can deduce that all lines are perpendicular to the radius, this howver only makes sense when we have positive radius.-/
 
-theorem tangent_is_perp{C : CCircle}{L : Line}(h : Tangent L C): Perpendicular L (qLine_through (Center C) )
+/-To make this a bit clearer, first following:-/
+
+lemma tangent_point_not_center{C : CCircle}{L : Line}(hC : PosRad C)(h : Tangent L C): Tangent_point h ≠ Center C := by{
+  exact posrad_not_center hC (tangent_point_on_circle h)
+}
+
+theorem tangent_is_perp{C : CCircle}{L : Line}(hC : PosRad C)(h : Tangent L C): Perpendicular L (Line_through (tangent_point_not_center hC h)) := by{
+  sorry
+}
