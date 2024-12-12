@@ -958,6 +958,20 @@ lemma parallel_refl (L : Line) : Parallel L L := by{
   rfl
 }
 
+/-Using parallel_def, we can also state a "quick" version to prove two points are equal:-/
+
+lemma lines_eq_parallel_point{L R : Line}(p : Point)(hp : Lies_on p L ∧ Lies_on p R)(LR : Parallel L R) : L = R := by{
+  have : L.range ∩ R.range = ∅ ∨ L.range = R.range := by{exact (parallel_def L R).mp LR}
+  obtain h0|h0 := this
+  · exfalso
+    unfold Lies_on at hp
+    have : p ∈ (L.range ∩ R.range) := by{tauto}
+    rw[h0] at this
+    contradiction
+  ext
+  rw[h0]
+}
+
 
 /-With this we can now talk about Intersections of lines:-/
 

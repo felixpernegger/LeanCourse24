@@ -498,7 +498,68 @@ lemma perp_is_tangent{C : CCircle}{p : Point}(hp : Lies_on_circle p C) : Tangent
 
   unfold PosRad at hC
   simp at hC
-  have : point_abs ze
+  have : p = Center C := by{exact lies_on_radius_zero hC hp}
+  apply (line_tangent_iff (perp_through (Center_line hp) p) C).2
+  have : foot (Center C) (perp_through (Center_line hp) p) = Center C := by{
+    symm
+    apply foot_unique
+    constructor
+    · rw[← this]
+      exact point_lies_on_perp_through (Center_line hp) p
+    exact point_lies_on_perp_through (perp_through (Center_line hp) p) (Center C)
+  }
+  rw[this]
+  apply point_on_circle_simp
+  rw[hC]
+  exact point_abs_self (Center C)
 }
 
 /-Therefore we can define the tangent through any given point!-/
+
+def Tangent_through{C : CCircle}{p : Point}(h : Lies_on_circle p C) : Line :=
+  perp_through (Center_line h) p
+
+/-As usual this does what we want:-/
+
+lemma tangent_through_is_tangent{C : CCircle}{p : Point}(h : Lies_on_circle p C) : Tangent (Tangent_through h) C := by{
+  unfold Tangent_through
+  exact perp_is_tangent h
+}
+
+/-And the point lies on it:-/
+
+lemma point_lies_on_tangent_through{C : CCircle}{p : Point}(h : Lies_on_circle p C) : Lies_on p (Tangent_through h) := by{
+  unfold Tangent_through
+  exact point_lies_on_perp_through (Center_line h) p
+}
+
+/-if posrad, this is perpendicular to the centerline:-/
+
+lemma tangent_through_is_perp{C : CCircle}{p : Point}(h : Lies_on_circle p C)(hC : PosRad C) : Perpendicular (Tangent_through h) (Center_line h) := by{
+  have s1: Tangent (Tangent_through h) C := by{exact tangent_through_is_tangent h}
+  have s2: Center_line h = Line_through (tangent_point_not_center hC s1) := by{
+    apply line_through_unique
+    constructor
+    have : Tangent_point s1 = p := by{
+      symm
+      apply tangent_point_unique
+      constructor
+      · exact point_lies_on_tangent_through h
+      assumption
+    }
+    rw[this]
+    exact point_on_center_line h
+    exact center_on_center_line h
+  }
+  rw[s2]
+  exact tangent_is_perp hC s1
+}
+
+/-And indeed unique for posrad!-/
+
+theorem tangent_through_unique{C : CCircle}{p : Point}{L : Line}(h : Lies_on_circle p C)(hC : PosRad C)(hp : Lies_on p L)(hL : Tangent L C) : L = Tangent_through h := by{
+  have goal : Parallel L (Tangent_through h) := by{
+    sorry
+  }
+
+}
