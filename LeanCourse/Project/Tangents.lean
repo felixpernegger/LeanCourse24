@@ -499,12 +499,18 @@ lemma perp_is_tangent{C : CCircle}{p : Point}(hC : PosRad C)(hp : Lies_on_circle
     have : Lies_on (Center C) (Line_through (posrad_not_center hC hp)) := by{
       exact line_through_mem_right (posrad_not_center hC hp)
     }
-    #check foot
-    sorry
+    have rev: Center C ≠ p := by{
+      have : p ≠ Center C := by{
+        exact (posrad_not_center hC hp)
+      }
+      exact id (Ne.symm this)
+    }
+    have : Line_through (posrad_not_center hC hp) = Line_through rev := by{exact line_through_symm rev}
+    rw[this]
+    exact foot_perp_through2 rev
   }
   rw[goal]
   assumption
 }
 
-
-/-Show that the reverse holds next-/
+/-Therefore we can define the tangent through any given point!-/
