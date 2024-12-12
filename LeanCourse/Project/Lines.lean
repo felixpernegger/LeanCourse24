@@ -192,6 +192,17 @@ lemma ex_different_point_on_line(p : Point)(L : Line): ∃(a : Point), Lies_on a
   use a
 }
 
+lemma line_through_symm{a b : Point}(ab : a ≠ b): Line_through (Ne.symm ab) = Line_through ab := by{
+  ext x
+  unfold Line_through
+  simp
+  constructor
+  · intro h
+    exact colinear_perm12 b a x h
+  intro h
+  exact colinear_perm12 a b x h
+}
+
 /-We can also conjugate lines:-/
 def line_conj : Line → Line :=
   fun L ↦ ⟨set_conj L.range, by{

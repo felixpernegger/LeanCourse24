@@ -40,7 +40,7 @@ theorem tangent_point_unique{L : Line}{C : CCircle}(p : Point)(h : Tangent L C)(
 /-therefore the distance on the tangent point is the radius of the circle to the center:-/
 
 lemma point_abs_tangent_point{L : Line}{C : CCircle}(h : Tangent L C) : point_abs (Center C) (Tangent_point h) = Radius C := by{
-  refine point_abs_point_lies_on_circle (Tangent_point h) ?h
+  apply point_abs_point_lies_on_circle
   exact tangent_point_on_circle h
 }
 
@@ -328,9 +328,9 @@ theorem line_tangent_iff(L : Line)(C : CCircle): Tangent L C ↔ Lies_on_circle 
     unfold Lies_on_circle
     exact mem_of_mem_inter_right bh
   }
-  have ad: point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle a ac}
-  have bd: point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle b bc}
-  have g: point_abs (Center C) (foot (Center C) L) = Radius C := by{exact point_abs_point_lies_on_circle (foot (Center C) L) h}
+  have ad: point_abs (Center C) a = Radius C := by{exact point_abs_point_lies_on_circle ac}
+  have bd: point_abs (Center C) b = Radius C := by{exact point_abs_point_lies_on_circle bc}
+  have g: point_abs (Center C) (foot (Center C) L) = Radius C := by{exact point_abs_point_lies_on_circle h}
   have aL : Lies_on a L := by{unfold Lies_on; exact mem_of_mem_inter_left ah}
   have bL : Lies_on b L := by{unfold Lies_on; exact mem_of_mem_inter_left bh}
   have eor: a ≠ Center C ∨ b ≠ Center C := by{exact Ne.ne_or_ne (Center C) ab}
@@ -428,5 +428,70 @@ lemma tangent_point_not_center{C : CCircle}{L : Line}(hC : PosRad C)(h : Tangent
 }
 
 theorem tangent_is_perp{C : CCircle}{L : Line}(hC : PosRad C)(h : Tangent L C): Perpendicular L (Line_through (tangent_point_not_center hC h)) := by{
-  sorry
+  have h': Lies_on_circle (foot (Center C) L) C := by{exact (line_tangent_iff L C).mp h}
+  have cnot: ¬Lies_on (Center C) L := by{
+    contrapose hC
+    unfold PosRad
+    simp at *
+    have : foot (Center C) L = Center C := by{exact foot_point_on_line hC}
+    have t: point_abs (Center C) ((foot (Center C) L)) = Radius C := by{exact point_abs_point_lies_on_circle h'}
+    rw[this] at t
+    rw[point_abs_self (Center C)] at t
+    ext
+    tauto
+  }
+  have hL: Line_through (tangent_point_not_center hC h) = perp_through L (Center C) := by{
+    have t: Line_through (tangent_point_not_center hC h) = Line_through (foot_point_not_on_line cnot) := by{
+      symm
+      apply line_through_unique
+      constructor
+      · rw[tangent_point_foot h]
+        exact line_through_mem_left (foot_point_not_on_line cnot)
+      exact line_through_mem_right (foot_point_not_on_line cnot)
+    }
+    rw[t]
+    exact foot_line_through cnot
+  }
+  rw[hL]
+  exact perp_through_is_perp L (Center C)
 }
+
+/- We define the line_through for a point on the perimiter nicely sperately, for more generality we use
+qLine_through:-/
+
+def Center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C): Line :=
+  qLine_through (Center C) p
+
+lemma center_on_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C): Lies_on (Center C) (Center_line hp) := by{
+  unfold Center_line
+  exact qline_through_mem_left (Center C) p
+}
+
+lemma point_on_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C): Lies_on p (Center_line hp) := by{
+  unfold Center_line
+  exact qline_through_mem_right (Center C) p
+}
+
+/-if posrad, this is the normal line_through:-/
+
+lemma posrad_center_line{C : CCircle}{p : Point}(hp : Lies_on_circle p C)(hC : PosRad C): Center_line hp = Line_through (posrad_not_center hC hp) := by{
+  unfold Center_line
+  unfold qLine_through
+  have : ¬Center C = p := by{
+    by_contra a
+    symm at a
+    contrapose a
+    exact posrad_not_center hC hp
+  }
+  simp [*]
+  apply line_through_unique
+  constructor
+  exact line_through_mem_right (of_eq_true (Eq.trans (congrArg Not (eq_false this)) not_false_eq_true))
+  exact?
+}
+
+/-The reveserse also holds, given a point on a circle, the perp through it is a tangent:-/
+lemma perp_is_tangent{C : CCircle}{p : Point}(hC : PosRad C)(hp : Lies_on p C) : perp_through
+
+
+/-Show that the reverse holds next-/
