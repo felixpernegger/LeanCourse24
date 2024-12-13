@@ -1,5 +1,3 @@
-import LeanCourse.Project.Pythagoras
-import LeanCourse.Project.Circles
 import LeanCourse.Project.Auxiliary
 import Mathlib
 
