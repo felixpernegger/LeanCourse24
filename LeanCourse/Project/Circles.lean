@@ -1,5 +1,4 @@
 import LeanCourse.Project.Triangles
-import LeanCourse.Project.qObject
 import Mathlib
 
 open Function Set Classical
