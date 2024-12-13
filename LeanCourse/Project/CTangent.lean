@@ -111,7 +111,9 @@ lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): 
       exact point_abs_self (CTangent_point h')
     }
     unfold p at this
-    #check reflection_point_point
+    rw[reflection_point_abs2] at this
+    simp at this
+    exact abs_zero_imp_same (CTangent_point h') (Center C) this
   }
   constructor
   have q1: Lies_on_circle (CTangent_point h') C := by{exact ctangent_mem_left h'}
@@ -128,7 +130,10 @@ lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): 
   simpa
 
   have q1: Lies_on_circle (CTangent_point h') O := by{exact ctangent_mem_right h'}
-  have q2: point_abs (Center O) (CTangent_point h') = Radius O := by{sorry}
+  have q2: point_abs (Center O) (CTangent_point h') = Radius O := by{
+    #check point_abs_center
+    sorry
+  }
   sorry
 }
 

@@ -648,4 +648,3 @@ theorem tangent_through_unique{C : CCircle}{p : Point}{L : Line}(h : Lies_on_cir
   apply perp_symm
   exact tangent_is_perp_center_line hC t1
 }
-#check point_line_abs
