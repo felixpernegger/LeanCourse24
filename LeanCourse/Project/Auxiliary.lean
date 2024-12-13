@@ -1,4 +1,4 @@
-import LeanCourse.Project.Perpendiculars
+import LeanCourse.Project.Pythagoras
 import Mathlib
 
 open Function Set Classical
