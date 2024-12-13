@@ -1,5 +1,4 @@
-import LeanCourse.Project.Auxiliary
-import LeanCourse.Project.qObject
+import LeanCourse.Project.Circumcircle
 import Mathlib
 
 open Function Set Classical
