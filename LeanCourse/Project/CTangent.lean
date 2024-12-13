@@ -131,10 +131,16 @@ lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): 
 
   have q1: Lies_on_circle (CTangent_point h') O := by{exact ctangent_mem_right h'}
   have q2: point_abs (Center O) (CTangent_point h') = Radius O := by{
-    #check point_abs_center
-    sorry
+    exact point_abs_point_lies_on_circle q1
   }
-  sorry
+  unfold PosRad
+  simp
+  ext
+  rw[← q2]
+  simp
+  unfold Concentric at h
+  rw[←h,s1]
+  exact point_abs_self (Center C)
 }
 
 
@@ -159,8 +165,32 @@ lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent
   }
   rw[this]
   exact qline_through_mem_right (Center C) (Center O)
-  sorry
-  #check lies_on_foot
+  --use once again the mirror
+  have CO : ¬Concentric C O := by{
+    by_contra h0
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h}
+    tauto
+  }
+  unfold Concentric at CO
+  have s1: qLine_through (Center C) (Center O) = Line_through CO := by{exact qline_through_line_through CO}
+  rw[s1]
+  clear s1
+  let p := reflection_point_line (CTangent_point h) (Line_through CO)
+  have hp : p = CTangent_point h := by{
+    apply ctangent_point_unique
+    let r := point_line_abs (CTangent_point h) (Line_through CO)
+    have hr: point_line_abs p (Line_through CO) = r := by{
+      unfold point_line_abs
+      unfold p
+      simp
+      unfold r
+      unfold point_line_abs reflection_point_line at *
+      sorry
+    }
+    sorry
+  }
+  unfold p at hp
+  exact (reflection_point_line_on_line (CTangent_point h) (Line_through CO)).1 hp
 }
 
 theorem ctangent_colinear{C O : CCircle}(h : CTangent C O): colinear (Center C) (Center O) (CTangent_point h) := by{
