@@ -61,6 +61,14 @@ lemma point_abs_ctangent_right{C O : CCircle}(h : CTangent C O) : point_abs (Cen
   exact point_abs_point_lies_on_circle (ctangent_mem_right h)
 }
 
+lemma ctangent_radius_zero_left{C O : CCircle}(h : CTangent C O)(hC: Radius C = 0): CTangent_point h = Center C := by{
+  exact lies_on_radius_zero hC (ctangent_mem_left h)
+}
+
+lemma ctangent_radius_zero_right{C O : CCircle}(h : CTangent C O)(hO: Radius O = 0): CTangent_point h = Center O := by{
+  exact lies_on_radius_zero hO (ctangent_mem_right h)
+}
+
 lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): ¬PosRad C ∧ ¬PosRad O := by{
   have s1: CTangent_point h' = Center C := by{
     let p := reflection_point_point (CTangent_point h') (Center C)
@@ -361,3 +369,115 @@ def Common_tangent{C O : CCircle}(h : CTangent C O) : Line :=
 
 --do a few more properties of the common tangent, in particular use the result above for center lines and stuff
 --then characerize ctangent circles (not too bad)
+
+lemma ctangent_point_common_tangent{C O : CCircle}(h : CTangent C O) : Lies_on (CTangent_point h) (Common_tangent h) := by{
+  unfold Common_tangent
+  exact point_lies_on_perp_through (qLine_through (Center C) (Center O)) (CTangent_point h)
+}
+
+lemma common_tangent_perp{C O : CCircle}(h : CTangent C O) : Perpendicular (qLine_through (Center C) (Center O)) (Common_tangent h) := by{
+  unfold Common_tangent
+  exact perp_through_is_perp (qLine_through (Center C) (Center O)) (CTangent_point h)
+}
+
+lemma common_tangent_symm{C O : CCircle}(h : CTangent C O) : Common_tangent (ctangent_symm h) = Common_tangent h := by{
+  unfold Common_tangent
+  rw[qline_through_symm, ctangent_point_symm h]
+}
+
+/-The common tangent as we proved before is now the same as the respective tangents:-/
+/-at least if we use posrad-/
+
+lemma common_tangent_left{C O : CCircle}(h : CTangent C O)(hC : PosRad C): Common_tangent h = Tangent_through (ctangent_mem_left h) := by{
+  have CO: Center C ≠ Center O := by{
+    by_contra p0
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent p0 h}
+    tauto
+  }
+  by_cases hO: PosRad O
+  have s1: Tangent_through (ctangent_mem_left h) = Tangent_through (ctangent_mem_right h) := by{exact ctangent_tangent_through h hC hO}
+  unfold Common_tangent
+  simp [CO]
+  have goal: Line_through CO = Center_line (ctangent_mem_left h) := by{
+    apply center_line_unique hC
+    constructor
+    exact line_through_mem_left CO
+    have : Lies_on (CTangent_point h) (qLine_through (Center C) (Center O)) := by{exact ctangent_point_lies_on h}
+    simp [CO] at this
+    assumption
+  }
+  rw[goal]
+  apply tangent_through_unique
+  assumption
+  exact point_lies_on_perp_through (Center_line (ctangent_mem_left h)) (CTangent_point h)
+  exact perp_is_tangent (ctangent_mem_left h)
+
+  unfold PosRad at hO
+  simp at hO
+  have s1: CTangent_point h = Center O := by{
+    exact ctangent_radius_zero_right h hO
+  }
+  apply tangent_through_unique
+  assumption
+  unfold Common_tangent
+  exact point_lies_on_perp_through (qLine_through (Center C) (Center O)) (CTangent_point h)
+
+  have : Common_tangent h = perp_through (Center_line (ctangent_mem_left h)) (CTangent_point h) := by{
+    unfold Common_tangent
+    simp [CO]
+    have : Line_through CO = Center_line (ctangent_mem_left h) := by{
+      apply center_line_unique hC
+      constructor
+      exact line_through_mem_left CO
+      unfold Line_through Lies_on
+      simp
+      exact ctangent_colinear h
+    }
+    rw[this]
+  }
+  rw[this]
+  exact perp_is_tangent (ctangent_mem_left h)
+}
+
+lemma common_tangent_right{C O : CCircle}(h : CTangent C O)(hO : PosRad O): Common_tangent h = Tangent_through (ctangent_mem_right h) := by{
+  have h': CTangent O C := by{exact ctangent_symm h}
+  have : Common_tangent h = Common_tangent h' := by{exact common_tangent_symm h'}
+  rw[this]
+  have : CTangent_point h = CTangent_point h' := by{exact ctangent_point_symm h'}
+  have : Tangent_through (ctangent_mem_right h) = Tangent_through (ctangent_mem_left h') := by{
+    apply tangent_through_unique
+    assumption
+    rw[← this]
+    exact point_lies_on_tangent_through (ctangent_mem_right h)
+    exact tangent_through_is_tangent (ctangent_mem_right h)
+  }
+  rw[this]
+  exact (common_tangent_left h' hO)
+}
+
+/-So its perp to the respective center_lines:-/
+
+lemma common_tangent_perp_left{C O : CCircle}(h : CTangent C O)(hC : PosRad C): Perpendicular (Common_tangent h) (Center_line (ctangent_mem_left h)) := by{
+  rw[common_tangent_left]
+  exact tangent_through_is_perp (ctangent_mem_left h) hC
+  assumption
+}
+
+lemma common_tangent_perp_right{C O : CCircle}(h : CTangent C O)(hO : PosRad O): Perpendicular (Common_tangent h) (Center_line (ctangent_mem_right h)) := by{
+  rw[common_tangent_right]
+  exact tangent_through_is_perp (ctangent_mem_right h) hO
+  assumption
+}
+
+/-we finish off with following characterization:-/
+
+lemma common_tangent_unique{C O : CCircle}{L : Line}(h: CTangent C O)(h' : PosRad C ∨ PosRad O)(hL : Lies_on (CTangent_point h) L ∧ (Perpendicular (qLine_through (Center C) (Center O)) L)) : L = Common_tangent h := by{
+  obtain h'|h' := h'
+  rw[common_tangent_left]
+  apply tangent_through_unique
+  assumption
+  exact hL.1
+  sorry
+  sorry
+  sorry
+}

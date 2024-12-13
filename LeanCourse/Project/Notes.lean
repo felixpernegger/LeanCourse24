@@ -21,7 +21,7 @@ for circumcenter, although one could very realistically bruteforce it.
 
 I still want to wait a while until I introduce angles, as they will be very painful.-/
 
-
+--7.6k llines rn
 
 /-I should probably reorder the files. Namely, Basic, Lines, Parallels, Perpendiculars, Triangles,
 ,*incoming* Orthocenter, Circles.
