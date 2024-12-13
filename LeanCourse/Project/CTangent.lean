@@ -46,6 +46,13 @@ lemma ctangent_symm{C O : CCircle}(h : CTangent C O) : CTangent O C := by{
   rwa[inter_comm O.range C.range]
 }
 
+lemma ctangent_point_symm{C O : CCircle}(h : CTangent C O) : CTangent_point (ctangent_symm h) = CTangent_point h := by{
+  apply ctangent_point_unique
+  constructor
+  · exact ctangent_mem_right (ctangent_symm h)
+  exact ctangent_mem_left (ctangent_symm h)
+}
+
 lemma point_abs_ctangent_left{C O : CCircle}(h : CTangent C O) : point_abs (Center C) (CTangent_point h) = Radius C := by{
   exact point_abs_point_lies_on_circle (ctangent_mem_left h)
 }
@@ -57,11 +64,23 @@ lemma point_abs_ctangent_right{C O : CCircle}(h : CTangent C O) : point_abs (Cen
 lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): ¬PosRad C ∧ ¬PosRad O := by{
   have s1: CTangent_point h' = Center C := by{
     let p := reflection_point_point (CTangent_point h') (Center C)
-    have t0 : Center C = Center O := by{
-      have : point_abs (Center C) (Tangent_point h') = Radius C := by{
-        #check point_abs_ctangent_left
-        sorry
+    have t0 : Radius C = Radius O := by{
+      have t: point_abs (Center C) (CTangent_point h') = Radius C := by{
+        exact point_abs_ctangent_left h'
       }
+      have : point_abs (Center O) (CTangent_point h') = Radius O := by{
+        have OC: CTangent O C := by{exact ctangent_symm h'}
+        have : CTangent_point h' = CTangent_point OC := by{
+          exact ctangent_point_symm OC
+        }
+        rw[this]
+        exact point_abs_ctangent_left OC
+      }
+      unfold Concentric at h
+      rw[h] at t
+      rw[t] at this
+      ext
+      assumption
     }
     have t1: point_abs (Center C) p = point_abs (Center C) (CTangent_point h') := by{
       have : Center C = pmidpoint p (CTangent_point h') := by{
@@ -77,9 +96,22 @@ lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): 
     rw[s2] at t1
     have s3: Lies_on_circle p C := by{exact point_on_circle_simp t1}
     have s4: Lies_on_circle p O := by{
-      sorry
+      unfold Concentric at h
+      rw[t0, h] at t1
+      exact point_on_circle_simp t1
     }
-    sorry
+    have s5: p = CTangent_point h' := by{
+      apply ctangent_point_unique
+      constructor
+      · assumption
+      assumption
+    }
+    have : point_abs p (CTangent_point h') = 0 := by{
+      rw[s5]
+      exact point_abs_self (CTangent_point h')
+    }
+    unfold p at this
+    #check reflection_point_point
   }
   constructor
   have q1: Lies_on_circle (CTangent_point h') C := by{exact ctangent_mem_left h'}

@@ -89,6 +89,23 @@ lemma reflection_point_abs(a b : Point) : point_abs (reflection_point_point a b)
   ring_nf
 }
 
+lemma reflection_point_abs2(a b : Point) : point_abs (reflection_point_point a b) a = 2*(point_abs a b) := by{
+  unfold reflection_point_point padd p_scal_mul pneg point_abs Complex.abs Complex.normSq
+  simp
+  ring_nf
+  have : (-(b.x.re * a.x.re * 8) + b.x.re ^ 2 * 4 + (a.x.re ^ 2 * 4 - b.x.im * a.x.im * 8) + b.x.im ^ 2 * 4 + a.x.im ^ 2 * 4) = 4*(-(b.x.re * a.x.re * 2) + b.x.re ^ 2 + (a.x.re ^ 2 - b.x.im * a.x.im * 2) + b.x.im ^ 2 + a.x.im ^ 2) := by{ring}
+  rw[this]
+  simp
+  have : √4 = 2 := by{
+    refine Real.sqrt_eq_cases.mpr ?_
+    left
+    ring_nf
+    simp
+  }
+  rw[this]
+  ring
+}
+
 /-Reflecting a point along a line is the same as reflection along the foot-/
 
 def reflection_point_line: Point → Line → Point :=
