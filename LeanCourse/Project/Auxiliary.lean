@@ -139,6 +139,11 @@ def inside_triangle (T : Triangle)(p : Point): Prop :=
 def inside_circle(a : Point)(C : CCircle) : Prop :=
   point_abs a (Center C) < Radius C
 
+/-Similar the outside:-/
+
+def outside_circle(a : Point)(C : CCircle) : Prop :=
+  Radius C < point_abs a (Center C)
+
 /-Now we do some tautological stuff, to simplify proving Lines are Copunctual and stuff-/
 
 def pairwise_different_point3 (a b c : Point): Prop :=
