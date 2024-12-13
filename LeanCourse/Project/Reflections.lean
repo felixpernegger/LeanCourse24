@@ -157,7 +157,7 @@ theorem reflection_point_line_on_line (a : Point)(L : Line): reflection_point_li
 
 lemma reflection_point_line_pmidpoint(a : Point)(L : Line): pmidpoint (reflection_point_line a L) a = foot a L := by{
   unfold reflection_point_line
-  exact reflection_point_point_pmidpoint
+  exact reflection_point_point_pmidpoint a (foot a L)
 }
 
 lemma reflection_point_line_abs(a : Point)(L : Line): point_line_abs (reflection_point_line a L) L = point_line_abs a L := by{
