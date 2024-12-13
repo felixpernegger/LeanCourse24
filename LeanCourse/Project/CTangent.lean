@@ -352,3 +352,12 @@ lemma ctangent_tangent_through{C O : CCircle}(h : CTangent C O)(hC: PosRad C)(hO
   rw[par] at this
   contradiction
 }
+
+/-We can therefore define a commong tangent to the two circles.
+To make it as general as possible, we use following approach:-/
+
+def Common_tangent{C O : CCircle}(h : CTangent C O) : Line :=
+  perp_through (qLine_through (Center C) (Center O)) (CTangent_point h)
+
+--do a few more properties of the common tangent, in particular use the result above for center lines and stuff
+--then characerize ctangent circles (not too bad)
