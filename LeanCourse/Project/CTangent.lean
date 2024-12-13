@@ -472,12 +472,166 @@ lemma common_tangent_perp_right{C O : CCircle}(h : CTangent C O)(hO : PosRad O):
 /-we finish off with following characterization:-/
 
 lemma common_tangent_unique{C O : CCircle}{L : Line}(h: CTangent C O)(h' : PosRad C ∨ PosRad O)(hL : Lies_on (CTangent_point h) L ∧ (Perpendicular (qLine_through (Center C) (Center O)) L)) : L = Common_tangent h := by{
+  obtain ⟨hL1,hL2⟩ := hL
   obtain h'|h' := h'
   rw[common_tangent_left]
   apply tangent_through_unique
   assumption
-  exact hL.1
+  exact hL1
+
+  have t1: Center C ≠ Center O := by{
+    contrapose h'
+    simp at *
+    have : Concentric C O := by{exact h'}
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent this h}
+    tauto
+  }
+  simp [*] at *
+  have : Line_through t1 = Center_line (ctangent_mem_left h) := by{
+    apply center_line_unique h'
+    constructor
+    exact line_through_mem_left t1
+    unfold Lies_on Line_through
+    simp
+    exact ctangent_colinear h
+  }
+  have : L = (perp_through (Center_line (ctangent_mem_left h)) (CTangent_point h)) := by{
+    apply perp_through_unique
+    constructor
+    rw[← this]
+    assumption
+    assumption
+  }
+  rw[this]
+  apply perp_is_tangent
+  assumption
+
+
+
+  rw[common_tangent_right]
+  apply tangent_through_unique
+  assumption
+  exact hL1
+
+  have t1: Center C ≠ Center O := by{
+    contrapose h'
+    simp at *
+    have : Concentric C O := by{exact h'}
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent this h}
+    tauto
+  }
+  simp [*] at *
+  have : Line_through t1 = Center_line (ctangent_mem_right h) := by{
+    apply center_line_unique h'
+    constructor
+    exact line_through_mem_right t1
+    unfold Lies_on Line_through
+    simp
+    exact ctangent_colinear h
+  }
+  have : L = (perp_through (Center_line (ctangent_mem_right h)) (CTangent_point h)) := by{
+    apply perp_through_unique
+    constructor
+    rw[← this]
+    assumption
+    assumption
+  }
+  rw[this]
+  apply perp_is_tangent
+  assumption
+}
+
+/-To have to  deal a bit less with predicates, we introduce quick versions of our stuff:-/
+
+def qCenter_line : CCircle → Point → Line :=
+  fun C p ↦ qLine_through (Center C) p
+
+def qTangent_through : CCircle → Point → Line :=
+  fun C p ↦ if h: Lies_on_circle p C then (Tangent_through h) else (perp_through (qCenter_line C p) p)
+
+def qCTangent_point : CCircle → CCircle → Point :=
+  fun C O ↦ if h: CTangent C O then (CTangent_point h) else pmidpoint (Center C) (Center O)
+
+def qCommon_tangent : CCircle → CCircle → Line :=
+  fun C O ↦ (perp_through (qLine_through (Center C) (Center O)) (qCTangent_point C O))
+
+@[simp] lemma qcenter_line_simp{C : CCircle}{p : Point}(h : Lies_on_circle p C): qCenter_line C p = Center_line h := by{
+  unfold qCenter_line Center_line
+  rfl
+}
+
+@[simp] lemma qtangent_through_simp{C : CCircle}{p : Point}(h : Lies_on_circle p C): qTangent_through C p = Tangent_through h := by{
+  unfold qTangent_through
+  simp [*]
+}
+
+@[simp] lemma qctangent_point_simp{C O : CCircle}(h : CTangent C O): qCTangent_point C O = CTangent_point h := by{
+  unfold qCTangent_point
+  simp [*]
+}
+
+@[simp] lemma qcommon_tangent_simp{C O : CCircle}(h : CTangent C O): qCommon_tangent C O = Common_tangent h := by{
+  unfold Common_tangent qCommon_tangent
+  simp [*]
+}
+
+lemma qcenter_line_center(C : CCircle)(p : Point): Lies_on (Center C) (qCenter_line C p) := by{
+  unfold qCenter_line
+  exact qline_through_mem_left (Center C) p
+}
+
+lemma qcenter_line_point(C : CCircle)(p : Point): Lies_on p (qCenter_line C p) := by{
+  unfold qCenter_line
+  exact qline_through_mem_right (Center C) p
+}
+
+lemma qtangent_through_point(C : CCircle)(p : Point): Lies_on p (qTangent_through C p) := by{
+  unfold qTangent_through
+  by_cases h0: Lies_on_circle p C
+  simp [*]
+  exact point_lies_on_tangent_through (of_eq_true (eq_true h0))
+  simp [*]
+  exact point_lies_on_perp_through (qCenter_line C p) p
+}
+
+lemma qctangent_point_symm(C O : CCircle): qCTangent_point O C = qCTangent_point C O := by{
+  unfold qCTangent_point
+  by_cases h : CTangent C O
+  have h': CTangent O C := by{exact ctangent_symm h}
+  simp [*]
+  exact ctangent_point_symm (of_eq_true (eq_true h))
+
+  have h': ¬CTangent O C := by{
+    by_contra p0
+    apply ctangent_symm at p0
+    contradiction
+  }
+  simp [*]
+  exact pmidpoint_symm (Center C) (Center O)
+}
+
+lemma qcommon_tangent_symm(C O : CCircle) : qCommon_tangent O C = qCommon_tangent C O := by{
+  unfold qCommon_tangent
+  rw[qline_through_symm (Center C) (Center O), qctangent_point_symm C O]
+}
+
+/-Now we want to characterize ctangent circles.
+This isnt super nice, because there are two different cases:
+The circles are tangent "from the outside" or from the inside. Therefore we first introduce some
+more predicates. First we will with the edge case of one circle lying of the other:-/
+
+lemma ctangent_radius_zero{C O : CCircle}(h : Lies_on_circle (Center O) C): CTangent C O ↔ Radius O = 0 := by{
+  constructor
+  intro h'
   sorry
+
+  intro h'
+  unfold CTangent Tangential
+  by_contra h0
+  by_cases h1: (C.range ∩ O.range).encard < 1
+  have : (C.range ∩ O.range) = ∅ := by{sorry}
   sorry
   sorry
 }
+
+/-FINISH THIS OMG THIS IS HORRIBLE-/
