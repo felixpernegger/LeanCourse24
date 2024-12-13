@@ -283,7 +283,45 @@ lemma ctangent_tangent_through{C O : CCircle}(h : CTangent C O)(hC: PosRad C)(hO
     exact point_on_center_line sC
     exact point_on_center_line sO
 
-    sorry
+    have t1: ¬Concentric C O := by{
+      by_contra h0
+      have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h}
+      tauto
+    }
+    unfold Concentric at t1
+    have : Lies_on (CTangent_point h) (qLine_through (Center C) (Center O)) := by{exact ctangent_point_lies_on h}
+    simp [*] at this
+    unfold Lies_on Center_line Line_through at *
+    simp at *
+    have : qLine_through (Center O) (CTangent_point h) = Line_through t1 := by{
+      apply line_through_unique
+      constructor
+      swap
+      exact qline_through_mem_left (Center O) (CTangent_point h)
+      have : (Center O) ≠ (CTangent_point h) := by{
+        contrapose hO
+        unfold PosRad
+        simp at *
+        have : point_abs (Center O) (CTangent_point h) = Radius O := by{exact point_abs_ctangent_right h}
+        rw[hO] at this
+        rw[point_abs_self] at this
+        ext
+        tauto
+      }
+      unfold qLine_through
+      simp [*]
+      unfold Lies_on Line_through
+      simp
+      apply colinear_perm13
+      apply colinear_perm23
+      exact ctangent_colinear h
+    }
+    rw[this]
+    clear this
+    unfold Line_through
+    simp
+    apply colinear_self
+    tauto
   }
   have par: Parallel (Tangent_through (ctangent_mem_left h)) (Tangent_through (ctangent_mem_right h)) := by{
     apply perp_perp (Center_line sC)
