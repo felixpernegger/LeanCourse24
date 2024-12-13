@@ -164,11 +164,7 @@ lemma reflection_point_line_pmidpoint(a : Point)(L : Line): pmidpoint (reflectio
 lemma reflection_point_line_abs(a : Point)(L : Line): point_line_abs (reflection_point_line a L) L = point_line_abs a L := by{
   unfold point_line_abs
   simp [*]
-  rw[← reflection_point_line_pmidpoint a L, point_abs_midpoint,pmidpoint_symm]
-  #check point_abs_pmidpoint
-
-
-  #check pmidpoint
+  rw[← reflection_point_line_pmidpoint a L, point_abs_pmidpoint,pmidpoint_symm, point_abs_pmidpoint,point_abs_symm]
 }
 
 /-this is perp in the following sense:-/
