@@ -25,7 +25,7 @@ def reflection_point_point: Point → Point → Point :=
   ring
 }
 
-lemma reflection_point_point_pmidpoint{a b : Point}: pmidpoint (reflection_point_point a b) a = b := by{
+lemma reflection_point_point_pmidpoint(a b : Point): pmidpoint (reflection_point_point a b) a = b := by{
   unfold pmidpoint reflection_point_point padd pneg p_scal_mul
   ext
   simp

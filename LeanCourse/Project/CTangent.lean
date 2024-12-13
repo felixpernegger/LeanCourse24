@@ -8,6 +8,14 @@ noncomputable section
 /-Here deal with Tangential Circles.
 The required predicate will be called "CTangent" for "circle tangent" or something-/
 
+def Concentric(C O : CCircle) : Prop :=
+  Center C = Center O
+
+lemma concentric_symm{C O : CCircle}(h : Concentric C O): Concentric O C := by{
+  unfold Concentric at *
+  tauto
+}
+
 /-Fot the ifrst few things we basically copy the Tangents section-/
 
 def CTangent(C O : CCircle) : Prop :=
@@ -46,6 +54,19 @@ lemma point_abs_ctangent_right{C O : CCircle}(h : CTangent C O) : point_abs (Cen
   exact point_abs_point_lies_on_circle (ctangent_mem_right h)
 }
 
+lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): ¬PosRad C ∧ ¬PosRad O := by{
+  have : CTangent_point h' = Center C := by{
+    let p := reflection_point_point (CTangent_point h') (Center C)
+    have : point_abs (Center C) p = point_abs (Center C) (CTangent_point h') := by{
+      have : Center C = pmidpoint p (CTangent_point h') := by{
+        unfold p
+        #check reflection_point_point_pmidpoint
+        exact reflection_point_point_pmidpoint (CTangent_point h') (Center C)
+      }
+    }
+  }
+}
+
 --theorem ctangent_perp{C O : CCircle}(h : CTangent C O)(hC : PosRad C)(hO : PosRad O) : Perpendicular
 
 lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent_point h) (qLine_through (Center C) (Center O)) := by{
@@ -67,7 +88,7 @@ lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent
   }
   rw[this]
   exact qline_through_mem_right (Center C) (Center O)
-
+  sorry
   #check lies_on_foot
 }
 
