@@ -144,8 +144,6 @@ lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): 
 }
 
 
---theorem ctangent_perp{C O : CCircle}(h : CTangent C O)(hC : PosRad C)(hO : PosRad O) : Perpendicular
-
 lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent_point h) (qLine_through (Center C) (Center O)) := by{
   by_cases hC : PosRad C
   swap
@@ -165,7 +163,6 @@ lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent
   }
   rw[this]
   exact qline_through_mem_right (Center C) (Center O)
-  --use once again the mirror
   have CO : ¬Concentric C O := by{
     by_contra h0
     have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h}
@@ -180,25 +177,140 @@ lemma ctangent_point_lies_on{C O : CCircle}(h: CTangent C O) : Lies_on (CTangent
     apply ctangent_point_unique
     let r := point_line_abs (CTangent_point h) (Line_through CO)
     have hr: point_line_abs p (Line_through CO) = r := by{
-      unfold point_line_abs
       unfold p
-      simp
-      unfold r
-      unfold point_line_abs reflection_point_line at *
-      sorry
+      rw[reflection_point_line_abs]
     }
-    sorry
+    constructor
+    refine point_on_circle_simp ?hp.left.h
+    have perp: perp_points (foot p (Line_through CO)) (Center C) (foot p (Line_through CO)) p := by{
+      apply perp_points_perm_front
+      apply perp_points_perm_back
+      apply perp_points_foot
+      exact line_through_mem_left CO
+    }
+    rw[pythagoras_points_bc perp]
+    unfold point_line_abs at hr
+    rw[hr]
+    unfold r
+    have perp2: perp_points (foot (CTangent_point h) (Line_through CO)) (Center C) (foot (CTangent_point h) (Line_through CO)) (CTangent_point h) := by{
+      apply perp_points_perm_front
+      apply perp_points_perm_back
+      apply perp_points_foot
+      exact line_through_mem_left CO
+    }
+    unfold p
+    simp
+    unfold point_line_abs
+    rw[← pythagoras_points_bc perp2]
+    exact point_abs_ctangent_left h
+
+    refine point_on_circle_simp ?hp.right.h
+    have perp: perp_points (foot p (Line_through CO)) (Center O) (foot p (Line_through CO)) p := by{
+      apply perp_points_perm_front
+      apply perp_points_perm_back
+      apply perp_points_foot
+      exact line_through_mem_right CO
+    }
+    rw[pythagoras_points_bc perp]
+    unfold point_line_abs at hr
+    rw[hr]
+    unfold r
+    have perp2: perp_points (foot (CTangent_point h) (Line_through CO)) (Center O) (foot (CTangent_point h) (Line_through CO)) (CTangent_point h) := by{
+      apply perp_points_perm_front
+      apply perp_points_perm_back
+      apply perp_points_foot
+      exact line_through_mem_right CO
+    }
+    unfold p
+    simp
+    unfold point_line_abs
+    rw[← pythagoras_points_bc perp2]
+    exact point_abs_ctangent_right h
   }
   unfold p at hp
   exact (reflection_point_line_on_line (CTangent_point h) (Line_through CO)).1 hp
 }
 
 theorem ctangent_colinear{C O : CCircle}(h : CTangent C O): colinear (Center C) (Center O) (CTangent_point h) := by{
-  sorry
+  have cent: Lies_on (CTangent_point h) (qLine_through (Center C) (Center O)) := by{exact ctangent_point_lies_on h}
+  by_cases hC: PosRad C
+  by_cases hO: PosRad O
+  have CO : ¬Concentric C O := by{
+    by_contra h0
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h}
+    tauto
+  }
+  unfold Concentric at CO
+  have s1: qLine_through (Center C) (Center O) = Line_through CO := by{exact qline_through_line_through CO}
+  rw[s1] at cent
+  unfold Lies_on Line_through at cent
+  simpa
+
+  have : (CTangent_point h) = Center O := by{
+    unfold PosRad at hO
+    simp at hO
+    exact lies_on_radius_zero hO (ctangent_mem_right h)
+  }
+  apply colinear_self
+  tauto
+
+  have : (CTangent_point h) = Center C := by{
+    unfold PosRad at hC
+    simp at hC
+    exact lies_on_radius_zero hC (ctangent_mem_left h)
+  }
+  apply colinear_self
+  tauto
 }
 
 /-Now the tangent through CTangent_point C is the same as O:-/
 
-lemma ctangent_tangent_through{C O : CCircle}(h : CTangent C O)(hC: PosRad C)(hO: PosRad O): Tangent_through (ctangent_point_mem_left h) = Tangent_through (ctangent_point_mem_right h) := by{
-  sorry
+lemma ctangent_tangent_through{C O : CCircle}(h : CTangent C O)(hC: PosRad C)(hO: PosRad O): Tangent_through (ctangent_mem_left h) = Tangent_through (ctangent_mem_right h) := by{
+  --for simplicity
+  have sC: Lies_on_circle (CTangent_point h) C := by{exact ctangent_mem_left h}
+  have sO: Lies_on_circle (CTangent_point h) O := by{exact ctangent_mem_right h}
+  have s1 : Center_line (sC) = Center_line (sO) := by{
+    apply lines_eq_ex
+    use (Center C)
+    use CTangent_point h
+    constructor
+    exact Ne.symm (posrad_not_center hC sC)
+    constructor
+    exact center_on_center_line sC
+    constructor
+    swap
+    constructor
+    exact point_on_center_line sC
+    exact point_on_center_line sO
+
+    sorry
+  }
+  have par: Parallel (Tangent_through (ctangent_mem_left h)) (Tangent_through (ctangent_mem_right h)) := by{
+    apply perp_perp (Center_line sC)
+    apply perp_symm
+    exact tangent_through_is_perp sC hC
+
+    rw[s1]
+    apply perp_symm
+    exact tangent_through_is_perp sO hO
+  }
+  apply (parallel_def (Tangent_through (ctangent_mem_left h)) (Tangent_through (ctangent_mem_right h))).1 at par
+  obtain par|par := par
+  swap
+  ext
+  rw[par]
+
+  exfalso
+  have : (CTangent_point h) ∈ (Tangent_through (ctangent_mem_left h)).range ∩ (Tangent_through (ctangent_mem_right h)).range := by{
+    refine mem_inter ?ha ?hb
+    have : Lies_on (CTangent_point h) (Tangent_through (ctangent_mem_left h)) := by{exact point_lies_on_tangent_through (ctangent_mem_left h)}
+    unfold Lies_on at this
+    assumption
+
+    have : Lies_on (CTangent_point h) (Tangent_through (ctangent_mem_right h)) := by{exact point_lies_on_tangent_through (ctangent_mem_right h)}
+    unfold Lies_on at this
+    assumption
+  }
+  rw[par] at this
+  contradiction
 }
