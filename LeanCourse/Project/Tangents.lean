@@ -1,4 +1,3 @@
-import LeanCourse.Project.qObject
 import LeanCourse.Project.Circle
 import Mathlib
 
