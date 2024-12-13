@@ -55,17 +55,51 @@ lemma point_abs_ctangent_right{C O : CCircle}(h : CTangent C O) : point_abs (Cen
 }
 
 lemma concentric_ctangent{C O : CCircle}(h : Concentric C O)(h': CTangent C O): ¬PosRad C ∧ ¬PosRad O := by{
-  have : CTangent_point h' = Center C := by{
+  have s1: CTangent_point h' = Center C := by{
     let p := reflection_point_point (CTangent_point h') (Center C)
-    have : point_abs (Center C) p = point_abs (Center C) (CTangent_point h') := by{
-      have : Center C = pmidpoint p (CTangent_point h') := by{
-        unfold p
-        #check reflection_point_point_pmidpoint
-        exact reflection_point_point_pmidpoint (CTangent_point h') (Center C)
+    have t0 : Center C = Center O := by{
+      have : point_abs (Center C) (Tangent_point h') = Radius C := by{
+        #check point_abs_ctangent_left
+        sorry
       }
     }
+    have t1: point_abs (Center C) p = point_abs (Center C) (CTangent_point h') := by{
+      have : Center C = pmidpoint p (CTangent_point h') := by{
+        unfold p
+        symm
+        exact reflection_point_point_pmidpoint (CTangent_point h') (Center C)
+      }
+      rw [this, pmidpoint_abs_right, pmidpoint_symm, pmidpoint_abs_right, point_abs_symm]
+    }
+    have s2: point_abs (Center C) (CTangent_point h') = Radius C := by{
+      exact point_abs_ctangent_left h'
+    }
+    rw[s2] at t1
+    have s3: Lies_on_circle p C := by{exact point_on_circle_simp t1}
+    have s4: Lies_on_circle p O := by{
+      sorry
+    }
+    sorry
   }
+  constructor
+  have q1: Lies_on_circle (CTangent_point h') C := by{exact ctangent_mem_left h'}
+  have q2: point_abs (Center C) (CTangent_point h') = Radius C := by{exact point_abs_ctangent_left h'}
+  rw[s1] at q2
+  have : Radius C = 0 := by{
+    symm
+    have : point_abs (Center C) (Center C) = 0 := by{exact point_abs_self (Center C)}
+    rw[this] at q2
+    ext
+    assumption
+  }
+  unfold PosRad
+  simpa
+
+  have q1: Lies_on_circle (CTangent_point h') O := by{exact ctangent_mem_right h'}
+  have q2: point_abs (Center O) (CTangent_point h') = Radius O := by{sorry}
+  sorry
 }
+
 
 --theorem ctangent_perp{C O : CCircle}(h : CTangent C O)(hC : PosRad C)(hO : PosRad O) : Perpendicular
 
