@@ -206,7 +206,6 @@ theorem powline_copunctal{C O U : CCircle}(h : cnoncolinear C O U): Copunctal (q
   simp at disj
   obtain ⟨CO,OU,UC⟩ := disj
   have s1: Parallel (qLine_through (Center C) (Center O)) (qLine_through (Center O) (Center U)) := by{
-    --simp [*] at *
     have t1: Perpendicular (Line_through CO) (qPowLine O U) := by{
       apply perp_parallel (qPowLine C O)
       have : ¬Concentric C O := by{
@@ -217,20 +216,21 @@ theorem powline_copunctal{C O U : CCircle}(h : cnoncolinear C O U): Copunctal (q
       rw[← qline_through_line_through]
       apply perp_symm
       exact powline_perp this
-
+      assumption
+    }
+    simp [*] at *
+    have t2: Perpendicular (Line_through OU) (qPowLine O U) := by{
+      rw[← qline_through_line_through]
       have : ¬Concentric O U := by{
         unfold Concentric
         assumption
       }
       simp [this]
-      sorry
-      /-
-      rw[← qline_through_line_through]
-      apply perp_symm
       exact powline_perp this
-      -/
     }
-    sorry
+    apply perp_symm at t1
+    apply perp_symm at t2
+    exact perp_perp (qPowLine O U) t1 t2
   }
   simp  [*] at s1
   apply (parallel_quot CO OU).1 at s1
@@ -241,9 +241,73 @@ theorem powline_copunctal{C O U : CCircle}(h : cnoncolinear C O U): Copunctal (q
   clear this
   simpa
 
-  use qqIntersection (qPowLine C O) (qPowLine O U)
-  sorry
+  have h0: (Center C ≠ Center O ∧ Center O ≠ Center U ∧ Center U ≠ Center C) := by{
+    contrapose h
+    unfold cnoncolinear noncolinear
+    simp at *
+    apply colinear_self
+    tauto
+  }
+  obtain ⟨CO',OU',UC'⟩ := h0
+  have CO: ¬Concentric C O := by{unfold Concentric;assumption}
+  have OU: ¬Concentric O U := by{unfold Concentric;assumption}
+  have UC: ¬Concentric U C := by{unfold Concentric;assumption}
+  have s1: ¬Parallel (PowLine CO) (PowLine OU) := by{
+    contrapose h
+    unfold cnoncolinear noncolinear
+    simp at *
+    have u1: Parallel (Line_through CO') (Line_through OU') := by{
+      apply perp_perp (PowLine CO)
+      apply perp_symm
+      rw[← qline_through_line_through]
+      exact powline_perp CO
+
+      apply parallel_perp (PowLine OU)
+      apply parallel_symm
+      assumption
+      apply perp_symm
+      rw[← qline_through_line_through]
+      exact powline_perp OU
+    }
+    apply (parallel_quot CO' OU').1 at u1
+    apply colinear_perm12
+    apply (colinear_alt (Center O) (Center C) (Center U)).2
+    have : ((Center O).x - (Center C).x) / ((Center O).x - (Center U).x) = -(((Center C).x - (Center O).x) / ((Center O).x - (Center U).x)) := by{ring}
+    rw[this]
+    clear this
+    simpa
+  }
+  use Intersection s1
+  simp [*]
+  constructor
+  · exact intersection_mem_left s1
+  constructor
+  · exact intersection_mem_right s1
+  refine
+    (lies_on_powline (of_eq_true (Eq.trans (congrArg Not (eq_false UC)) not_false_eq_true))
+          (Intersection s1)).mpr
+      ?h.right.right.a
+
+  have t1: PowPoint (Intersection s1) O = PowPoint (Intersection s1) U := by{
+    refine (lies_on_powline OU (Intersection s1)).mp ?_
+    exact intersection_mem_right s1
+  }
+  have t2: PowPoint (Intersection s1) C = PowPoint (Intersection s1) O := by{
+    refine (lies_on_powline CO (Intersection s1)).mp ?_
+    exact intersection_mem_left s1
+  }
+  rw[t2,←t1]
 }
+
+/-_Therefore we can define the power of point center:-/
+
+def PowCener{C O U : CCircle}(h : cnoncolinear C O U) : Point :=
+  Line_center (powline_copunctal h)
+
+--do the trivial stuff for this first, then fix the theorems beforehand.
+
+
+
 
 /-
 /-As explained earlier, the case when C and O are concentric is irrelevant and is just given for conveninence!-/
@@ -293,7 +357,7 @@ theorem powline_def(C O : CCircle)(p : Point)(CO: ¬Concentric C O) : PowPoint p
       exact line_through_mem_right CO
     }
     have p1: point_abs (Center C) q ^ 2 = point_abs p (Center C) ^ 2 - point_abs q p ^ 2 := by{
-      rw[pythagoras_points perp1]
+      rw[pythagoras_points perp1
       ring
     }
     have p2: point_abs (Center O) q ^ 2 = point_abs p (Center O) ^ 2 - point_abs q p ^ 2 := by{
