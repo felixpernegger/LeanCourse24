@@ -170,7 +170,80 @@ lemma powline_ctangent{C O : CCircle}(h : ¬Concentric C O)(h' : CTangent C O): 
   exact powline_perp h
 }
 
+/-The cool thing about powlines is now that they are copunctal in the following sense:-/
 
+def cnoncolinear(C O U : CCircle): Prop :=
+  noncolinear (Center C) (Center O) (Center U)
+
+lemma cnoncolinear_perm12 {C O U : CCircle} (h : cnoncolinear C O U) : cnoncolinear O C U := by{
+  unfold cnoncolinear at *
+  exact noncolinear_perm12 h
+}
+
+lemma cnoncolinear_perm13 {C O U : CCircle} (h : cnoncolinear C O U) : cnoncolinear U O C := by{
+  unfold cnoncolinear at *
+  exact noncolinear_perm13 h
+}
+
+lemma cnoncolinear_perm23 {C O U : CCircle} (h : cnoncolinear C O U) : cnoncolinear C U O := by{
+  unfold cnoncolinear at *
+  exact noncolinear_perm23 h
+}
+
+/-The existence of the circumcenter is a special case of the folowing now:-/
+
+theorem powline_copunctal{C O U : CCircle}(h : cnoncolinear C O U): Copunctal (qPowLine C O) (qPowLine O U) (qPowLine U C) := by{
+  refine copunctal_simp ?h ?h'
+  refine lines_not_same_parallel (qPowLine C O) (qPowLine O U) (qPowLine U C) ?h.h
+  contrapose h
+  unfold cnoncolinear noncolinear
+  simp at *
+  by_cases disj: ¬(Center C ≠ Center O ∧ Center O ≠ Center U ∧ Center U ≠ Center C)
+  simp at disj
+  apply colinear_self
+  tauto
+
+  simp at disj
+  obtain ⟨CO,OU,UC⟩ := disj
+  have s1: Parallel (qLine_through (Center C) (Center O)) (qLine_through (Center O) (Center U)) := by{
+    --simp [*] at *
+    have t1: Perpendicular (Line_through CO) (qPowLine O U) := by{
+      apply perp_parallel (qPowLine C O)
+      have : ¬Concentric C O := by{
+        unfold Concentric
+        assumption
+      }
+      simp [this]
+      rw[← qline_through_line_through]
+      apply perp_symm
+      exact powline_perp this
+
+      have : ¬Concentric O U := by{
+        unfold Concentric
+        assumption
+      }
+      simp [this]
+      sorry
+      /-
+      rw[← qline_through_line_through]
+      apply perp_symm
+      exact powline_perp this
+      -/
+    }
+    sorry
+  }
+  simp  [*] at s1
+  apply (parallel_quot CO OU).1 at s1
+  apply colinear_perm12
+  apply (colinear_alt (Center O) (Center C) (Center U)).2
+  have : ((Center O).x - (Center C).x) / ((Center O).x - (Center U).x) = -(((Center C).x - (Center O).x) / ((Center O).x - (Center U).x)) := by{ring}
+  rw[this]
+  clear this
+  simpa
+
+  use qqIntersection (qPowLine C O) (qPowLine O U)
+  sorry
+}
 
 /-
 /-As explained earlier, the case when C and O are concentric is irrelevant and is just given for conveninence!-/
