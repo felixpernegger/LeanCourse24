@@ -330,6 +330,26 @@ lemma tri_diff_ab(T : Triangle): T.a ≠ T.b := by{
   exact (triangle_pairwise_different T).1
 }
 
+lemma tri_diff_ba(T : Triangle): T.b ≠ T.a := by{
+  exact Ne.symm (tri_diff_ab T)
+}
+
+lemma tri_diff_bc(T : Triangle): T.b ≠ T.c := by{
+  exact (triangle_pairwise_different T).2.1
+}
+
+lemma tri_diff_cb(T : Triangle): T.c ≠ T.b := by{
+  exact Ne.symm (tri_diff_bc T)
+}
+
+lemma tri_diff_ca(T : Triangle): T.c ≠ T.a := by{
+  exact (triangle_pairwise_different T).2.2
+}
+
+lemma tri_diff_ac(T : Triangle): T.a ≠ T.c := by{
+  exact Ne.symm (tri_diff_ca T)
+}
+
 
 
 /-For simplicity sake, we want to grab them directly:-/
