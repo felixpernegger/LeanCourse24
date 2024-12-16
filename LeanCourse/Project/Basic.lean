@@ -521,6 +521,14 @@ lemma colinear_self(a b c : Point)(h: a=b ∨ b=c ∨ c=a): colinear a b c := by
   exact det_self a b c h
 }
 
+lemma noncolinear_self(a b c : Point)(h: noncolinear a b c): a ≠ b ∧ b ≠ c ∧ c ≠ a := by{
+  contrapose h
+  unfold noncolinear
+  simp at *
+  apply colinear_self a b
+  tauto
+}
+
 /-Some lemmas i added to simp because for some reason they werent included, despite ebing useful for my calculations:-/
 
 @[simp] lemma wtf(x y z v : ℝ): {re := x, im := y} + ({re := z, im := v}:ℂ) = ({re := (x+z), im := (y+v)} : ℂ) := by{
