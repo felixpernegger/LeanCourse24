@@ -150,6 +150,6 @@ theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAn
       }
       _= Real.pi := by{simp}
 }
+#check triangle_pairwise_different
 
-#check pairwise_different_point3
-#check noncolinear
+def Triangle

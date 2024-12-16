@@ -182,16 +182,6 @@ lemma pairwise_different_lines3_perm23 {L R T : Line}(h: pairwise_different_line
   tauto
 }
 
-lemma noncolinear_pairwise_different{a b c : Point}(h : noncolinear a b c): pairwise_different_point3 a b c := by{
-  unfold pairwise_different_point3
-  exact noncolinear_self a b c h
-}
-
-lemma tri_pairwise_different(T : Triangle): pairwise_different_point3 T.a T.b T.c := by{
-  exact noncolinear_pairwise_different T.noncolinear
-}
-
-
 def lines_int_nonempty(L R T : Line) : Prop :=
   ∃p : Point, Lies_on p L ∧ Lies_on p R ∧ Lies_on p T
 

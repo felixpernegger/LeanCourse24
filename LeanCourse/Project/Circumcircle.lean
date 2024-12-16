@@ -326,6 +326,12 @@ lemma triangle_pairwise_different(T : Triangle): pairwise_different_point3 T.a T
   exact noncolinear_imp_pairwise_different T.noncolinear
 }
 
+lemma tri_diff_ab(T : Triangle): T.a ≠ T.b := by{
+  exact (triangle_pairwise_different T).1
+}
+
+
+
 /-For simplicity sake, we want to grab them directly:-/
 
 lemma noncolinear_imp_pairwise_different12{a b c : Point}(h : noncolinear a b c): a ≠ b := by{
