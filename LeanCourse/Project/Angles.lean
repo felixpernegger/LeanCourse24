@@ -103,6 +103,30 @@ lemma qangle_symm(a b c : Point): qAngle a b c = -qAngle c b a := by{
 
 /-With this we can already prove the sum of angles in a triangle!-/
 
-theorem angle_tri_points{a b c : Point}(h : noncolinear a b c): qAngle a b c + qAngle b c a + qAngle c a b = 0 := by{
-  #check noncolinear
+theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAngle a b c + qAngle b c a + qAngle c a b = Real.pi := by{
+  obtain ⟨h1,h2,h3⟩ := h
+  have h1' : b ≠ a :=by{tauto}
+  have h2' : c ≠ b :=by{tauto}
+  have h3' : a ≠ c :=by{tauto}
+  have absub : a.x-b.x ≠ 0 := by{exact sub_neq_zero h1}
+  have basub : b.x-a.x ≠ 0 := by{exact sub_neq_zero h1'}
+  have bcsub : b.x-c.x ≠ 0 := by{exact sub_neq_zero h2}
+  have cbsub : c.x-b.x ≠ 0 := by{exact sub_neq_zero h2'}
+  have casub : c.x-a.x ≠ 0 := by{exact sub_neq_zero h3}
+  have acsub : a.x-c.x ≠ 0 := by{exact sub_neq_zero h3'}
+  simp [*]
+  unfold Angle
+  have s1: (↑((a.x - b.x) / (c.x - b.x)).arg : Real.Angle) + ↑((b.x - c.x) / (a.x - c.x)).arg = ↑((b.x-a.x)/(a.x-c.x)).arg := by{
+
+  }
+  rw[s1]
+  calc
+    (↑((b.x - a.x) / (a.x - c.x)).arg : Real.Angle)  + ↑((c.x - a.x) / (b.x - a.x)).arg = (↑(((b.x - a.x) / (a.x - c.x))*((c.x - a.x) / (b.x - a.x))).arg) := by{
+      refine Eq.symm (Complex.arg_mul_coe_angle ?hx ?hy)
+      repeat
+        field_simp
+        assumption
+    }
+      _=((-1:ℂ)).arg := by{sorry}
+      _= Real.pi := by{simp}
 }
