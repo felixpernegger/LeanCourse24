@@ -117,16 +117,39 @@ theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAn
   simp [*]
   unfold Angle
   have s1: (↑((a.x - b.x) / (c.x - b.x)).arg : Real.Angle) + ↑((b.x - c.x) / (a.x - c.x)).arg = ↑((b.x-a.x)/(a.x-c.x)).arg := by{
-
+    calc
+      (↑((a.x - b.x) / (c.x - b.x)).arg : Real.Angle) + ↑((b.x - c.x) / (a.x - c.x)).arg = (((a.x-b.x)/(c.x-b.x))*((b.x-c.x)/(a.x-c.x))).arg := by{
+        refine Eq.symm (Complex.arg_mul_coe_angle ?hx ?hy)
+        repeat
+          field_simp
+          assumption
+      }
+      _= ↑((b.x - a.x) / (a.x - c.x)).arg := by{
+        have : (a.x - b.x) / (c.x - b.x) * ((b.x - c.x) / (a.x - c.x)) = (b.x - a.x) / (a.x - c.x) := by{
+          field_simp
+          ring
+        }
+        rw[this]
+      }
   }
   rw[s1]
   calc
     (↑((b.x - a.x) / (a.x - c.x)).arg : Real.Angle)  + ↑((c.x - a.x) / (b.x - a.x)).arg = (↑(((b.x - a.x) / (a.x - c.x))*((c.x - a.x) / (b.x - a.x))).arg) := by{
-      refine Eq.symm (Complex.arg_mul_coe_angle ?hx ?hy)
+      symm
+      apply Complex.arg_mul_coe_angle
       repeat
         field_simp
         assumption
     }
-      _=((-1:ℂ)).arg := by{sorry}
+      _=((-1:ℂ)).arg := by{
+        have : ((b.x - a.x) / (a.x - c.x))*((c.x - a.x) / (b.x - a.x)) = -1 := by{
+          field_simp
+          ring
+        }
+        rw[this]
+      }
       _= Real.pi := by{simp}
 }
+
+#check pairwise_different_point3
+#check noncolinear
