@@ -152,4 +152,21 @@ theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAn
 }
 #check triangle_pairwise_different
 
-def Triangle
+def Angle_A : Triangle → Real.Angle :=
+  fun T ↦ Angle (tri_diff_ca T) (tri_diff_ba T)
+
+def Angle_B : Triangle → Real.Angle :=
+  fun T ↦ Angle (tri_diff_ab T) (tri_diff_cb T)
+
+def Angle_C : Triangle → Real.Angle :=
+  fun T ↦ Angle (tri_diff_bc T) (tri_diff_ac T)
+
+theorem tri_sum_angle(T : Triangle): Angle_A T + Angle_B T + Angle_C T = Real.pi := by{
+  have : pairwise_different_point3 T.a T.b T.c := by{exact (triangle_pairwise_different T)}
+  unfold Angle_A Angle_B Angle_C
+  repeat
+    rw[← qangle_simp]
+  apply anglesum_points
+  apply pairwise_different_point3_perm12
+  exact pairwise_different_point3_perm23 this
+}
