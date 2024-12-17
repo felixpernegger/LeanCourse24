@@ -22,12 +22,37 @@ lemma not_zero_simp{a : Point}(ah : a ≠ zero): a.x ≠ 0 := by{
 def Linear_trans_point : Point → Point → Point → Point :=
   fun a b p ↦ padd (pmul a p) b
 
+lemma linear_trans_point_eq(p : Point){a b c d : Point}(h1: a = c)(h2: b = d): Linear_trans_point a b p = Linear_trans_point c d p := by{rw[h1,h2]}
+
+lemma linear_trans_point_id_simp(p : Point){a b : Point}(ah : a = one)(bh : b = zero): Linear_trans_point a b p = p := by{
+  rw[ah,bh]
+  unfold Linear_trans_point zero one pmul padd
+  simp
+}
+
 /-the inverse of a linear transformation is 1/a and -b/a or:-/
 def lt_inv1 : Point → Point → Point :=
   fun a b ↦ recip a
 
 def lt_inv2 : Point → Point → Point :=
   fun a b ↦ pneg (pmul b (recip a))
+
+lemma lt_inv1_inv(a b : Point)(ah: a ≠ zero): pmul (lt_inv1 a b) a = one := by{
+  have : a.x ≠ 0 := by{exact not_zero_simp ah}
+  unfold lt_inv1 recip pmul one
+  field_simp
+}
+
+lemma lt_inv2_inv(a b : Point)(ah : a ≠ zero): padd (pmul (lt_inv1 a b) b) (lt_inv2 a b) = zero := by{
+  unfold lt_inv2 lt_inv1 recip pmul padd zero pneg
+  field_simp [not_zero_simp ah]
+}
+
+lemma lt_inv2_inv'(a b : Point)(ah : a ≠ zero): padd (pmul a (lt_inv2 a b)) b = zero := by{
+  unfold lt_inv2 recip pmul padd zero pneg
+  field_simp [not_zero_simp ah]
+  ring
+}
 
 /-A few observations:-/
 
@@ -131,6 +156,14 @@ def Linear_trans_set : Point → Point → Set Point → Set Point :=
 
 @[simp] lemma linear_trans_set_id(S : Set Point): Linear_trans_set one zero S = S := by{
   unfold Linear_trans_set
+  simp_rw [linear_trans_point_id]
+  simp
+}
+
+lemma linear_trans_set_eq(S : Set Point){a b c d : Point}(h1: a = c)(h2: b = d): Linear_trans_set a b S = Linear_trans_set c d S := by{rw[h1,h2]}
+
+lemma linear_trans_set_id_simp(S : Set Point){a b : Point}(ah : a = one)(bh : b = zero): Linear_trans_set a b S = S := by{
+  rw[ah,bh]
   simp
 }
 
@@ -156,6 +189,21 @@ lemma linear_trans_set_comp(a b c d : Point)(S : Set Point): Linear_trans_set a 
   rw[sh2]
   symm
   exact linear_trans_point_comp a b c d s
+}
+
+lemma linear_trans_set_inv_left(a b : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_set (lt_inv1 a b) (lt_inv2 a b) (Linear_trans_set a b S) = S := by{
+  rw[linear_trans_set_comp]
+  apply linear_trans_set_id_simp
+  · exact lt_inv1_inv a b ah
+  exact lt_inv2_inv a b ah
+}
+
+lemma linear_trans_set_inv_right(a b : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_set a b (Linear_trans_set (lt_inv1 a b) (lt_inv2 a b) S) = S := by{
+  rw[linear_trans_set_comp]
+  apply linear_trans_set_id_simp
+  · rw[pmul_comm]
+    exact lt_inv1_inv a b ah
+  exact lt_inv2_inv' a b ah
 }
 
 def Linear_trans_line : Point → Point → Line → Line :=
@@ -223,6 +271,18 @@ def Linear_trans_line : Point → Point → Line → Line :=
     assumption
   }⟩)
 
+lemma linear_trans_line_comp(a b c d : Point)(L : Line): Linear_trans_line a b (Linear_trans_line c d L) = Linear_trans_line (pmul a c) (padd (pmul a d) b) L := by{
+  unfold Linear_trans_line
+  by_cases ah: a = zero
+  simp [*]
+  by_cases ch: c = zero
+  simp [*]
+  #check pmul
+  sorry
+  sorry
+
+}
+
 lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ Linear_trans_set a b S ↔ p ∈ S := by{
   constructor
   intro h
@@ -241,7 +301,7 @@ lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linea
   assumption
 
   intro h
-  unfold linear_trans_set
+  unfold Linear_trans_set
   simp
   use p
 }

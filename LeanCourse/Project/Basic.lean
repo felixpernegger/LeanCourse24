@@ -122,11 +122,29 @@ lemma padd_zero (a : Point) : padd a (Point.mk 0) = a := by{
 
 /-So is multipliying one:-/
 
-lemma pmul_one (a : Point) : pmul one a = a := by{
+@[simp] lemma pmul_one (a : Point) : pmul one a = a := by{
   unfold one pmul
   ext
   simp
 }
+
+@[simp] lemma one_pmul (a : Point) : pmul a one = a := by{
+  unfold pmul one
+  ext
+  simp
+}
+
+@[simp] lemma pmul_zero(a : Point) : pmul a zero = zero := by{
+  unfold pmul zero
+  simp
+}
+
+@[simp] lemma zero_pmul(a : Point) : pmul zero a = zero := by{
+  unfold pmul zero
+  simp
+}
+
+
 
 /-Adding is commutative:-/
 lemma padd_comm (a b : Point) : padd a b = padd b a := by{
