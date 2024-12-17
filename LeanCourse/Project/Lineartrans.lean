@@ -22,6 +22,13 @@ lemma not_zero_simp{a : Point}(ah : a ≠ zero): a.x ≠ 0 := by{
 def Linear_trans_point : Point → Point → Point → Point :=
   fun a b p ↦ padd (pmul a p) b
 
+/-the inverse of a linear transformation is 1/a and -b/a or:-/
+def lt_inv1 : Point → Point → Point :=
+  fun a b ↦ recip a
+
+def lt_inv2 : Point → Point → Point :=
+  fun a b ↦ pneg (pmul b (recip a))
+
 /-A few observations:-/
 
 lemma linear_trans_point_comp(a b c d p: Point): Linear_trans_point a b (Linear_trans_point c d p) = Linear_trans_point (pmul a c) (padd (pmul a d) b) p := by{
@@ -37,12 +44,25 @@ lemma linear_trans_point_comp(a b c d p: Point): Linear_trans_point a b (Linear_
   simp
 }
 
-lemma linear_trans_point_inj{a b u v : Point}(h : Linear_trans_point a b u = Linear_trans_point a b v)(ha : a ≠ zero): u = v := by{
+lemma linear_trans_point_inv_left(a b : Point)(ah : a ≠ zero)(p : Point): Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) (Linear_trans_point a b p) = p := by{
+  have : a.x ≠ 0 := by{exact fun a_1 ↦ id (Ne.symm ah) (congrArg Point.mk (id (Eq.symm a_1)))}
+  unfold Linear_trans_point lt_inv1 lt_inv2 recip pmul padd pneg
+  field_simp
+}
+
+
+lemma linear_trans_point_inv_right(a b : Point)(ah : a ≠ zero)(p : Point): Linear_trans_point a b (Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) p) = p := by{
+  have : a.x ≠ 0 := by{exact fun a_1 ↦ id (Ne.symm ah) (congrArg Point.mk (id (Eq.symm a_1)))}
+  unfold Linear_trans_point lt_inv1 lt_inv2 recip pmul padd pneg
+  field_simp
+}
+
+lemma linear_trans_point_inj(a b: Point)(ah : a ≠ zero){u v : Point}(h : Linear_trans_point a b u = Linear_trans_point a b v): u = v := by{
   calc
     u = Linear_trans_point one zero u := by{exact Eq.symm (linear_trans_point_id u)}
       _= Linear_trans_point (pmul (recip a) a) (padd (pmul (recip a) b) (pneg (pmul b (recip a)))) u := by{
         have : a.x ≠ 0 := by{
-          contrapose ha
+          contrapose ah
           unfold zero
           simp at *
           ext
@@ -57,7 +77,7 @@ lemma linear_trans_point_inj{a b u v : Point}(h : Linear_trans_point a b u = Lin
       _= Linear_trans_point (pmul (recip a) a) (padd (pmul (recip a) b) (pneg (pmul b (recip a)))) v := by{rw[linear_trans_point_comp (recip a) (pneg (pmul b (recip a))) a b v]}
       _= Linear_trans_point one zero v := by{
         have : a.x ≠ 0 := by{
-          contrapose ha
+          contrapose ah
           unfold zero
           simp at *
           ext
@@ -128,7 +148,7 @@ def Linear_trans_line : Point → Point → Line → Line :=
     simp
     constructor
     by_contra h0
-    have : u = v := by{exact linear_trans_point_inj h0 h}
+    have : u = v := by{exact linear_trans_point_inj a b h h0}
     contradiction
 
     ext z
@@ -136,7 +156,7 @@ def Linear_trans_line : Point → Point → Line → Line :=
     constructor
     intro hh
     obtain ⟨s,sh1,sh2⟩ := hh
-    have : z = Linear_trans_point a b s := by{unfold linear_trans_point; assumption}
+    have : z = Linear_trans_point a b s := by{unfold Linear_trans_point; assumption}
     rw[this]
     exact linear_trans_point_colinear a b sh1
     have s1: Linear_trans_point a b (Linear_trans_point (recip a) (pneg (pmul b (recip a))) z) = z := by{
@@ -195,7 +215,7 @@ lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linea
   use p
 }
 
-lemma linear_trans_lies_on{p : Point}(a b : Point)(ah : a ≠ zero){L : Line}: Lies_on (Linear_trans_point a b p) (Linear_trans_line a b L) ↔ Lies_on p L := by{
+lemma linear_trans_lies_on(a b : Point)(ah : a ≠ zero)(p : Point)(L : Line): Lies_on (Linear_trans_point a b p) (Linear_trans_line a b L) ↔ Lies_on p L := by{
   unfold Lies_on Linear_trans_line at *
   simp [*]
   exact linear_trans_set_mem a b p ah L.range
@@ -230,14 +250,64 @@ lemma linear_trans_perp(a b : Point)(ah : a ≠ zero)(L R : Line): Perpendicular
   intro h
   unfold Perpendicular at *
   obtain ⟨u,v,s,r,uv,sr,uh,vh,sh,rh,hh⟩ := h
+  use Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) u
+  use Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) v
+  use Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) s
+  use Linear_trans_point (lt_inv1 a b) (lt_inv2 a b) r
+  constructor
+  contrapose uv
+  simp at *
+  apply linear_trans_point_inj (lt_inv1 a b) (lt_inv2 a b)
+  contrapose ah
+  unfold lt_inv1 recip at ah
+  unfold zero at *
+  simp at *
+  ext
+  simpa
+  assumption
+
+  constructor
+  contrapose sr
+  simp at *
+  apply linear_trans_point_inj (lt_inv1 a b) (lt_inv2 a b)
+  contrapose ah
+  unfold lt_inv1 recip at ah
+  unfold zero at *
+  simp at *
+  ext
+  simpa
+  assumption
+
+  constructor
+  sorry
   sorry
   sorry
 }
 
 /-Thus perp_throughs stay the same:-/
 
-lemma linear_trans_perp_through(a b : Point)(ah : a ≠ 0)(p : Point)(L : Line): Linear_trans_line a b (perp_through L p) = perp_through (Linear_trans_line a b L) (Linear_trans_point a b p) := by{
-  sorry
+lemma linear_trans_perp_through(a b : Point)(ah : a ≠ zero)(p : Point)(L : Line): Linear_trans_line a b (perp_through L p) = perp_through (Linear_trans_line a b L) (Linear_trans_point a b p) := by{
+  apply perp_through_unique
+  constructor
+  apply (linear_trans_perp a b ah L (perp_through L p)).2
+  exact perp_through_is_perp L p
+
+  apply (linear_trans_lies_on a b ah p (perp_through L p)).2
+  exact point_lies_on_perp_through L p
+}
+
+/-Thus foots stay the same:-/
+
+lemma linear_trans_foot(a b : Point)(ah : a ≠ zero)(p : Point)(L : Line): Linear_trans_point a b (foot p L) = foot (Linear_trans_point a b p) (Linear_trans_line a b L) := by{
+  apply foot_unique
+  constructor
+  apply (linear_trans_lies_on a b ah (foot p L) L).2
+  exact foot_on_line L p
+
+  rw[← linear_trans_perp_through]
+  apply (linear_trans_lies_on a b ah (foot p L) (perp_through L p)).2
+  · exact foot_on_perp L p
+  assumption
 }
 
 
