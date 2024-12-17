@@ -14,59 +14,44 @@ noncomputable section
 
 /-We will use angles only as directed angles, furthermore, for the time being,
 we only define angles between three points. Definining angles between lines is a bit tricky.
-
-We will also make two versions of angles, seen as followed:
 -/
 #check Complex.arg_mul_coe_angle
 #check Real.Angle
-def Angle{a b c : Point}(ha : a ≠ b)(hc : c ≠ b): Real.Angle :=
-  Complex.arg ((a.x-b.x)/(c.x-b.x))
+def Angle : Point → Point → Point → Real.Angle :=
+  fun a b c ↦ Complex.arg ((a.x-b.x)/(c.x-b.x))
 
-def qAngle(a b c : Point): Real.Angle :=
-  if ha : a ≠ b then (if hc : c ≠ b then (Angle ha hc) else 0) else 0
-
-@[simp] lemma qangle_simp{a b c : Point}(ha : a ≠ b)(hc : c ≠ b): qAngle a b c = Angle ha hc := by{
-  unfold qAngle
+@[simp] lemma angle_simp_left(a b c : Point)(ha : a = b): Angle a b c = 0 := by{
+  unfold Angle
   simp [*]
 }
 
-@[simp] lemma qangle_simp_left(a b c : Point)(ha : a = b): qAngle a b c = 0 := by{
-  unfold qAngle
+@[simp] lemma angle_simp_left'(a b c : Point)(ha : b = a): Angle a b c = 0 := by{
+  unfold Angle
   simp [*]
 }
 
-@[simp] lemma qangle_simp_left'(a b c : Point)(ha : b = a): qAngle a b c = 0 := by{
-  unfold qAngle
+@[simp] lemma angle_simp_right(a b c : Point)(ha : c = b): Angle a b c = 0 := by{
+  unfold Angle
   simp [*]
 }
 
-@[simp] lemma qangle_simp_right(a b c : Point)(ha : c = b): qAngle a b c = 0 := by{
-  unfold qAngle
+@[simp] lemma angle_simp_right'(a b c : Point)(ha : b = c): Angle a b c = 0 := by{
+  unfold Angle
   simp [*]
 }
 
-@[simp] lemma qangle_simp_right'(a b c : Point)(ha : b = c): qAngle a b c = 0 := by{
-  unfold qAngle
-  simp [*]
-}
+/-A small lemma for convencience:-/
+lemma same_arg_simp{x y : ℂ}(h : x = y): x.arg = y.arg := by{rw[h]}
 
 /-We prove several elementary but very important properties:-/
 
-lemma angle_self{a b : Point}(ha : a ≠ b): Angle ha ha = 0 := by{
+lemma angle_self{a b : Point}(ha : a ≠ b): Angle a b a = 0 := by{
   have asub : a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
   unfold Angle
   field_simp
 }
 
-lemma qangle_self(a b : Point): qAngle a b a = 0 := by{
-  by_cases ha: a ≠ b
-  · simp [*]
-    exact angle_self ha
-  simp at ha
-  simp [*]
-}
-
-lemma angle_add{a b c d : Point}(ha : a ≠ b)(hc : c ≠ b)(hd : d ≠ b): Angle ha hd = Angle ha hc + Angle hc hd := by{
+lemma angle_add{a b c d : Point}(ha : a ≠ b)(hc : c ≠ b)(hd : d ≠ b): Angle a b d = Angle a b c + Angle c b d := by{
   unfold Angle
   have asub: a.x - b.x ≠ 0 := by{exact sub_neq_zero ha}
   have csub: c.x - b.x ≠ 0 := by{exact sub_neq_zero hc}
@@ -80,30 +65,17 @@ lemma angle_add{a b c d : Point}(ha : a ≠ b)(hc : c ≠ b)(hd : d ≠ b): Angl
     tauto
 }
 
-lemma angle_symm{a b c : Point}(ha : a ≠ b)(hc : c ≠ b): Angle hc ha = -(Angle ha hc) := by{
-  have g: Angle ha ha = Angle ha hc + Angle hc ha := by{exact angle_add ha hc ha}
+lemma angle_symm{a b c : Point}(ha : a ≠ b)(hc : c ≠ b): Angle c b a = -(Angle a b c) := by{
+  have g: Angle a b a = Angle a b c + Angle c b a := by{exact angle_add ha hc ha}
   rw[angle_self ha] at g
-  have : Angle hc ha = Angle hc ha - 0 := by{simp}
+  have : Angle c b a = Angle c b a - 0 := by{simp}
   rw[this, g]
   simp
 }
 
-lemma qangle_symm(a b c : Point): qAngle a b c = -qAngle c b a := by{
-  by_cases ha : a ≠ b
-  by_cases hc : c ≠ b
-  simp [*]
-  rw[angle_symm ha hc]
-  simp
-
-  simp at hc
-  simp [*]
-  simp at ha
-  simp [*]
-}
-
 /-With this we can already prove the sum of angles in a triangle!-/
 
-theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAngle a b c + qAngle b c a + qAngle c a b = Real.pi := by{
+theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): Angle a b c + Angle b c a + Angle c a b = Real.pi := by{
   obtain ⟨h1,h2,h3⟩ := h
   have h1' : b ≠ a :=by{tauto}
   have h2' : c ≠ b :=by{tauto}
@@ -114,7 +86,6 @@ theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAn
   have cbsub : c.x-b.x ≠ 0 := by{exact sub_neq_zero h2'}
   have casub : c.x-a.x ≠ 0 := by{exact sub_neq_zero h3}
   have acsub : a.x-c.x ≠ 0 := by{exact sub_neq_zero h3'}
-  simp [*]
   unfold Angle
   have s1: (↑((a.x - b.x) / (c.x - b.x)).arg : Real.Angle) + ↑((b.x - c.x) / (a.x - c.x)).arg = ↑((b.x-a.x)/(a.x-c.x)).arg := by{
     calc
@@ -153,22 +124,23 @@ theorem anglesum_points{a b c : Point}(h : pairwise_different_point3 a b c): qAn
 #check triangle_pairwise_different
 
 def Angle_A : Triangle → Real.Angle :=
-  fun T ↦ Angle (tri_diff_ca T) (tri_diff_ba T)
+  fun T ↦ Angle T.c T.a T.b
 
 def Angle_B : Triangle → Real.Angle :=
-  fun T ↦ Angle (tri_diff_ab T) (tri_diff_cb T)
+  fun T ↦ Angle T.a T.b T.c
 
 def Angle_C : Triangle → Real.Angle :=
-  fun T ↦ Angle (tri_diff_bc T) (tri_diff_ac T)
+  fun T ↦ Angle T.b T.c T.a
 
 theorem tri_sum_angle(T : Triangle): Angle_A T + Angle_B T + Angle_C T = Real.pi := by{
   have : pairwise_different_point3 T.a T.b T.c := by{exact (triangle_pairwise_different T)}
   unfold Angle_A Angle_B Angle_C
-  repeat
-    rw[← qangle_simp]
-  apply anglesum_points
-  apply pairwise_different_point3_perm12
-  exact pairwise_different_point3_perm23 this
+  have : pairwise_different_point3 T.c T.a T.b := by{
+    apply pairwise_different_point3_perm12
+    apply pairwise_different_point3_perm23
+    assumption
+  }
+  rw[anglesum_points this]
 }
 
 /-The next step is a bit ugly. We prove that angles along a line are either 0 or pi.
@@ -190,7 +162,7 @@ lemma arg_real{t:ℂ}(h: t.im = 0): Complex.arg t = 0 ∨ Complex.arg t = Real.p
   exact Complex.arg_ofReal_of_neg h0
 }
 
-theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c ≠ b): Angle ha hc = Real.pi := by{
+theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c ≠ b): Angle a b c = Real.pi := by{
   have col: colinear a c b := by{exact in_between_imp_colinear h}
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
   have basub: b.x-a.x ≠ 0 := by{exact sub_neq_zero (id (Ne.symm ha))}
@@ -311,14 +283,34 @@ theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c
   obtain ⟨h1,h2⟩ := hh
   rw[ht] at h0
   simp at h0
+  have s2: (↑t : ℂ) ≠ 0 := by{
+      contrapose ha
+      simp at *
+      rw[ht,ha]
+      ext
+      simp
+    }
+  have s3: (1-(↑t : ℂ)) ≠ 0 := by{
+    contrapose hc
+    simp at *
+    rw[ht]
+    ext
+    simp
+    have : (↑t:ℂ)=1 := by{
+      calc
+        (↑t : ℂ)= ↑t + 0 := by{ring}
+          _= ↑t + (1-↑t) := by{rw[hc]}
+          _= 1 := by{ring}
+    }
+    rw[this]
+    ring
+  }
   have : ↑t * (a.x - c.x) / (c.x - (a.x - ↑t * (a.x - c.x))) = -↑t /(1-↑t) := by{
     have : (c.x - (a.x - ↑t * (a.x - c.x))) = (c.x-a.x)*(1-t) := by{ring}
     rw[this]
     clear this
-
-    have : (1-(↑t : ℂ)) ≠ 0 := by{sorry}
     have : (c.x - a.x) * (1 - ↑t) ≠ 0 := by{
-      refine mul_ne_zero ?ha this
+      refine mul_ne_zero ?ha s3
       exact sub_neq_zero (id (Ne.symm l))
     }
     field_simp
@@ -326,5 +318,348 @@ theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c
   }
   rw[this] at h0
   clear this
-  sorry
+  norm_cast at h0
+  have : -t / (1-t)< 0 := by{
+    apply div_neg_of_neg_of_pos
+    contrapose s2
+    norm_cast
+    simp
+    linarith
+
+    contrapose s3
+    norm_cast
+    simp
+    linarith
+  }
+  have : (↑(-t / (1 - t)):ℂ).arg = Real.pi := by{
+    exact Complex.arg_ofReal_of_neg this
+  }
+  rw[h0] at this
+  contrapose this
+  show 0 ≠ Real.pi
+  symm
+  exact Real.pi_ne_zero
+
+
+  --Second case!
+  rw[h0] -- lol
 }
+
+theorem not_in_between_angle{a b c : Point}(h : in_between b c a)(ha : a ≠ b)(hc : c ≠ b): Angle a b c = 0 := by{
+  have col: colinear a c b := by{apply colinear_perm13; exact in_between_imp_colinear h}
+  have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
+  have basub: b.x-a.x ≠ 0 := by{exact sub_neq_zero (id (Ne.symm ha))}
+  have cbsub: c.x-b.x ≠ 0 := by{exact sub_neq_zero hc}
+  have bcsub: b.x-c.x ≠ 0 := by{exact sub_neq_zero (id (Ne.symm hc))}
+  apply colinear_perm13 at col
+  apply colinear_perm23 at col
+  unfold Angle
+  apply (colinear_alt b a c).1 at col
+  have : (b.x - a.x) / (b.x - c.x) = (a.x-b.x)/(c.x-b.x) := by{
+    field_simp
+    ring
+  }
+  rw[this] at col
+  clear this
+
+  have col2: colinear b a c := by{
+    have : (a.x - b.x) / (c.x - b.x) = (b.x-a.x)/(b.x-c.x) := by{
+      field_simp
+      ring
+    }
+    rw[this] at col
+    exact (colinear_alt b a c).2 col
+  }
+  apply colinear_perm12 at col2
+  by_cases l : a ≠ c
+  have acsub: a.x - c.x ≠ 0 := by{exact sub_neq_zero l}
+  apply colinear_perm12 at col2
+  obtain p0|p0 := (colinear_alt2 b a c).1 col2
+  · symm at p0
+    contradiction
+  obtain ⟨t,ht⟩ := p0
+  have s1: a = go_along b c (t*(point_abs b c)) := by{
+    rw[ht]
+    unfold go_along padd point_abs dir point_abs p_scal_mul
+    ext
+    simp
+    have : (↑(Complex.abs (b.x - c.x)):ℂ) ≠ 0 := by{
+      norm_cast
+      exact (AbsoluteValue.ne_zero_iff Complex.abs).mpr bcsub
+    }
+    field_simp
+    ring
+  }
+  have t1: point_abs a b = abs t * point_abs b c := by{
+    rw[point_abs_symm a b,s1, go_along_abs1,abs_mul]
+    field_simp
+    left
+    exact point_abs_pos b c
+    exact id (Ne.symm hc)
+  }
+  have t2 : point_abs c a = abs (1-t)*point_abs b c := by{
+    rw[s1,go_along_abs2]
+    have : point_abs b c - t*point_abs b c = (1-t)*(point_abs b c) := by{ring}
+    rw[this,abs_mul]
+    field_simp
+    left
+    exact point_abs_pos b c
+    exact id (Ne.symm hc)
+  }
+  unfold in_between at h
+  rw[point_abs_symm] at t1 t2
+  rw[t1,t2] at h
+  have : point_abs b c ≠ 0 := by{
+    contrapose hc
+    simp at *
+    symm
+    exact abs_zero_imp_same b c hc
+  }
+  have : |t| * point_abs b c + |1 - t| * point_abs b c = (abs t + abs (1-t))*point_abs b c := by{ring}
+  rw[this] at h
+  have s2: abs t + abs (1-t) = 1 := by{
+    calc
+      abs t + abs (1-t) = ((abs t + abs (1-t))*point_abs b c)/(point_abs b c) := by{field_simp}
+        _= (point_abs b c)/(point_abs b c) := by{rw[h]}
+        _=1 := by{field_simp}
+  }
+
+  have hh: 0 ≤ t ∧ t ≤ 1 := by{
+    have : 0 < point_abs a c := by{
+      have : 0 ≤ point_abs a c := by{exact point_abs_pos a c}
+      have r: point_abs a c ≠ 0 := by{
+        contrapose l
+        simp at *
+        exact abs_zero_imp_same a c l
+      }
+      contrapose r
+      simp at *
+      linarith
+    }
+    have g: abs t + abs (1-t) = 1 := by{
+      calc
+        abs t + abs (1-t) = ((abs t)*(point_abs b c) + abs (1-t)*(point_abs b c))/(point_abs b c) := by{field_simp;ring}
+          _= (point_abs b c)/(point_abs b c) := by{
+            clear this
+            rw[← this] at h
+            rw[h]
+          }
+          _= 1 := by{field_simp}
+    }
+    constructor
+    by_contra q0
+    simp at q0
+    have i1: abs t = -t := by{exact abs_of_neg q0}
+    have i2: abs (1 - t)= 1-t := by{
+      apply abs_of_nonneg
+      linarith
+    }
+    rw[i1,i2] at g
+    have t0: t = 0 := by{linarith}
+    rw[t0] at ht
+    simp at ht
+    rw[ht] at absub
+    simp at absub
+
+    rw[← g]
+    calc
+      t ≤ abs t := by{exact le_abs_self t}
+        _= abs t + 0 := by{ring}
+        _≤ abs t + abs (1-t) := by{
+          apply add_le_add
+          rfl
+          exact abs_nonneg (1 - t)
+        }
+  }
+  obtain ⟨h1,h2⟩ := hh
+  have tt0: t ≠ 0 := by{
+    contrapose ha
+    simp at *
+    ext
+    rw[ht,ha]
+    simp
+  }
+  have tt1: t≠1 := by{
+    contrapose l
+    simp at *
+    ext
+    rw[ht,l]
+    simp
+  }
+  rw[ht]
+  simp at *
+  have : -(↑t * (b.x - c.x)) / (c.x - b.x) = t := by{field_simp;ring}
+  rw[this]
+  have: 0 < t := by{
+    contrapose tt0
+    simp at *
+    linarith
+  }
+  rw[Complex.arg_ofReal_of_nonneg h1]
+  rfl
+
+  simp at l
+  rw[l]
+  field_simp
+}
+
+/-If the shift points, the angle between them stay the same:-/
+
+lemma angle_shift(a b c v : Point): Angle (padd a v) (padd b v) (padd c v) = Angle a b c := by{
+  by_cases ah: a=b
+  rw[ah]
+  simp
+  by_cases ch: c=b
+  rw[ch]
+  simp
+
+  have ah': padd a v ≠ padd b v := by{
+    contrapose ah
+    unfold padd at ah
+    simp at *
+    ext
+    assumption
+  }
+  have ch': padd c v ≠ padd b v := by{
+    contrapose ch
+    unfold padd at ch
+    simp at *
+    ext
+    assumption
+  }
+  unfold Angle
+  unfold padd
+  simp
+}
+
+/-Similarly, scaling by a nonzero numbers leaves angles intact:-/
+
+lemma angle_scal(a b c :Point)(v : ℂ)(hv : v ≠ 0): Angle (p_scal_mul v a) (p_scal_mul v b) (p_scal_mul v c) = Angle a b c := by{
+  by_cases ah: a=b
+  rw[ah]
+  simp
+  by_cases ch: c=b
+  rw[ch]
+  simp
+
+  have ah': p_scal_mul v a ≠ p_scal_mul v b := by{
+    contrapose ah
+    unfold p_scal_mul at ah
+    simp at *
+    simp [*] at ah
+    ext
+    assumption
+  }
+  have ch': p_scal_mul v c ≠ p_scal_mul v b := by{
+    contrapose ch
+    unfold p_scal_mul at ch
+    simp at *
+    simp [*] at ch
+    ext
+    assumption
+  }
+  unfold Angle p_scal_mul
+  simp
+  apply same_arg_simp
+  have s1: c.x-b.x ≠ 0 := by{exact sub_neq_zero ch}
+  have s2: (v * c.x - v * b.x) ≠ 0 := by{
+    have : (v * c.x - v * b.x) = v*(c.x-b.x) := by{ring}
+    rw[this]
+    by_contra p0
+    simp at p0
+    tauto
+  }
+  field_simp
+  ring
+}
+
+lemma angle_scal'(a b c x : Point)(xh: x ≠ zero): Angle (pmul x a) (pmul x b) (pmul x c) = Angle a b c := by{
+  by_cases ah: a=b
+  rw[ah]
+  simp
+  by_cases ch: c=b
+  rw[ch]
+  simp
+
+  let q := x.x
+  have s1: pmul x a = p_scal_mul q a := by{unfold pmul p_scal_mul q;rfl}
+  have s2: pmul x b = p_scal_mul q b := by{unfold pmul p_scal_mul q;rfl}
+  have s3: pmul x c = p_scal_mul q c := by{unfold pmul p_scal_mul q;rfl}
+  rw[s1,s2,s3]
+  have : q ≠ 0 := by{
+    contrapose xh
+    unfold q at xh
+    simp at *
+    unfold zero
+    ext
+    rw[xh]
+  }
+  exact angle_scal a b c q this
+}
+
+/-A very important thing is that angles stay the same under reflection, we will use this
+to show that isoceles triangles have the same angles:-/
+
+theorem angle_reflection_point(a b c x : Point):  Angle (reflection_point_point a x) (reflection_point_point b x) (reflection_point_point c x) = Angle a b c := by{
+  symm
+  by_cases ah: a=b
+  rw[ah]
+  simp
+
+  by_cases ch: c = b
+  rw[ch]
+  simp
+
+  have ah': reflection_point_point a x ≠ reflection_point_point b x := by{
+    contrapose ah
+    simp at *
+    rw[← reflection_point_point_twice a x, ah, reflection_point_point_twice]
+  }
+  have ch': reflection_point_point c x ≠ reflection_point_point b x := by{
+    contrapose ch
+    simp at *
+    rw[← reflection_point_point_twice c x, ch, reflection_point_point_twice]
+  }
+  unfold Angle
+  unfold reflection_point_point padd p_scal_mul pneg
+  simp
+  apply same_arg_simp
+  have cbsub: c.x-b.x≠0 := by{exact sub_neq_zero ch}
+  have cbsub': -c.x+b.x ≠ 0 := by{
+    contrapose cbsub
+    simp at *
+    have : (0:ℂ)=-0 :=by{ring}
+    rw[this,← cbsub]
+    ring
+  }
+  field_simp
+  ring
+}
+
+theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (reflection_point_line c L) (reflection_point_line b L) (reflection_point_line a L) := by{
+  by_cases ah: a=b
+  rw[ah]
+  simp
+  by_cases ch: c=b
+  rw[ch]
+  simp
+
+  have ah': reflection_point_line a L ≠ reflection_point_line b L := by{
+    contrapose ah
+    simp at *
+    rw[← reflection_point_line_twice a L, ah, reflection_point_line_twice]
+  }
+  have ch': reflection_point_line c L ≠ reflection_point_line b L := by{
+    contrapose ch
+    simp at *
+    rw[← reflection_point_line_twice c L, ch, reflection_point_line_twice]
+  }
+  sorry -- i actually dont know how to proceed here
+  /-Well now I do but its not that easy:
+  We basically turn the Line so that it is parallel to the real line, then shift it down.
+  and then finish with angle_pconj.
+  Problem is, i have to introduce some stuff to make this transformation.-/
+}
+
+/-We know to prove isoceles triangles have the same angles:
+First a point version-/
