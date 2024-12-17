@@ -124,11 +124,42 @@ lemma linear_trans_point_colinear(a b : Point){u v r : Point}(h : colinear u v r
   simp
 }
 
-def linear_trans_set : Point → Point → Set Point → Set Point :=
+--lemma linear_trans_set_inv_left
+
+def Linear_trans_set : Point → Point → Set Point → Set Point :=
   fun a b S ↦ {u | ∃ s ∈ S, u = Linear_trans_point a b s}
 
+@[simp] lemma linear_trans_set_id(S : Set Point): Linear_trans_set one zero S = S := by{
+  unfold Linear_trans_set
+  simp
+}
+
+lemma linear_trans_set_comp(a b c d : Point)(S : Set Point): Linear_trans_set a b (Linear_trans_set c d S) = Linear_trans_set (pmul a c) (padd (pmul a d) b) S := by{
+  ext u
+  unfold Linear_trans_set
+  simp
+  constructor
+  intro h
+  obtain ⟨v,vh1,vh2⟩ := h
+  obtain ⟨r,rh1,rh2⟩ := vh1
+  use r
+  constructor
+  · assumption
+  rw[vh2,rh2]
+  exact linear_trans_point_comp a b c d r
+
+  intro h
+  obtain ⟨s,sh1,sh2⟩ := h
+  use Linear_trans_point c d s
+  constructor
+  use s
+  rw[sh2]
+  symm
+  exact linear_trans_point_comp a b c d s
+}
+
 def Linear_trans_line : Point → Point → Line → Line :=
-  fun a b L ↦ (if h : a = zero then real_line else ⟨linear_trans_set a b L.range, by{
+  fun a b L ↦ (if h : a = zero then real_line else ⟨Linear_trans_set a b L.range, by{
     have ah: a.x≠ 0 := by{
       contrapose h
       unfold zero
@@ -144,7 +175,7 @@ def Linear_trans_line : Point → Point → Line → Line :=
     rw[hL]
     use Linear_trans_point a b u
     use Linear_trans_point a b v
-    unfold Line_through linear_trans_set
+    unfold Line_through Linear_trans_set
     simp
     constructor
     by_contra h0
@@ -192,10 +223,10 @@ def Linear_trans_line : Point → Point → Line → Line :=
     assumption
   }⟩)
 
-lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ linear_trans_set a b S ↔ p ∈ S := by{
+lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ Linear_trans_set a b S ↔ p ∈ S := by{
   constructor
   intro h
-  unfold linear_trans_set at h
+  unfold Linear_trans_set at h
   simp at h
   obtain ⟨s,sh1,sh2⟩ := h
   have : p = s := by{
