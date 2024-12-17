@@ -271,16 +271,25 @@ def Linear_trans_line : Point → Point → Line → Line :=
     assumption
   }⟩)
 
-lemma linear_trans_line_comp(a b c d : Point)(L : Line): Linear_trans_line a b (Linear_trans_line c d L) = Linear_trans_line (pmul a c) (padd (pmul a d) b) L := by{
+lemma linear_trans_line_comp(a b : Point)(ah : a ≠ zero)(c d : Point)(ch : c ≠ zero)(L : Line): Linear_trans_line a b (Linear_trans_line c d L) = Linear_trans_line (pmul a c) (padd (pmul a d) b) L := by{
   unfold Linear_trans_line
-  by_cases ah: a = zero
-  simp [*]
-  by_cases ch: c = zero
-  simp [*]
-  #check pmul
-  sorry
-  sorry
+  have : pmul a c ≠ zero := by{
+    by_contra h0
+    unfold pmul zero at *
+    simp at *
+    obtain h0|h0 := h0
+    contrapose ah
+    simp
+    ext
+    simp [*]
 
+    contrapose ch
+    simp
+    ext
+    simp [*]
+  }
+  simp [*]
+  exact linear_trans_set_comp a b c d L.range
 }
 
 lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ Linear_trans_set a b S ↔ p ∈ S := by{
