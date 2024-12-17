@@ -524,6 +524,20 @@ lemma detproper_column3 (a b c x y z r s t factor : ℂ): detproper a b (factor*
   ring
 }
 
+lemma det_zero_detproper{a b c : ℂ}(h: det (Point.mk a) (Point.mk b) (Point.mk c) = 0): detproper a (conj a) 1 b (conj b) 1 c (conj c) 1 = 0:= by{
+  rw[det_detproper] at h
+  simp at h
+  have : (detproper a (conj a) 1 b (conj b) 1 c (conj c) 1).re = 0 := by{
+    unfold detproper conj
+    simp
+    ring
+  }
+  calc
+    (detproper a (conj a) 1 b (conj b) 1 c (conj c) 1) =({re := (detproper a (conj a) 1 b (conj b) 1 c (conj c) 1).re , im := (detproper a (conj a) 1 b (conj b) 1 c (conj c) 1).im}:ℂ) := by{exact rfl}
+      _= ({re := 0, im := 0}:ℂ) := by{rw[h,this]}
+      _= 0 := rfl
+}
+
 def colinear (a b c : Point) : Prop :=
   det a b c = 0
 
