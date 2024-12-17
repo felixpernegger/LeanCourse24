@@ -361,7 +361,11 @@ lemma linear_trans_point_comp(a b c d p: Point): linear_trans_point a b (linear_
   ring
 }
 
-lemma linear_trans_point_id(p : Point): linear_trans_point zero
+@[simp] lemma linear_trans_point_id(p : Point): linear_trans_point one zero p = p := by{
+  unfold linear_trans_point one zero padd pmul
+  ext
+  simp
+}
 
 lemma linear_trans_point_inj{a b u v : Point}(h : linear_trans_point a b u = linear_trans_point a b v)(ha : a ≠ zero): u = v := by{
   sorry

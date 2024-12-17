@@ -134,6 +134,12 @@ lemma padd_comm (a b : Point) : padd a b = padd b a := by{
   ring_nf
 }
 
+lemma pmul_comm(a b : Point): pmul a b = pmul b a := by{
+  unfold pmul
+  simp
+  ring
+}
+
 /-And associative:-/
 
 lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
@@ -143,10 +149,27 @@ lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
 
 /-So we have an abelian group:-/
 
-lemma padd_neg (a : Point): padd a (pneg a) = Point.mk 0 := by{
+@[simp] lemma padd_neg (a : Point): padd a (pneg a) = zero := by{
+  unfold zero
   unfold pneg
   unfold padd
   simp
+}
+
+def recip : Point → Point :=
+  fun p ↦ Point.mk (1/p.x)
+
+@[simp] lemma pmul_recip{a : Point}(ha: a ≠ zero): pmul a (recip a) = one := by{
+  unfold pmul recip one zero at *
+  have : a.x ≠ 0 := by{
+    contrapose ha
+    simp at *
+    ext
+    simp
+    assumption
+  }
+  simp
+  field_simp
 }
 
 /-Also midpoints are neat-/
