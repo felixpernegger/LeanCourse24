@@ -344,3 +344,41 @@ For example show circles reflection are still circles, reflect lines across line
 However this becomes so repetitive, I skip it, as reflections wont actually be used much at all.
 
 Parallel lines stay parallel, tangents tangents and so on and so forth.-/
+
+
+
+/-We will sometimes need linear transformations, which are define as follows::-/
+
+def linear_trans_point : Point → Point → Point → Point :=
+  fun a b p ↦ padd (pmul a p) b
+
+/-A few observations:-/
+
+lemma linear_trans_point_comp(a b c d p: Point): linear_trans_point a b (linear_trans_point c d p) = linear_trans_point (pmul a c) (padd (pmul a d) b) p := by{
+  ext
+  unfold linear_trans_point padd pmul
+  simp
+  ring
+}
+
+lemma linear_trans_point_id(p : Point): linear_trans_point zero
+
+lemma linear_trans_point_inj{a b u v : Point}(h : linear_trans_point a b u = linear_trans_point a b v)(ha : a ≠ zero): u = v := by{
+  sorry
+}
+
+def linear_trans_set : Point → Point → Set Point → Set Point :=
+  fun a b S ↦ {u | ∃ s ∈ S, u = padd (pmul a s) b}
+
+def linear_trans_line : Point → Point → Line → Line :=
+  fun a b L ↦ (if h : a = zero then real_line else ⟨linear_trans_set a b L.range, by{
+    obtain ⟨u,v,uv,uh,vh⟩ := ex_points_on_line L
+    have hL : L = Line_through uv := by{
+      apply line_through_unique
+      tauto
+    }
+    rw[hL]
+    use linear_trans_point a b u
+    use linear_trans_point a b v
+    sorry
+  })

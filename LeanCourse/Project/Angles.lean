@@ -43,9 +43,21 @@ def Angle : Point → Point → Point → Real.Angle :=
 /-A small lemma for convencience:-/
 lemma same_arg_simp{x y : ℂ}(h : x = y): x.arg = y.arg := by{rw[h]}
 
+/-Another!-/
+@[simp] lemma arg_conj(x : ℂ): (conj x).arg = if x.arg = Real.pi then Real.pi else -x.arg
+ := by{
+  unfold conj
+  rw [Complex.arg_conj]
+}
+
+
 /-We prove several elementary but very important properties:-/
 
-lemma angle_self{a b : Point}(ha : a ≠ b): Angle a b a = 0 := by{
+lemma angle_self(a b : Point): Angle a b a = 0 := by{
+  by_cases ha : a = b
+  rw[ha]
+  simp
+
   have asub : a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
   unfold Angle
   field_simp
@@ -65,9 +77,15 @@ lemma angle_add{a b c d : Point}(ha : a ≠ b)(hc : c ≠ b)(hd : d ≠ b): Angl
     tauto
 }
 
-lemma angle_symm{a b c : Point}(ha : a ≠ b)(hc : c ≠ b): Angle c b a = -(Angle a b c) := by{
+lemma angle_symm(a b c): Angle c b a = -(Angle a b c) := by{
+  by_cases ha: a = b
+  rw[ha]
+  simp
+  by_cases hc: c = b
+  rw[hc]
+  simp
   have g: Angle a b a = Angle a b c + Angle c b a := by{exact angle_add ha hc ha}
-  rw[angle_self ha] at g
+  rw[angle_self a] at g
   have : Angle c b a = Angle c b a - 0 := by{simp}
   rw[this, g]
   simp
@@ -595,6 +613,72 @@ lemma angle_scal'(a b c x : Point)(xh: x ≠ zero): Angle (pmul x a) (pmul x b) 
     rw[xh]
   }
   exact angle_scal a b c q this
+}
+
+/-Conjugating takes an angle to its negative, i.e. switches the arguments:-/
+
+lemma angle_pconj(a b c : Point): Angle (pconj a) (pconj b) (pconj c) = Angle c b a := by{
+  by_cases ah: a=b
+  rw[ah]
+  simp
+  by_cases ch: c=b
+  rw[ch]
+  simp
+
+  have ah': pconj a ≠ pconj b := by{
+    contrapose ah
+    simp at *
+    rw[← pconj_twice a,ah, pconj_twice]
+  }
+  have ch': pconj c ≠ pconj b := by{
+    contrapose ch
+    simp at *
+    rw[← pconj_twice c, ch, pconj_twice]
+  }
+
+  unfold Angle
+  unfold pconj
+  have : ((({ x := conj a.x } : Point).x - ({ x := conj b.x }:Point).x) / (({ x := conj c.x }:Point).x - ({ x := conj b.x }:Point).x)) = (conj a.x - conj b.x)/(conj c.x -conj b.x) := by{
+    simp
+  }
+  rw[this]
+  clear this
+  have s1: (conj a.x - conj b.x) / (conj c.x - conj b.x) = conj ((a.x-b.x)/(c.x-b.x)) := by{
+    unfold pconj at ch'
+    simp at ch'
+    have : conj c.x - conj b.x ≠ 0 := by{
+      contrapose ch'
+      simp at *
+      calc
+        conj c.x = conj c.x - 0 := by{ring}
+          _= conj c.x - (conj c.x - conj b.x) := by{rw[ch']}
+          _= conj b.x := by{ring}
+    }
+    field_simp
+  }
+  rw[s1]
+  rw[arg_conj]
+  by_cases h: ((a.x - b.x) / (c.x - b.x)).arg = Real.pi
+  simp [*]
+  have : Angle a b c = Real.pi := by {
+    unfold Angle
+    rw[h]
+  }
+  have : Angle c b a = -Real.pi := by{
+    rw [← this]
+    exact angle_symm a b c
+  }
+  unfold Angle at this
+  rw[this]
+  simp
+
+  simp [h]
+  have : - Angle a b c = Angle c b a := by{
+    rw[angle_symm c b a]
+    simp
+  }
+  unfold Angle at this
+  assumption
 }
 
 /-A very important thing is that angles stay the same under reflection, we will use this

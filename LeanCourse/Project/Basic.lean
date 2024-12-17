@@ -39,6 +39,9 @@ open Classical -- In order to take intersections and stuff
 def zero : Point
   := Point.mk 0
 
+def one : Point
+  := Point.mk 1
+
 /- Natural definition for tangential of sets in a general manner-/
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1
@@ -116,6 +119,15 @@ lemma padd_zero (a : Point) : padd a (Point.mk 0) = a := by{
   unfold padd
   simp
 }
+
+/-So is multipliying one:-/
+
+lemma pmul_one (a : Point) : pmul one a = a := by{
+  unfold one pmul
+  ext
+  simp
+}
+
 /-Adding is commutative:-/
 lemma padd_comm (a b : Point) : padd a b = padd b a := by{
   unfold padd
