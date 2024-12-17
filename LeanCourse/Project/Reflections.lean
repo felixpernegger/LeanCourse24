@@ -368,7 +368,67 @@ lemma linear_trans_point_comp(a b c d p: Point): linear_trans_point a b (linear_
 }
 
 lemma linear_trans_point_inj{a b u v : Point}(h : linear_trans_point a b u = linear_trans_point a b v)(ha : a ≠ zero): u = v := by{
+  calc
+    u = linear_trans_point one zero u := by{exact Eq.symm (linear_trans_point_id u)}
+      _= linear_trans_point (pmul (recip a) a) (padd (pmul (recip a) b) (pneg (pmul b (recip a)))) u := by{
+        have : a.x ≠ 0 := by{
+          contrapose ha
+          unfold zero
+          simp at *
+          ext
+          assumption
+        }
+        unfold linear_trans_point recip pmul pneg padd one zero
+        simp
+        field_simp
+      }
+      _= linear_trans_point (recip a) (pneg (pmul b (recip a))) (linear_trans_point a b u) := by{rw[linear_trans_point_comp (recip a) (pneg (pmul b (recip a))) a b u]}
+      _= linear_trans_point (recip a) (pneg (pmul b (recip a))) (linear_trans_point a b v) := rw[rw[h]]
+      _= linear_trans_point (pmul (recip a) a) (padd (pmul (recip a) b) (pneg (pmul b (recip a)))) v := by{rw[linear_trans_point_comp (recip a) (pneg (pmul b (recip a))) a b v]}
+      _= linear_trans_point one zero v := by{
+        have : a.x ≠ 0 := by{
+          contrapose ha
+          unfold zero
+          simp at *
+          ext
+          assumption
+        }
+        unfold linear_trans_point recip pmul pneg padd one zero
+        simp
+        field_simp
+      }
+      _= v := by{rw[linear_trans_point_id v]}
+}
+
+/-And colinear points stay colinear!-/
+lemma linear_trans_point_colinear(a b : Point){u v r : Point}(h : colinear u v r): colinear (linear_trans_point a b u) (linear_trans_point a b v) (linear_trans_point a b r) := by{
+  unfold colinear
+  have : det (linear_trans_point a b u) (linear_trans_point a b v) (linear_trans_point a b r) = det (pmul a u) (pmul a v) (pmul a r) := by{
+    unfold linear_trans_point padd pmul det conj
+    obtain ⟨a1,a2⟩ := a
+    obtain ⟨b1,b2⟩ := b
+    obtain ⟨u1,u2⟩ := u
+    obtain ⟨v1,v2⟩ := v
+    obtain ⟨r1,r2⟩ := r
+    simp
+    ring
+  }
+  rw[this]
+  clear this
+  unfold colinear at *
   sorry
+
+
+  /-
+  unfold colinear det at *
+  unfold linear_trans_point padd pmul conj at *
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨b1,b2⟩ := b
+  obtain ⟨u1,u2⟩ := u
+  obtain ⟨v1,v2⟩ := v
+  obtain ⟨r1,r2⟩ := r
+  simp at *
+  -/
 }
 
 def linear_trans_set : Point → Point → Set Point → Set Point :=
@@ -376,6 +436,13 @@ def linear_trans_set : Point → Point → Set Point → Set Point :=
 
 def linear_trans_line : Point → Point → Line → Line :=
   fun a b L ↦ (if h : a = zero then real_line else ⟨linear_trans_set a b L.range, by{
+    have ah: a.x≠ 0 := by{
+      contrapose h
+      unfold zero
+      simp at *
+      ext
+      simp [h]
+    }
     obtain ⟨u,v,uv,uh,vh⟩ := ex_points_on_line L
     have hL : L = Line_through uv := by{
       apply line_through_unique
@@ -384,5 +451,51 @@ def linear_trans_line : Point → Point → Line → Line :=
     rw[hL]
     use linear_trans_point a b u
     use linear_trans_point a b v
+    unfold Line_through linear_trans_set
+    simp
+    constructor
+    by_contra h0
+    have : u = v := by{exact linear_trans_point_inj h0 h}
+    contradiction
+
+    ext z
+    simp
+    constructor
+    intro hh
+    obtain ⟨s,sh1,sh2⟩ := hh
+    have : z = linear_trans_point a b s := by{unfold linear_trans_point; assumption}
+    rw[this]
+    exact linear_trans_point_colinear a b sh1
+    have s1: linear_trans_point a b (linear_trans_point (recip a) (pneg (pmul b (recip a))) z) = z := by{
+      unfold linear_trans_point pneg recip padd pmul
+      field_simp
+    }
+    intro hh
+    use linear_trans_point (recip a) (pneg (pmul b (recip a))) z
+    constructor
+    swap
+    ext
+    unfold linear_trans_point padd pneg pmul recip
+    simp
+    field_simp
+
+    have uh: u = (linear_trans_point (recip a) (pneg (pmul b (recip a))) (linear_trans_point a b u)) := by{
+      unfold linear_trans_point pneg recip padd pmul
+      field_simp
+    }
+    have vh: v =  (linear_trans_point (recip a) (pneg (pmul b (recip a))) (linear_trans_point a b v)) := by{
+      unfold linear_trans_point pneg recip padd pmul
+      field_simp
+    }
+    rw[uh,vh,← s1]
+    clear uh vh s1
+    --falsch herum fuck you
     sorry
-  })
+  }⟩)
+
+--TO DO: PERP LINES STAY PERP, THEREFORE PERP THROUGH STAY THE SAME THEREFORE FOOTS STAY THE SAME
+--THEREFORE REFLECTION STAY THE SAME
+
+--THEN : THEORE EXISTS A B WITH A NOT ZERO (IMPORTANT) FOR ANY LINE, SUCH THAT L GETS SENT TO THE REAL LINE
+
+--IN THE ANGLES SECTION THEN SHOW THAT ANGLES ARE PRESERVED UNDER LINEAR TRANS
