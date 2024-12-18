@@ -220,8 +220,7 @@ lemma reflection_point_line_real_line(a : Point): reflection_point_line a real_l
 #check pmidpoint_lies_on_perp_bisector
 lemma reflection_perp_bisector{a b : Point}(ab : a ≠ b): reflection_point_line a (perp_bisector ab) = b := by{
   unfold reflection_point_line
-  #check foot_on
-  rw[foot_on_perp_bisector_left ab, reflection_point_point_pmidpoint']
+  rw[foot_perp_bisector_left ab, reflection_point_point_pmidpoint']
 }
 
 

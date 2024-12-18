@@ -221,7 +221,7 @@ lemma perp_bisector_foot{a b p : Point}(ab : a ≠ b)(hp : Lies_on p (perp_bisec
   exact pmidpoint_lies_on_perp_bisector ab
 }
 
-lemma foot_on_perp_bisector_left{a b : Point}(ab : a ≠ b): foot a (perp_bisector ab) = pmidpoint a b := by{
+lemma foot_perp_bisector_left{a b : Point}(ab : a ≠ b): foot a (perp_bisector ab) = pmidpoint a b := by{
   symm
   apply foot_unique
   constructor
@@ -237,7 +237,7 @@ lemma foot_on_perp_bisector_left{a b : Point}(ab : a ≠ b): foot a (perp_bisect
   exact pmidpoint_lies_on ab
 }
 
-lemma foot_on_perp_bisector_right{a b : Point}(ab : a ≠ b): foot b (perp_bisector ab) = pmidpoint a b := by{
+lemma foot_perp_bisector_right{a b : Point}(ab : a ≠ b): foot b (perp_bisector ab) = pmidpoint a b := by{
   symm
   apply foot_unique
   constructor
