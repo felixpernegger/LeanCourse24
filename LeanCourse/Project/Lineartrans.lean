@@ -317,6 +317,23 @@ lemma linear_trans_line_inv_left(a b : Point)(ah : a ≠ zero)(L : Line): Linear
   simp_rw[linear_trans_set_inv_left a b ah L.range]
 }
 
+lemma linear_trans_line_inv_right(a b : Point)(ah : a ≠ zero)(L : Line): Linear_trans_line a b (Linear_trans_line (lt_inv1 a b) (lt_inv2 a b) L) = L := by{
+  unfold Linear_trans_line
+  simp [*]
+  have : lt_inv1 a b ≠ zero := by{
+    contrapose ah
+    simp at *
+    unfold zero lt_inv1 recip at *
+    simp at *
+    ext
+    simp
+    assumption
+  }
+  simp [*]
+  simp_rw[linear_trans_set_inv_right a b ah L.range]
+}
+
+
 lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ Linear_trans_set a b S ↔ p ∈ S := by{
   constructor
   intro h
@@ -490,6 +507,125 @@ lemma linear_trans_reflection_point_line(a b : Point)(ah : a ≠ zero)(p : Point
   assumption
 }
 
+/-One of the major reasons we do all of this rather tedious work, is that we transform every line onto the real line,
+and therefore if we want to prove something concerning some central line, we "only" have to prove the speical case
+when the line is the real line and can then transform everything back into its original state.
+For example, this method will later be used to show angles stay the same when we reflect them across a line. -/
+
+lemma linear_trans_line_real_line(L : Line): ∃(a b : Point), a ≠ zero ∧ Linear_trans_line a b L = real_line := by{
+  obtain ⟨u,v,uv,uh,vh⟩ := ex_points_on_line L
+  have s1: padd v (pneg u) ≠ zero := by{
+    contrapose uv
+    unfold padd pneg zero at *
+    simp at *
+    ext
+    rw[← add_zero u.x, ← uv]
+    ring
+  }
+  have s2: recip (padd v (pneg u)) ≠ zero := by{
+    contrapose s1
+    simp at *
+    unfold recip zero at s1
+    simp at s1
+    unfold zero
+    ext
+    simpa
+  }
+  use recip (padd v (pneg u))
+  use pmul (pneg u) (recip (padd v (pneg u)))
+  constructor
+  assumption
+
+  rw[real_line_line_through]
+  apply line_through_unique
+  constructor
+  unfold Linear_trans_line Lies_on
+  simp [*]
+  have : zero = Linear_trans_point (recip (padd v (pneg u))) (pmul (pneg u) (recip (padd v (pneg u)))) u := by{
+    unfold Linear_trans_point padd pmul zero pneg recip at *
+    field_simp
+  }
+  rw[this]
+  exact
+    (linear_trans_set_mem (recip (padd v (pneg u))) (pmul (pneg u) (recip (padd v (pneg u)))) u s2
+          L.range).mpr
+      uh
+
+  unfold Linear_trans_line Lies_on
+  simp [*]
+  have : one = Linear_trans_point (recip (padd v (pneg u))) (pmul (pneg u) (recip (padd v (pneg u)))) v := by{
+    unfold Linear_trans_point padd pmul zero one pneg recip at *
+    symm at uv
+    have : v.x +-u.x ≠ 0 := by{exact fun a ↦ s1 (congrArg Point.mk a)}
+    field_simp
+  }
+  rw[this]
+  exact
+    (linear_trans_set_mem (recip (padd v (pneg u))) (pmul (pneg u) (recip (padd v (pneg u)))) v s2
+          L.range).mpr
+      vh
+}
+variable (R : Line)
+
+def lt_norm_line1 : Line → Point :=
+  fun L ↦ (linear_trans_line_real_line L).choose
+
+lemma lt_norm_line1_ex2(L : Line): ∃(b : Point), (lt_norm_line1 L) ≠ zero ∧ Linear_trans_line (lt_norm_line1 L) b L = real_line := by{
+  exact Exists.choose_spec (linear_trans_line_real_line L)
+}
+
+def lt_norm_line2 : Line → Point :=
+  fun L ↦ (lt_norm_line1_ex2 L).choose
+
+lemma lt_norm_line1_neq_zero(L : Line): lt_norm_line1 L ≠ zero := by{
+  obtain ⟨b,bh⟩ := lt_norm_line1_ex2 L
+  tauto
+}
+
+lemma lt_norm_line_real_line(L : Line): Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L = real_line := by{
+  unfold lt_norm_line2
+  exact (Exists.choose_spec (lt_norm_line1_ex2 L)).2
+}
+
+/-We can also define the inverse, which therefore takes the real line to L:-/
+
+def lt_norm_line_inv1: Line → Point :=
+  fun L ↦ lt_inv1 (lt_norm_line1 L) (lt_norm_line2 L)
+
+def lt_norm_line_inv2: Line → Point :=
+  fun L ↦ lt_inv2 (lt_norm_line1 L) (lt_norm_line2 L)
+
+/-Which is inverse...-/
+
+lemma lt_norm_line_inv_inv_point_left(L : Line)(p : Point): Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) p) = p := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_point_inv_left (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) p
+}
+
+lemma lt_norm_line_inv_inv_point_right(L : Line)(p : Point): Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) p) = p := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_point_inv_right (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) p
+}
+
+lemma lt_norm_line_inv_inv_set_left(L : Line)(S : Set Point): Linear_trans_set (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) (Linear_trans_set (lt_norm_line1 L) (lt_norm_line2 L) S) = S := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_set_inv_left (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) S
+}
+
+lemma lt_norm_line_inv_inv_set_right(L : Line)(S : Set Point): Linear_trans_set (lt_norm_line1 L) (lt_norm_line2 L) (Linear_trans_set (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) S) = S := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_set_inv_right (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) S
+}
+
+lemma lt_norm_line_inv_inv_line_left(L : Line)(R : Line): Linear_trans_line (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) R) = R := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_line_inv_left (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) R
+}
+
+lemma lt_norm_line_inv_inv_line_right(L : Line)(R : Line): Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) (Linear_trans_line (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) R) = R := by{
+  unfold lt_norm_line_inv1 lt_norm_line_inv2
+  exact linear_trans_line_inv_right (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) R
+}
 
 --TO DO: PERP LINES STAY PERP, THEREFORE PERP THROUGH STAY THE SAME THEREFORE FOOTS STAY THE SAME
 --THEREFORE REFLECTION STAY THE SAME
