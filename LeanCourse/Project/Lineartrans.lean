@@ -595,6 +595,11 @@ def lt_norm_line_inv1: Line → Point :=
 def lt_norm_line_inv2: Line → Point :=
   fun L ↦ lt_inv2 (lt_norm_line1 L) (lt_norm_line2 L)
 
+lemma lt_norm_line_inv1_neq_zero(L : Line): lt_norm_line_inv1 L ≠ zero := by{
+  unfold lt_norm_line_inv1
+  exact lt_inv1_not_zero (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L)
+}
+
 /-Which is inverse...-/
 
 lemma lt_norm_line_inv_inv_point_left(L : Line)(p : Point): Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) p) = p := by{

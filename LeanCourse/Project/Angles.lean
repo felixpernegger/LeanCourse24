@@ -781,21 +781,29 @@ theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (ref
   rw[ch]
   simp
 
-  have ah': reflection_point_line a L ≠ reflection_point_line b L := by{
-    contrapose ah
-    simp at *
-    rw[← reflection_point_line_twice a L, ah, reflection_point_line_twice]
-  }
-  have ch': reflection_point_line c L ≠ reflection_point_line b L := by{
-    contrapose ch
-    simp at *
-    rw[← reflection_point_line_twice c L, ch, reflection_point_line_twice]
-  }
-  sorry -- i actually dont know how to proceed here
-  /-Well now I do but its not that easy:
-  We basically turn the Line so that it is parallel to the real line, then shift it down.
-  and then finish with angle_pconj.
-  Problem is, i have to introduce some stuff to make this transformation.-/
+  symm
+  calc
+    Angle (reflection_point_line c L) (reflection_point_line b L) (reflection_point_line a L) = Angle (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line c L)) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line b L)) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line a L)) := by{
+      rw[linear_trans_angle (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) (reflection_point_line c L) (reflection_point_line b L) (reflection_point_line a L)]
+    }
+      _= Angle (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) := by{
+        repeat
+          rw[linear_trans_reflection_point_line]
+        repeat
+          exact (lt_norm_line1_neq_zero L)
+      }
+      _= Angle (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) real_line) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) real_line) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) real_line) := by{
+        repeat
+          rw[lt_norm_line_real_line L]
+      }
+      _= Angle (pconj (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c)) (pconj (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b)) (pconj (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a)) := by{
+        repeat
+          rw[reflection_point_line_real_line]
+      }
+      _= Angle (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) := by{
+        rw[angle_pconj]
+      }
+
 }
 
 /-We know to prove isoceles triangles have the same angles:
