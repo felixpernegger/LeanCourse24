@@ -976,3 +976,6 @@ lemma angle_perp_points(a b c : Point)(bh: b ≠ a)(ch: c ≠ a): perp_points a 
   }
   exact Complex.arg_eq_neg_pi_div_two_iff.mp goal
 }
+
+/-this is pretty much all (or at least most of) the "basic" stuff about angles.
+Later, more properties will be shown.-/
