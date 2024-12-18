@@ -418,15 +418,8 @@ lemma perp_line_points_is_perp(a b p : Point)(ab : a ≠ b): Perpendicular (Line
   obtain ⟨a1,a2⟩ := a
   obtain ⟨b1,b2⟩ := b
   simp at *
-  have : -({ re := b2 - a2, im := a1 - b1 }:ℂ) = ({re := a2-b2, im := b1-a1}:ℂ) := by{
-    rw [@neg_eq_iff_add_eq_zero]
-    simp
-    rfl
-  }
-  rw[this]
-  simp
+  left
   ring_nf
-  tauto
 }
 
 lemma lies_on_perp_line_points (a b p)(ab: a ≠ b): Lies_on p (perp_line_points a b p ab) := by{
@@ -823,10 +816,6 @@ lemma foot_real_line(p : Point): foot p real_line = Point.mk (p.x.re) := by{
       set a := p.x.re
       set b := p.x.im
       simp
-      sorry
-      calc
-        { re := p.x.re, im := p.x.im } - ({ re := p.x.re, im := 0 }:ℂ) = (↑({ re := p.x.re-p.x.re, im := p.x.im } : ℂ).re : ℂ) := by{}
-        -/
     }
     rw[this]
   }
