@@ -50,6 +50,83 @@ lemma same_arg_simp{x y : ℂ}(h : x = y): x.arg = y.arg := by{rw[h]}
   rw [Complex.arg_conj]
 }
 
+lemma arg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(Real.pi / 2) : Real.Angle)): z.arg = Real.pi / 2 := by{
+  obtain ⟨k,kh⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 h
+  have hh: z.arg = 2*Real.pi * k + Real.pi/2 := by{linarith}
+  clear kh
+  have goal: k = 0 := by{
+    apply le_antisymm
+    have : 2 * Real.pi * ↑k + Real.pi / 2 ≤ Real.pi := by{
+      rw[← hh]
+      exact Complex.arg_le_pi z
+    }
+    have tt: Real.pi* k ≤ Real.pi*1/4 := by{linarith}
+
+    have t1: (↑k:ℝ) ≤ 1/4 := by{
+      simp [*] at tt
+      have : Real.pi * (1/4) = Real.pi / 4 := by{ring}
+      rw[← this] at tt
+      exact le_of_mul_le_mul_left tt Real.pi_pos
+    }
+    contrapose t1
+    simp at *
+    have : (↑1 : ℝ) ≤ (↑k : ℝ) := by{exact Int.cast_one_le_of_pos t1}
+    have : 4⁻¹ < (1:ℝ) := by{norm_num}
+    linarith
+
+    have :  -Real.pi < 2 * Real.pi * ↑k + Real.pi / 2 := by{
+      rw[← hh]
+      exact Complex.neg_pi_lt_arg z
+    }
+    have tt: Real.pi*(-3/4) ≤ Real.pi*k := by{linarith}
+    have g: (-3/4 : ℝ) ≤ (↑k:ℝ) := by{
+      exact le_of_mul_le_mul_left tt Real.pi_pos
+    }
+    contrapose g
+    simp at *
+    have : (↑k:ℝ) ≤ -1 := by{exact Int.cast_le_neg_one_of_neg g}
+    linarith
+  }
+  rw[goal] at hh
+  simp at hh
+  assumption
+}
+
+lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2) : Real.Angle)): z.arg = -(Real.pi / 2) := by{
+  obtain ⟨k,kh⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 h
+  have hh: z.arg = 2*Real.pi * k - Real.pi/2 := by{linarith}
+  clear kh
+  have goal: k = 0 := by{
+    apply le_antisymm
+    have tt: 2 * Real.pi * ↑k - Real.pi / 2 ≤ Real.pi := by{
+      rw[← hh]
+      exact Complex.arg_le_pi z
+    }
+    have tt: Real.pi*k ≤ Real.pi * (3/4) := by{linarith}
+    have g : k ≤ (3/4 : ℝ) := by{exact le_of_mul_le_mul_left tt Real.pi_pos}
+    contrapose g
+    simp at *
+    have : 1 ≤ (↑k:ℝ) := by{exact Int.cast_one_le_of_pos g}
+    linarith
+
+    have tt: -Real.pi ≤ 2 * Real.pi * ↑k - Real.pi / 2 := by{
+      suffices : -Real.pi < 2 * Real.pi * ↑k - Real.pi / 2
+      linarith
+
+      rw[← hh]
+      exact Complex.neg_pi_lt_arg z
+    }
+    have tt: Real.pi*(-1/4) ≤ Real.pi * k := by{linarith}
+    have g : -1/4 ≤ (↑k : ℝ) := by{exact le_of_mul_le_mul_left tt Real.pi_pos}
+    contrapose g
+    simp at *
+    have : (↑k:ℝ) ≤ -1 := by{exact Int.cast_le_neg_one_of_neg g}
+    linarith
+  }
+  rw[goal] at hh
+  simp at hh
+  assumption
+}
 
 /-We prove several elementary but very important properties:-/
 
@@ -820,20 +897,82 @@ theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (ref
 same angles at their base.
 First a (more general) point version:
 -/
-theorem same_abs_angle{a b p : Point}(h: point_abs a p = point_abs p b): Angle p a b = Angle a b p := by{
+theorem same_abs_angle{a b p : Point}(h: point_abs p a = point_abs p b): Angle p a b = Angle a b p := by{
   by_cases ab: a=b
   rw[ab]
   simp
 
-  have s1: Lies_on p (perp_bisector ab) := by{
-    exact (perp_bisector_def ab).1 h
-  }
-  have sa: reflection_
+  rw[angle_reflection_line a b p (perp_bisector ab), reflection_point_line_perp_bisector ab,reflection_point_line_perp_bisector' ab,(reflection_point_line_on_line p (perp_bisector ab)).2 ((perp_bisector_def a b p ab).1 h)]
+}
+/-(note: the inverse of this will be proven at a later point)-/
+
+
+/-Now the triangle version: (once again the special point is at A for simplicity)-/
+
+def Isosceles(T : Triangle): Prop :=
+  abs_tri_ab T = abs_tri_ca T
+
+theorem isosceles_angle{T : Triangle}(h: Isosceles T): Angle_B T = Angle_C T := by{
+  unfold Angle_B Angle_C Isosceles abs_tri_ab abs_tri_ca at *
+  rw[point_abs_symm T.c T.a] at h
+  exact same_abs_angle h
 }
 
-/-
---TO DO:
---(MAYBE I DID THIS: FOOT ON PERP THROUGH IS FOOT
---FOOT OF BISECTOR IS MIDPOINT
---THEREFORE REFLECTION
--/
+/-In the next section we will prove Thales theorem. We have everything set up for this except a characterization
+of perp points via angles:-/
+
+lemma angle_perp_points(a b c : Point)(bh: b ≠ a)(ch: c ≠ a): perp_points a b a c ↔ Angle b a c = Real.pi / (2:ℝ) ∨ Angle b a c = - Real.pi / (2:ℝ) := by{
+  have s1: ((b.x-a.x)/(c.x-a.x)) = ((a.x-b.x)/(a.x-c.x)) := by{
+    by_cases ac: a=c
+    rw[ac]
+    simp
+
+    have : c.x-a.x ≠ 0 := by{exact sub_neq_zero fun a_1 ↦ ac (id (Eq.symm a_1))}
+    have : a.x - c.x ≠ 0 := by{exact sub_neq_zero ac}
+    field_simp
+    ring
+  }
+  unfold Angle perp_points
+  rw[← s1]
+  clear s1
+  constructor
+  intro h
+  have s2: ((b.x-a.x)/(c.x-a.x)).im ≠ 0 := by{
+    by_contra p0
+    have : (b.x-a.x)/(c.x-a.x) = 0 := by{
+      exact Eq.symm (Complex.ext (id (Eq.symm h)) (id (Eq.symm p0)))
+    }
+    field_simp at this
+    have : b.x -a.x ≠ 0 := by{exact sub_neq_zero bh}
+    have : c.x - a.x ≠ 0 := by{exact sub_neq_zero ch}
+    tauto
+  }
+  by_cases h0: ((b.x - a.x) / (c.x - a.x)).im < 0
+  right
+  rw[(Complex.arg_eq_neg_pi_div_two_iff).2 ⟨h, h0⟩]
+  ring_nf
+
+  left
+  have g: 0 < ((b.x - a.x) / (c.x - a.x)).im := by{
+    contrapose s2
+    simp at *
+    linarith
+  }
+  rw[(Complex.arg_eq_pi_div_two_iff).2 ⟨h, g⟩]
+
+  intro h
+  obtain h|h := h
+  suffices:  ((b.x - a.x) / (c.x - a.x)).re = 0 ∧  0 < ((b.x - a.x) / (c.x - a.x)).im
+  tauto
+  have goal : ((b.x - a.x) / (c.x - a.x)).arg = (Real.pi / 2) := by{
+    exact arg_pi_div_two h
+  }
+  exact Complex.arg_eq_pi_div_two_iff.mp goal
+
+  suffices:  ((b.x - a.x) / (c.x - a.x)).re = 0 ∧  ((b.x - a.x) / (c.x - a.x)).im < 0
+  tauto
+  have goal : ((b.x - a.x) / (c.x - a.x)).arg = -(Real.pi / 2) := by{
+    exact arg_neg_pi_div_two h
+  }
+  exact Complex.arg_eq_neg_pi_div_two_iff.mp goal
+}

@@ -25,6 +25,34 @@ def reflection_point_point: Point → Point → Point :=
   ring
 }
 
+lemma reflection_point_point_fix(a b : Point): reflection_point_point a b = a ↔ a = b := by{
+  unfold reflection_point_point padd p_scal_mul pneg
+  simp
+  constructor
+  intro h
+  ext
+  have : 2*b.x + -a.x = a.x := by{
+    nth_rw 2[← h]
+  }
+  have : 2*b.x = a.x+a.x := by{
+    calc
+      2*b.x = 2*b.x + -a.x + a.x := by{ring}
+        _= a.x + a.x := by{rw[this]}
+  }
+  symm
+  calc
+    b.x = 1/2 * (2*b.x) := by{ring}
+      _= 1/2 * (a.x+a.x) := by{rw[this]}
+      _= a.x := by{ring}
+
+
+  intro h
+  rw[h]
+  ext
+  simp
+  ring
+}
+
 lemma reflection_point_point_pmidpoint(a b : Point): pmidpoint (reflection_point_point a b) a = b := by{
   unfold pmidpoint reflection_point_point padd pneg p_scal_mul
   ext
