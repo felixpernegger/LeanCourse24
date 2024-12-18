@@ -31,6 +31,13 @@ lemma reflection_point_point_pmidpoint(a b : Point): pmidpoint (reflection_point
   simp
 }
 
+lemma reflection_point_point_pmidpoint'(a b : Point): reflection_point_point a (pmidpoint a b) = b := by{
+  unfold reflection_point_point padd pmidpoint p_scal_mul pneg
+  ext
+  simp
+  ring
+}
+
 lemma reflection_point_point_same_imp_same {a b : Point}(h : a = reflection_point_point a b): a = b := by{
   obtain ⟨a1,a2⟩ := a
   obtain ⟨b1,b2⟩ := b
@@ -208,6 +215,12 @@ lemma reflection_point_line_real_line(a : Point): reflection_point_line a real_l
   simp
   ring
 }
+
+#check pmidpoint_lies_on
+#check pmidpoint_lies_on_perp_bisector
+
+
+
 
 /-this is perp in the following sense:-/
 

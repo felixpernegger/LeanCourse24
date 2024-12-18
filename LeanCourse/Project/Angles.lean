@@ -773,6 +773,8 @@ theorem linear_trans_angle(a b : Point)(ah: a ≠ zero)(u v w : Point): Angle (L
   rw[goal]
 }
 
+/-We use linear transformations with the speical case for the real line, which we have already proved:-/
+
 theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (reflection_point_line c L) (reflection_point_line b L) (reflection_point_line a L) := by{
   by_cases ah: a=b
   rw[ah]
@@ -803,8 +805,21 @@ theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (ref
       _= Angle (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) := by{
         rw[angle_pconj]
       }
-
+      _= Angle (Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) ((Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a))) (Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) ((Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b))) (Linear_trans_point (lt_norm_line_inv1 L) (lt_norm_line_inv2 L) ((Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c))) := by{
+        nth_rw 2[linear_trans_angle]
+        exact lt_norm_line_inv1_neq_zero L
+      }
+      _= Angle a b c := by{
+        repeat
+          rw[lt_norm_line_inv_inv_point_left]
+      }
 }
 
-/-We know to prove isoceles triangles have the same angles:
-First a point version-/
+/-With this we are now able to prove isocoloes triangle (i.e. triangles for which two sides have same length) have
+same angles at their base.
+First observe the following:-/
+
+--TO DO:
+--(MAYBE I DID THIS: FOOT ON PERP THROUGH IS FOOT
+--FOOT OF BISECTOR IS MIDPOINT
+--THEREFORE REFLECTION
