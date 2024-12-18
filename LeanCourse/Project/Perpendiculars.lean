@@ -220,7 +220,7 @@ lemma perp_all {L R : Line}{a b c d : Point}(LR: Perpendicular L R)(ah: Lies_on 
   exact perp_on_line rcab rc rcd
 }
 
-lemma perp_line_through_points{a b c d}{ab : a ≠ b}{cd : c ≠ d}(h : Perpendicular (Line_through ab) (Line_through cd)): perp_points a b c d := by{
+lemma perp_line_through_points{a b c d : Point}{ab : a ≠ b}{cd : c ≠ d}(h : Perpendicular (Line_through ab) (Line_through cd)): perp_points a b c d := by{
   apply perp_all h
   exact line_through_mem_left ab
   exact line_through_mem_right ab
@@ -810,12 +810,25 @@ lemma foot_real_line(p : Point): foot p real_line = Point.mk (p.x.re) := by{
   exact point_lies_on_perp_through real_line p
 
   have s1: Perpendicular (Line_through h0) real_line := by{
-    have s3: real_line = qLine_through zero one := by{
-      have : zero ≠ one := by{unfold one zero; simp}
-      simp [*]
-      apply line_through_unique
-
+    rw[real_line_line_through]
+    apply (perp_quot h0 zero_neq_one).2
+    unfold perp_points zero one
+    simp
+    have : (p.x - ↑p.x.re) / -1 = {re := 0, im := -p.x.im} := by{
+      field_simp
+      have : p.x = {re := p.x.re, im := p.x.im} := rfl
+      rw[this]
+      have : (↑(p.x.re) : ℂ) = {re := p.x.re, im := 0} := rfl
+      rw[this]
+      set a := p.x.re
+      set b := p.x.im
+      simp
+      sorry
+      calc
+        { re := p.x.re, im := p.x.im } - ({ re := p.x.re, im := 0 }:ℂ) = (↑({ re := p.x.re-p.x.re, im := p.x.im } : ℂ).re : ℂ) := by{}
+        -/
     }
+    rw[this]
   }
   have s2: perp_through real_line p = Line_through h0 := by{
     symm

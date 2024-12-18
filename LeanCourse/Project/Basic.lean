@@ -667,6 +667,17 @@ lemma noncolinear_self(a b c : Point)(h: noncolinear a b c): a ≠ b ∧ b ≠ c
       _=  ({re := (x*z+y*v)/(z^2+v^2), im := (-x*v+y*z)/(z^2+v^2)} : ℂ) := by simp; ring_nf; tauto
 }
 
+@[simp] lemma wtf5(x y : ℝ): -({re := x, im := y}:ℂ) = ({re := -x, im := -y}:ℂ) := by{
+  have : (-1 : ℂ) = ({re := -1, im := 0}:ℂ) := by{
+    refine Complex.ext_iff.mpr ?_
+    simp
+  }
+  calc
+    -({re := x, im := y}:ℂ)= -1 * ({re := x, im := y}:ℂ) := by{ring}
+      _= ({re := -1, im := 0}:ℂ)*({re := x, im := y}:ℂ) := by{rw[this]}
+      _= ({re := -x, im := -y}:ℂ) := by{simp}
+}
+
 
 /-The alternative (nonsymmetric) notion of colinear is now the following:-/
 lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
