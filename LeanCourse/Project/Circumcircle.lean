@@ -221,6 +221,38 @@ lemma perp_bisector_foot{a b p : Point}(ab : a ≠ b)(hp : Lies_on p (perp_bisec
   exact pmidpoint_lies_on_perp_bisector ab
 }
 
+lemma foot_on_perp_bisector_left{a b : Point}(ab : a ≠ b): foot a (perp_bisector ab) = pmidpoint a b := by{
+  symm
+  apply foot_unique
+  constructor
+  · exact pmidpoint_lies_on_perp_bisector ab
+  have : Line_through ab = (perp_through (perp_bisector ab) a) := by{
+    apply perp_through_unique
+    constructor
+    · apply perp_symm
+      exact perp_bisector_is_perp ab
+    exact line_through_mem_left ab
+  }
+  rw[← this]
+  exact pmidpoint_lies_on ab
+}
+
+lemma foot_on_perp_bisector_right{a b : Point}(ab : a ≠ b): foot b (perp_bisector ab) = pmidpoint a b := by{
+  symm
+  apply foot_unique
+  constructor
+  · exact pmidpoint_lies_on_perp_bisector ab
+  have : Line_through ab = (perp_through (perp_bisector ab) b) := by{
+    apply perp_through_unique
+    constructor
+    · apply perp_symm
+      exact perp_bisector_is_perp ab
+    exact line_through_mem_right ab
+  }
+  rw[← this]
+  exact pmidpoint_lies_on ab
+}
+
 /-Now the universal property:-/
 
 theorem perp_bisector_def (a b p : Point)(ab : a ≠ b): (point_abs p a = point_abs p b) ↔ (Lies_on p (perp_bisector ab)) := by{
