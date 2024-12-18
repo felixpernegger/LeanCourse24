@@ -216,11 +216,14 @@ lemma reflection_point_line_real_line(a : Point): reflection_point_line a real_l
   ring
 }
 
-#check pmidpoint_lies_on
-#check pmidpoint_lies_on_perp_bisector
 lemma reflection_perp_bisector{a b : Point}(ab : a ≠ b): reflection_point_line a (perp_bisector ab) = b := by{
   unfold reflection_point_line
   rw[foot_perp_bisector_left ab, reflection_point_point_pmidpoint']
+}
+
+lemma reflection_perp_bisector'{a b : Point}(ab : a ≠ b): reflection_point_line b (perp_bisector ab) = a := by{
+  have ba: b ≠ a := by{exact id (Ne.symm ab)}
+  have : perp_bisector ba = perp_bisector ab := by{exact?}
 }
 
 

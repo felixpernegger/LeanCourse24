@@ -202,6 +202,11 @@ lemma pmidpoint_foot_perp_bisector{a b : Point}(ab : a ≠ b): foot (pmidpoint a
   exact foot_point_on_line (pmidpoint_lies_on_perp_bisector ab)
 }
 
+lemma perp_bisector_symm{a b : Point}(ab : a ≠ b): perp_bisector (Ne.symm (ab)) = perp_bisector ab := by{
+  unfold perp_bisector
+  rw[pmidpoint_symm,line_through_symm]
+}
+
 lemma perp_bisector_foot{a b p : Point}(ab : a ≠ b)(hp : Lies_on p (perp_bisector ab)) : foot p (Line_through ab) = pmidpoint a b := by{
   symm
   apply foot_unique
