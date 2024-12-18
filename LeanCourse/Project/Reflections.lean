@@ -38,10 +38,12 @@ lemma reflection_point_point_same_imp_same {a b : Point}(h : a = reflection_poin
   simp at *
   have s1:  ({ re := a1, im := a2 }:ℂ).re = (2 * { re := b1, im := b2 } + -({ re := a1, im := a2 } : ℂ)).re := by{
     nth_rw 1[h]
+    rfl
   }
   simp at s1
   have s2:  ({ re := a1, im := a2 }:ℂ).im = (2 * { re := b1, im := b2 } + -({ re := a1, im := a2 } : ℂ)).im := by{
     nth_rw 1[h]
+    rfl
   }
   simp at s2
   constructor
