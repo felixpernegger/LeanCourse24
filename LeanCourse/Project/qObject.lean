@@ -81,6 +81,27 @@ def qLine_through : Point → Point → Line :=
   contradiction
 }
 
+/-Also the real line is the line through zero and one:-/
+
+lemma zero_lies_on_real_line: Lies_on zero real_line := by{
+  unfold zero Lies_on real_line
+  simp
+}
+
+lemma one_lies_on_real_line: Lies_on one real_line := by{
+  unfold one Lies_on real_line
+  simp
+}
+
+lemma zero_neq_one: zero ≠ one := by{unfold zero one;simp}
+
+lemma real_line_line_through: real_line = Line_through zero_neq_one := by{
+  apply line_through_unique
+  constructor
+  exact one_lies_on_real_line
+  exact zero_lies_on_real_line
+}
+
 /-with this construction we preserve some important properties:-/
 
 lemma qline_through_symm (a b : Point): qLine_through a b = qLine_through b a := by{

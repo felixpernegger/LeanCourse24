@@ -794,3 +794,36 @@ lemma point_line_abs_zero_iff{p : Point}{L : Line} : point_line_abs p L = 0 ↔ 
   unfold point_line_abs
   nth_rw 1[hp, point_abs_self (foot p L)]
 }
+
+
+/-ALso note that the foot of a point onto the real line is its real part:-/
+
+lemma foot_real_line(p : Point): foot p real_line = Point.mk (p.x.re) := by{
+  symm
+  apply foot_unique
+  constructor
+  unfold real_line Lies_on
+  simp
+
+  by_cases h0: p = Point.mk (p.x.re)
+  rw[← h0]
+  exact point_lies_on_perp_through real_line p
+
+  have s1: Perpendicular (Line_through h0) real_line := by{
+    have s3: real_line = qLine_through zero one := by{
+      have : zero ≠ one := by{unfold one zero; simp}
+      simp [*]
+      apply line_through_unique
+
+    }
+  }
+  have s2: perp_through real_line p = Line_through h0 := by{
+    symm
+    apply perp_through_unique
+    constructor
+    exact perp_symm s1
+    exact line_through_mem_left h0
+  }
+  rw[s2]
+  exact line_through_mem_right h0
+}

@@ -34,6 +34,15 @@ lemma linear_trans_point_id_simp(p : Point){a b : Point}(ah : a = one)(bh : b = 
 def lt_inv1 : Point → Point → Point :=
   fun a b ↦ recip a
 
+lemma lt_inv1_not_zero(a b : Point)(ah: a ≠ zero): lt_inv1 a b ≠ zero := by{
+  contrapose ah
+  simp at *
+  unfold zero lt_inv1 recip at *
+  ext
+  simp at *
+  assumption
+}
+
 def lt_inv2 : Point → Point → Point :=
   fun a b ↦ pneg (pmul b (recip a))
 
@@ -292,6 +301,22 @@ lemma linear_trans_line_comp(a b : Point)(ah : a ≠ zero)(c d : Point)(ch : c �
   exact linear_trans_set_comp a b c d L.range
 }
 
+lemma linear_trans_line_inv_left(a b : Point)(ah : a ≠ zero)(L : Line): Linear_trans_line (lt_inv1 a b) (lt_inv2 a b) (Linear_trans_line a b L) = L := by{
+  unfold Linear_trans_line
+  simp [*]
+  have : lt_inv1 a b ≠ zero := by{
+    contrapose ah
+    simp at *
+    unfold zero lt_inv1 recip at *
+    simp at *
+    ext
+    simp
+    assumption
+  }
+  simp [*]
+  simp_rw[linear_trans_set_inv_left a b ah L.range]
+}
+
 lemma linear_trans_set_mem(a b p : Point)(ah : a ≠ zero)(S : Set Point): Linear_trans_point a b p ∈ Linear_trans_set a b S ↔ p ∈ S := by{
   constructor
   intro h
@@ -379,9 +404,48 @@ lemma linear_trans_perp(a b : Point)(ah : a ≠ zero)(L R : Line): Perpendicular
   assumption
 
   constructor
-  sorry
-  sorry
-  sorry
+  · rw[← linear_trans_line_inv_left a b ah L]
+    exact (linear_trans_lies_on (lt_inv1 a b) (lt_inv2 a b) (lt_inv1_not_zero a b ah) u (Linear_trans_line a b L)).2 uh
+  constructor
+  · rw[← linear_trans_line_inv_left a b ah L]
+    exact (linear_trans_lies_on (lt_inv1 a b) (lt_inv2 a b) (lt_inv1_not_zero a b ah) v (Linear_trans_line a b L)).2 vh
+  constructor
+  · rw[← linear_trans_line_inv_left a b ah R]
+    exact (linear_trans_lies_on (lt_inv1 a b) (lt_inv2 a b) (lt_inv1_not_zero a b ah) s (Linear_trans_line a b R)).2 sh
+  constructor
+  · rw[← linear_trans_line_inv_left a b ah R]
+    exact (linear_trans_lies_on (lt_inv1 a b) (lt_inv2 a b) (lt_inv1_not_zero a b ah) r (Linear_trans_line a b R)).2 rh
+
+  exact (linear_trans_perp_points (lt_inv1 a b) (lt_inv2 a b) (lt_inv1_not_zero a b ah) u v s r).2 hh
+
+
+  intro h
+
+  unfold Perpendicular at *
+  obtain ⟨u,v,s,r,uv,sr,uh,vh,sh,rh,hh⟩ := h
+  use Linear_trans_point a b u
+  use Linear_trans_point a b v
+  use Linear_trans_point a b s
+  use Linear_trans_point a b r
+  constructor
+  contrapose uv
+  simp at *
+  exact linear_trans_point_inj a b ah uv
+
+  constructor
+  contrapose sr
+  simp at *
+  exact linear_trans_point_inj  a b ah sr
+
+  constructor
+  · exact (linear_trans_lies_on a b ah u L).2 uh
+  constructor
+  · exact (linear_trans_lies_on a b ah v L).2 vh
+  constructor
+  · exact (linear_trans_lies_on a b ah s R).2 sh
+  constructor
+  · exact (linear_trans_lies_on a b ah r R).2 rh
+  exact (linear_trans_perp_points a b ah u v s r).mpr hh
 }
 
 /-Thus perp_throughs stay the same:-/
@@ -407,6 +471,22 @@ lemma linear_trans_foot(a b : Point)(ah : a ≠ zero)(p : Point)(L : Line): Line
   rw[← linear_trans_perp_through]
   apply (linear_trans_lies_on a b ah (foot p L) (perp_through L p)).2
   · exact foot_on_perp L p
+  assumption
+}
+
+/-Now we show reflections stay the same:-/
+
+lemma linear_trans_reflection_point_point(a b : Point)(ah : a ≠ zero)(p q : Point): Linear_trans_point a b (reflection_point_point p q) = reflection_point_point (Linear_trans_point a b p) (Linear_trans_point a b q) := by{
+  unfold Linear_trans_point reflection_point_point padd pmul p_scal_mul pneg
+  simp
+  ring
+}
+
+/-And using the foot result above this works for line reflections:-/
+
+lemma linear_trans_reflection_point_line(a b : Point)(ah : a ≠ zero)(p : Point)(L : Line): Linear_trans_point a b (reflection_point_line p L) = reflection_point_line (Linear_trans_point a b p) (Linear_trans_line a b L) := by{
+  unfold reflection_point_line
+  rw[← linear_trans_foot a b ah p L, linear_trans_reflection_point_point]
   assumption
 }
 

@@ -180,7 +180,7 @@ lemma arg_real{t:ℂ}(h: t.im = 0): Complex.arg t = 0 ∨ Complex.arg t = Real.p
   exact Complex.arg_ofReal_of_neg h0
 }
 
-theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c ≠ b): Angle a b c = Real.pi := by{
+theorem angle_in_between{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c ≠ b): Angle a b c = Real.pi := by{
   have col: colinear a c b := by{exact in_between_imp_colinear h}
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
   have basub: b.x-a.x ≠ 0 := by{exact sub_neq_zero (id (Ne.symm ha))}
@@ -363,7 +363,7 @@ theorem in_between_angle{a b c : Point}(h : in_between a c b)(ha: a ≠ b)(hc: c
   rw[h0] -- lol
 }
 
-theorem not_in_between_angle{a b c : Point}(h : in_between b c a)(ha : a ≠ b)(hc : c ≠ b): Angle a b c = 0 := by{
+theorem angle_not_in_between'{a b c : Point}(h : in_between b c a)(ha : a ≠ b)(hc : c ≠ b): Angle a b c = 0 := by{
   have col: colinear a c b := by{apply colinear_perm13; exact in_between_imp_colinear h}
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ha}
   have basub: b.x-a.x ≠ 0 := by{exact sub_neq_zero (id (Ne.symm ha))}
@@ -519,6 +519,31 @@ theorem not_in_between_angle{a b c : Point}(h : in_between b c a)(ha : a ≠ b)(
   simp at l
   rw[l]
   field_simp
+}
+
+/-Now we state last theorem in a slightly nicer version:-/
+
+theorem angle_not_in_between{a b c : Point}(h: colinear a b c)(h' : ¬in_between a c b)(ha : a ≠ b)(hc : c ≠ b): Angle a b c = 0 := by{
+  apply colinear_perm23 at h
+  obtain h0|h0|h0 := colinear_imp_in_between2 a c b h
+  · tauto
+  · apply in_between_symm at h0
+    exact angle_not_in_between' h0 ha hc
+  rw[angle_symm, angle_not_in_between' h0 hc ha]
+  simp
+}
+
+
+/-As a collorary we obtain the following two results:-/
+lemma angle_in_between_out{a b c p : Point}(h: in_between a c b)(ha : a ≠ b)(hc : c ≠ b)(hp : p ≠ b): Angle c b p = Real.pi + Angle a b p := by{
+  rw[angle_add hc ha hp]
+  apply in_between_symm at h
+  rw[angle_in_between h hc ha]
+}
+
+lemma angle_not_in_between_out{a b c p : Point}(h : colinear a b c)(h' : ¬in_between a c b)(ha : a ≠ b)(hc : c ≠ b)(hp : p ≠ b): Angle c b p = Angle a b p := by{
+  rw[angle_add hc ha hp, angle_symm, angle_not_in_between h h' ha hc]
+  simp
 }
 
 /-If the shift points, the angle between them stay the same:-/
@@ -718,6 +743,34 @@ theorem angle_reflection_point(a b c x : Point):  Angle (reflection_point_point 
   }
   field_simp
   ring
+}
+
+/-To show that angles are the same if we reflect them along aribitrary lines we use a trick as follows:
+First we show angles are preserved under linear transformation, so the take point and a line to the real line, then the
+reflection is just conjugating and turn back.
+We will use this to show isoceles triangles have same angles at the base.-/
+
+theorem linear_trans_angle(a b : Point)(ah: a ≠ zero)(u v w : Point): Angle (Linear_trans_point a b u) (Linear_trans_point a b v) (Linear_trans_point a b w) = Angle u v w := by{
+  unfold Angle Linear_trans_point padd pmul
+  simp
+  have goal:((a.x * u.x - a.x * v.x) / (a.x * w.x - a.x * v.x)) = (u.x-v.x)/(w.x-v.x) := by{
+    have a0: a.x ≠ 0 := by{exact fun a_1 ↦ id (Ne.symm ah) (congrArg Point.mk (id (Eq.symm a_1)))}
+    by_cases wv: w=v
+    rw[wv]
+    simp
+
+    have : w.x - v.x ≠ 0 := by{exact sub_neq_zero wv}
+    have : a.x*w.x-a.x*v.x = a.x*(w.x-v.x) := by{ring}
+    rw[this]
+    have : a.x * (w.x-v.x) ≠ 0 := by{
+      by_contra h0
+      simp at h0
+      tauto
+    }
+    field_simp
+    ring
+  }
+  rw[goal]
 }
 
 theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (reflection_point_line c L) (reflection_point_line b L) (reflection_point_line a L) := by{
