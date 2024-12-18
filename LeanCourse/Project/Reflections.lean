@@ -183,6 +183,30 @@ lemma reflection_point_line_abs(a : Point)(L : Line): point_line_abs (reflection
   rw[← reflection_point_line_pmidpoint a L, point_abs_pmidpoint,pmidpoint_symm, point_abs_pmidpoint,point_abs_symm]
 }
 
+/-Reflection along the real line is the same as conjugating:-/
+lemma reflection_point_line_real_line(a : Point): reflection_point_line a real_line = pconj a := by{
+  unfold reflection_point_line
+  rw[foot_real_line]
+  unfold reflection_point_point padd p_scal_mul pneg pconj conj
+  simp
+  obtain ⟨a1,a2⟩ := a
+  simp
+  have : (starRingEnd ℂ) { re := a1, im := a2 } = { re := a1, im := -a2} := by{rfl}
+  rw[this]
+  have : 2 * (↑a1:ℂ) = 2*{re := a1, im := 0} := by{
+    simp
+    exact rfl
+  }
+  rw[this]
+  have : 2*{re := a1, im := 0} = ({re := 2*a1, im := 0}:ℂ) := by{
+    refine Complex.ext_iff.mpr ?_
+    simp
+  }
+  rw[this]
+  simp
+  ring
+}
+
 /-this is perp in the following sense:-/
 
 lemma reflection_point_line_perp_through{a : Point}{L : Line}(h: ¬Lies_on a L): qLine_through (reflection_point_line a L) a = perp_through L a := by{
