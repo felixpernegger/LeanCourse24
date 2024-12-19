@@ -151,5 +151,6 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
     nth_rw 1[g]
     simp
   }
+  unfold Angle at *
   sorry
 }

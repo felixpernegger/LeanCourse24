@@ -130,8 +130,9 @@ lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2
 
 /-the halt of an angle is not unique!!-/
 
-lemma half_arg{z : ℂ}{t : ℝ}(h: z.arg + z.arg = t): z.arg = (↑(t/2): Real.Angle) ∨ z.arg = (↑(t/2 + Real.pi): Real.Angle) := by{
+lemma half_arg{z : ℂ}{t : ℝ}(h: (↑z.arg: Real.Angle) + (↑z.arg: Real.Angle) = t): z.arg = (↑(t/2): Real.Angle) ∨ z.arg = (↑(t/2 + Real.pi): Real.Angle) := by{
   #check Real.Angle.angle_eq_iff_two_pi_dvd_sub
+
   sorry
 }
 
