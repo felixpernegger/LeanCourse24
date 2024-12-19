@@ -117,6 +117,16 @@ lemma perp_points_self{a b c d : Point}(h : a = b ∨ c = d): perp_points a b c 
   simp
 }
 
+lemma perp_points_self_left{a b c : Point}: perp_points a a b c := by{
+  apply perp_points_self
+  tauto
+}
+
+lemma perp_points_self_right{a b c : Point}: perp_points a b c c := by{
+  apply perp_points_self
+  tauto
+}
+
 /-This is, in a way, transitive / we can stay on a line:-/
 
 lemma perp_on_line{a b c d p : Point}(h:perp_points a b c d)(ab: a ≠ b)(ph: colinear a b p): perp_points b p c d := by{

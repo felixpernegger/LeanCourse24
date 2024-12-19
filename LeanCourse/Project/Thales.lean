@@ -72,12 +72,41 @@ lemma thales_mem(a b p : Point): Lies_on_circle p (Thales_circle a b) ↔ point_
 /-Now we feel brave enough to have a go at the theorem:-/
 #check posrad_not_center
 
-lemma thales_abs_left(a b p : Point)(hp : Lies_on_circle p (Thales_circle a b)): point_abs (pmidpoint a b) p = point_abs (pmidpoint a b) a := by{
+lemma thales_abs_left{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): point_abs (pmidpoint a b) p = point_abs (pmidpoint a b) a := by{
   rw[(thales_mem a b p).1 hp, ← point_abs_pmidpoint, point_abs_symm]
 }
 
-lemma thales_abs_right(a b p : Point)(hp : Lies_on_circle p (Thales_circle a b)): point_abs (pmidpoint a b) p = point_abs (pmidpoint a b) b := by{
+lemma thales_abs_right{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): point_abs (pmidpoint a b) p = point_abs (pmidpoint a b) b := by{
   rw[(thales_mem a b p).1 hp]
   nth_rw 2[point_abs_symm]
   rw[pmidpoint_symm, point_abs_pmidpoint, point_abs_symm]
+}
+
+lemma thales_self(a : Point): ¬PosRad (Thales_circle a a) := by{
+  unfold PosRad
+  simp
+  rw[thales_radius']
+  simp
+  exact point_abs_self a
+}
+
+lemma thales_same_angles_left{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): Angle (pmidpoint a b) a p = Angle a p (pmidpoint a b) := by{
+  exact same_abs_angle (Eq.symm (thales_abs_left hp))
+}
+
+lemma thales_same_angles_right{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): Angle (pmidpoint a b) b p = Angle b p (pmidpoint a b) := by{
+  exact same_abs_angle (Eq.symm (thales_abs_right hp))
+}
+
+theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): perp_points p a p b := by{
+  by_cases ab: a=b
+  rw[ab]
+  apply perp_points_self
+  simp
+  have : ¬PosRad (Thales_circle a b) := by{
+    rw[ab]
+    exact thales_self b
+  }
+  #check zero
+  sorry
 }
