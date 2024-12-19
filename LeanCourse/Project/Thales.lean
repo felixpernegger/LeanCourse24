@@ -138,10 +138,11 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
   nth_rw 2[angle_symm]
   nth_rw 4[angle_symm]
   rw[← thales_same_angles_right hp]
-  have : a ≠ pmidpoint a b := by{exact?}
+  have t1: p ≠ pmidpoint a b := by{exact thales_neq_midpoint ab hp}
   have s1: Angle (pmidpoint a b) a p = Angle b a p := by{
     #check pmidpoint_in_between
-    #check angle_in_between_out (pmidpoint_in_between a b)
+    #check angle_in_between_out
+    #check angle_in_between_out (pmidpoint_in_between a b) (Ne.symm (pmidpoint_diff_left ab)) (Ne.symm (pmidpoint_diff_right ab)) (thales_neq_midpoint ab hp)
     #check angle_not_in_between_out
     rw[angle_in_between_out]
   }

@@ -58,6 +58,20 @@ lemma pmidpoint_in_between (a b : Point): in_between a b (pmidpoint a b) := by{
   ring
 }
 
+lemma pmidpoint_not_in_between_left{a b : Point}(ab : a ≠ b): ¬in_between b (pmidpoint a b) a := by{
+  contrapose ab
+  simp at *
+  unfold in_between at ab
+  rw[pmidpoint_abs_left, pmidpoint_symm, pmidpoint_abs_left, point_abs_symm b a] at ab
+  simp at ab
+  exact abs_zero_imp_same a b ab
+}
+
+lemma pmidpoint_not_in_between_right{a b : Point}(ab : a ≠ b): ¬in_between a (pmidpoint a b) b := by{
+  rw[pmidpoint_symm]
+  exact pmidpoint_not_in_between_left (id (Ne.symm ab))
+}
+
 lemma pmidpoint_colinear (a b : Point): colinear a b (pmidpoint a b) := by{
   exact in_between_imp_colinear (pmidpoint_in_between a b)
 }
