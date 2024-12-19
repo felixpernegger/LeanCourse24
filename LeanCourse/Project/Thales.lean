@@ -70,7 +70,11 @@ lemma thales_mem(a b p : Point): Lies_on_circle p (Thales_circle a b) ↔ point_
 }
 
 /-Now we feel brave enough to have a go at the theorem:-/
-#check posrad_not_center
+
+lemma thales_neq_midpoint{a b p : Point}(ab: a ≠ b)(hp : Lies_on_circle p (Thales_circle a b)): p ≠ pmidpoint a b := by{
+  rw[← thales_center]
+  exact posrad_not_center (thales_posrad ab) hp
+}
 
 lemma thales_abs_left{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): point_abs (pmidpoint a b) p = point_abs (pmidpoint a b) a := by{
   rw[(thales_mem a b p).1 hp, ← point_abs_pmidpoint, point_abs_symm]
@@ -90,6 +94,14 @@ lemma thales_self(a : Point): ¬PosRad (Thales_circle a a) := by{
   exact point_abs_self a
 }
 
+lemma thales_self_center(a : Point): Center (Thales_circle a a) = a := by{
+  rw[thales_center, pmidpoint_self]
+}
+
+lemma thales_self_mem{a p : Point}(h : Lies_on_circle p (Thales_circle a a)): p = a := by{
+  rw[lies_on_not_posrad (thales_self a) h, thales_self_center]
+}
+
 lemma thales_same_angles_left{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): Angle (pmidpoint a b) a p = Angle a p (pmidpoint a b) := by{
   exact same_abs_angle (Eq.symm (thales_abs_left hp))
 }
@@ -100,13 +112,42 @@ lemma thales_same_angles_right{a b p : Point}(hp : Lies_on_circle p (Thales_circ
 
 theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b)): perp_points p a p b := by{
   by_cases ab: a=b
-  rw[ab]
-  apply perp_points_self
-  simp
-  have : ¬PosRad (Thales_circle a b) := by{
-    rw[ab]
-    exact thales_self b
+  · rw[ab]
+    rw[ab] at hp
+    rw[thales_self_mem hp]
+    apply perp_points_self
+    tauto
+
+  by_cases ah: a = p
+  · apply perp_points_self
+    tauto
+  by_cases bh: b = p
+  · apply perp_points_self
+    tauto
+
+  apply (angle_perp_points p a b ah bh).2
+  have : Angle a p b = Angle a p (pmidpoint a b) + Angle (pmidpoint a b) p b := by{
+    rw[angle_add]
+    assumption
+    symm
+    exact thales_neq_midpoint ab hp
+    assumption
   }
-  #check zero
-  sorry
+  rw[this]
+  rw[← thales_same_angles_left hp]
+  nth_rw 2[angle_symm]
+  nth_rw 4[angle_symm]
+  rw[← thales_same_angles_right hp]
+  have : a ≠ pmidpoint a b := by{exact?}
+  have s1: Angle (pmidpoint a b) a p = Angle b a p := by{
+    #check pmidpoint_in_between
+    #check angle_in_between_out (pmidpoint_in_between a b)
+    #check angle_not_in_between_out
+    rw[angle_in_between_out]
+  }
+  have s2: Angle (pmidpoint a b) b p = Angle a b p := by{
+    sorry
+  }
+  rw[s1,s2]
+
 }

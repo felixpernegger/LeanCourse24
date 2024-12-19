@@ -690,6 +690,57 @@ lemma noncolinear_self(a b c : Point)(h: noncolinear a b c): a ≠ b ∧ b ≠ c
       _= ({re := -x, im := -y}:ℂ) := by{simp}
 }
 
+@[simp] lemma wtf6(x y: ℝ): 2*({re := x, im := y}:ℂ)={re := 2*x, im := 2*y} := by{
+  have : 2 = ({re := 2, im := 0}:ℂ) := by{exact rfl}
+  rw[this]
+  simp
+}
+
+@[simp] lemma wtf7(x y : ℝ): ({re := x, im := y}:ℂ)/2 = ({re := x/2, im := y/2}:ℂ) := by{
+  have : ({re := x, im := y}:ℂ)/2 = 1/2 * ({re := x, im := y}:ℂ) := by{ring}
+  rw[this]
+  norm_cast
+  have : 1/2 = ({re := 1/2, im := 0}:ℂ) := by{
+    refine Eq.symm (eq_one_div_of_mul_eq_one_right ?h)
+    rw[wtf6]
+    ring_nf
+    rfl
+  }
+  rw[this]
+  simp
+  ring_nf
+  tauto
+}
+
+lemma pmidpoint_same_imp_same_left{a b : Point}(h : pmidpoint a b = a): a = b := by{
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨b1,b2⟩ := b
+  unfold pmidpoint at h
+  simp at *
+  obtain ⟨h1,h2⟩ := h
+  constructor
+  linarith
+  linarith
+}
+
+lemma pmidpoint_same_imp_same_right{a b : Point}(h : pmidpoint a b = b): a = b := by{
+  symm
+  rw[pmidpoint_symm] at h
+  exact pmidpoint_same_imp_same_left h
+}
+
+lemma pmidpoint_diff_left{a b : Point}(ab : a ≠ b): pmidpoint a b ≠ a := by{
+  contrapose ab
+  simp at *
+  exact (pmidpoint_same_imp_same_left ab)
+}
+
+lemma pmidpoint_diff_right{a b : Point}(ab : a ≠ b): pmidpoint a b ≠ b := by{
+  contrapose ab
+  simp at *
+  exact (pmidpoint_same_imp_same_right ab)
+}
+
 
 /-The alternative (nonsymmetric) notion of colinear is now the following:-/
 lemma colinear_alt (a b c : Point): colinear a b c ↔ ((a.x-b.x)/(a.x-c.x)).im = 0 := by{
