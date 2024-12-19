@@ -152,5 +152,12 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
     simp
   }
   unfold Angle at *
-  sorry
+  obtain u|u := half_arg u
+  · left
+    assumption
+  right
+  rw[u]
+  refine Real.Angle.angle_eq_iff_two_pi_dvd_sub.mpr ?_
+  use 1
+  ring
 }
