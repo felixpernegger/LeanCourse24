@@ -161,3 +161,39 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
   use 1
   ring
 }
+
+/-The inverse also holds. We first show rectangles have same lengths in a specific way:-/
+
+lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Lies_on a L)(bh : Lies_on b L): point_abs a (foot a R) = point_abs b (foot b R) ∧ point_abs a b = point_abs (foot a R) (foot b R) := by{
+  --pythagoras twice
+  #check pythagoras_points
+  have p1: perp_points a b a (foot a R) := by{
+    by_cases ab: a=b
+    rw[ab]
+    unfold perp_points
+    simp
+
+    have s1: L = Line_through ab := by{
+      apply line_through_unique
+      tauto
+    }
+    by_cases a0: Lies_on a R
+    · rw[foot_point_on_line]
+      unfold perp_points
+      simp
+      assumption
+    have hL: Perpendicular L (perp_through R a) := by{
+      apply parallel_perp R
+
+      apply parallel_symm
+      assumption
+
+      exact perp_through_is_perp R a
+    }
+    rw[← foot_line_through a0,s1] at hL
+    apply perp_points_perm_back
+    exact (perp_quot ab (foot_point_not_on_line a0)).1 hL
+  }
+  --repeat for other corners
+  sorry
+}
