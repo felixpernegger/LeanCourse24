@@ -22,5 +22,6 @@ lemma thales_center(a b : Point): Center (Thales_circle a b) = pmidpoint a b := 
 }
 
 lemma thales_radius(a b : Point): Radius (Thales_circle a b)= 1/2 * point_abs a b := by{
-
+  unfold Thales_circle
+  nth_rw1[radius_unique (pmidpoint a b) (1 /2 * point_abs a b, Thales_circle.proof_2 a b)]
 }

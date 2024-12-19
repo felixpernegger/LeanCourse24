@@ -579,12 +579,12 @@ def Circle_around{a b c : Point}(h : noncolinear a b c): CCircle :=
 
 lemma circle_around_center{a b c : Point}(h : noncolinear a b c): Center (Circle_around h) = pCenter h := by{
   unfold Circle_around
-  exact Eq.symm (center_unique (pCenter h) ⟨pRadius h, pradius_nonneg h⟩)
+  exact (center_unique (pCenter h) ⟨pRadius h, pradius_nonneg h⟩)
 }
 
 lemma circle_around_radius{a b c : Point}(h : noncolinear a b c): Radius (Circle_around h) = pRadius h := by{
   unfold Circle_around
-  rw [← radius_unique]
+  rw [radius_unique]
 }
 
 /-And really contains all points:-/
@@ -648,7 +648,7 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
     tauto
   }
   have t: Center (Circle_through z R) = Center (Circle_around h) := by{
-    have : Center (Circle_through z R) = z := by{exact Eq.symm (center_unique z R)}
+    have : Center (Circle_through z R) = z := by{exact (center_unique z R)}
     rw[this, circle_around_center h]
     assumption
   }
