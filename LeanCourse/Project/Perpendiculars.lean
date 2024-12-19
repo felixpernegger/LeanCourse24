@@ -770,16 +770,6 @@ lemma foot_explicit(p : Point){a b : Point}(ab : a ≠ b): foot p (Line_through 
   rw[this]
   clear this
   simp
-  have {x y : ℝ}: 2*({ re := x, im := y}: ℂ)= ({ re := 2*x, im := 2*y}:ℂ) := by{
-    have: 2 = ({ re := 2, im := 0} : ℂ) := by{
-      rfl
-    }
-    rw[this]
-    simp
-  }
-  repeat
-    rw[this]
-    simp
   ring_nf
   rfl
   }
