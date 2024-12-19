@@ -244,7 +244,7 @@ lemma anglesum_points3{a b c : Point}(h : pairwise_different_point3 a b c): Angl
 }
 
 /-Or in other words once more:-/
-lemma angle_sum_point1'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle a b c = Angle b c a + Angle c a b := by{
+lemma anglesum_point1'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle a b c = Angle b c a + Angle c a b := by{
   rw[anglesum_points1]
   simp
   have : ↑Real.pi + (Angle c a b + (Angle b c a + ↑Real.pi)) = ↑Real.pi + ↑Real.pi + Angle c a b + Angle b c a := by{
@@ -262,7 +262,7 @@ lemma angle_sum_point1'{a b c : Point}(h : pairwise_different_point3 a b c): Rea
   assumption
 }
 
-lemma angle_sum_point2'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle b c a = Angle c a b + Angle a b c := by{
+lemma anglesum_point2'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle b c a = Angle c a b + Angle a b c := by{
   rw[anglesum_points2]
   simp
   rw[add_comm]
@@ -273,7 +273,7 @@ lemma angle_sum_point2'{a b c : Point}(h : pairwise_different_point3 a b c): Rea
   assumption
 }
 
-lemma angle_sum_point3'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle c a b = Angle a b c + Angle b c a := by{
+lemma anglesum_point3'{a b c : Point}(h : pairwise_different_point3 a b c): Real.pi +-Angle c a b = Angle a b c + Angle b c a := by{
   rw[anglesum_points3]
   simp
   rw[add_comm]

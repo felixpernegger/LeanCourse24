@@ -126,20 +126,46 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
     tauto
 
   apply (angle_perp_points p a b ah bh).2
-  have : Angle a p b = Angle a p (pmidpoint a b) + Angle (pmidpoint a b) p b := by{
+  have g: Angle a p b = Angle a p (pmidpoint a b) + Angle (pmidpoint a b) p b := by{
     rw[angle_add]
     assumption
     symm
     exact thales_neq_midpoint ab hp
     assumption
   }
-  rw[this]
-  rw[← thales_same_angles_left hp]
+  rw[g]
+  #check angle_pmidpoint_right
+  #check angle_pmidpoint_left
+  rw[← thales_same_angles_left hp] at *
   nth_rw 2[angle_symm]
   nth_rw 4[angle_symm]
-  rw[← thales_same_angles_right hp]
+  nth_rw 3[angle_symm] at g
+  rw[← thales_same_angles_right hp] at *
   have t1: p ≠ pmidpoint a b := by{exact thales_neq_midpoint ab hp}
-  rw[angle_pmidpoint_left ab ah, angle_pmidpoint_right ab bh]
-  #check sum_angle
+  rw[angle_pmidpoint_left ab ah] at *
+  rw[angle_pmidpoint_right ab bh] at *
+  nth_rw 2[angle_symm]
+  nth_rw 4[angle_symm]
+  nth_rw 3[angle_symm] at g
+  simp at *
+  have z: pairwise_different_point3 a p b := by{
+    unfold pairwise_different_point3
+    tauto
+  }
+  #check angle_sum_point1'
+  rw[← angle_sum_point1' z] at g
+
+
+  /-rw[angle_pmidpoint_left ab ah, angle_pmidpoint_right ab bh]
+  have t2: pairwise_different_point3 a p b := by{
+    unfold pairwise_different_point3
+    tauto
+  }
+  rw[anglesum_points3]
+  have t2: pairwise_different_point3 a b p := by{
+    unfold pairwise_different_point3
+    tauto
+  }
+  -/
 
 }
