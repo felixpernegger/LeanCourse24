@@ -623,6 +623,16 @@ lemma angle_not_in_between_out{a b c p : Point}(h : colinear a b c)(h' : ¬in_be
   simp
 }
 
+/-To save some time, here is a specific use case:-/
+lemma angle_pmidpoint_right{a b p : Point}(ab : a ≠ b)(hb: b ≠ p): Angle (pmidpoint a b) b p = Angle a b p := by{
+  exact angle_not_in_between_out (pmidpoint_colinear a b) (pmidpoint_not_in_between_right ab) ab (pmidpoint_diff_right ab) (Ne.symm hb)
+}
+
+lemma angle_pmidpoint_left{a b p : Point}(ab : a ≠ b)(ha: a ≠ p) : Angle (pmidpoint a b) a p = Angle b a p := by{
+  exact angle_not_in_between_out (colinear_perm12 a b (pmidpoint a b) (pmidpoint_colinear a b)) (pmidpoint_not_in_between_left ab) (Ne.symm ab) (pmidpoint_diff_left ab) (Ne.symm ha)
+}
+--Angle (pmidpoint a b) b p = Angle a b p
+
 /-If the shift points, the angle between them stay the same:-/
 
 lemma angle_shift(a b c v : Point): Angle (padd a v) (padd b v) (padd c v) = Angle a b c := by{
