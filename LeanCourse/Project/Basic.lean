@@ -269,6 +269,18 @@ lemma point_abs_pos (a b : Point): 0 ≤ point_abs a b := by{
   exact AbsoluteValue.nonneg Complex.abs (a.x - b.x)
 }
 
+lemma point_abs_neq{a b}(ab : a ≠ b): 0 < point_abs a b := by{
+  by_contra h0
+  simp at h0
+  have : point_abs a b = 0 := by{
+    apply le_antisymm
+    assumption
+    exact point_abs_pos a b
+  }
+  have : a = b := by{exact abs_zero_imp_same a b this}
+  contradiction
+}
+
 lemma point_abs_self (a : Point) : point_abs a a = 0 := by{
   unfold point_abs
   ring_nf
