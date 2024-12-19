@@ -8,15 +8,14 @@ noncomputable section
 
 --Angles
 
-#check Complex.arg
+
 
 /-We now FINALLY deifne angles (I pretty much did everything you can reasonably do without angles lol)-/
 
 /-We will use angles only as directed angles, furthermore, for the time being,
 we only define angles between three points. Definining angles between lines is a bit tricky.
 -/
-#check Complex.arg_mul_coe_angle
-#check Real.Angle
+
 def Angle : Point → Point → Point → Real.Angle :=
   fun a b c ↦ Complex.arg ((a.x-b.x)/(c.x-b.x))
 
