@@ -908,7 +908,7 @@ theorem same_abs_angle{a b p : Point}(h: point_abs p a = point_abs p b): Angle p
 
 /-Therefore in a circle we have same angles to the center:-/
 lemma same_angles_circle_center{a b : Point}{C : CCircle}(ha: Lies_on_circle a C)(hb: Lies_on_circle b C): Angle (Center C) a b = Angle a b (Center C) := by{
-  apply same_abs_angle (point_abs_lies_on_circle_same ha hb)
+  exact same_abs_angle (point_abs_lies_on_circle_same ha hb)
 }
 
 
