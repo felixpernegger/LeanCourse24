@@ -72,13 +72,13 @@ lemma reflection_point_point_same_imp_same {a b : Point}(h : a = reflection_poin
   unfold reflection_point_point padd pneg p_scal_mul at h
   simp at *
   have s1:  ({ re := a1, im := a2 }:ℂ).re = (2 * { re := b1, im := b2 } + -({ re := a1, im := a2 } : ℂ)).re := by{
-    nth_rw 1[h]
-    rfl
+    simp
+    exact h.1
   }
   simp at s1
   have s2:  ({ re := a1, im := a2 }:ℂ).im = (2 * { re := b1, im := b2 } + -({ re := a1, im := a2 } : ℂ)).im := by{
-    nth_rw 1[h]
-    rfl
+    simp
+    exact h.2
   }
   simp at s2
   constructor
@@ -232,7 +232,9 @@ lemma reflection_point_line_real_line(a : Point): reflection_point_line a real_l
   rw[this]
   have : 2 * (↑a1:ℂ) = 2*{re := a1, im := 0} := by{
     simp
-    exact rfl
+    have : a1 = ({re := a1, im := 0}: ℂ) := rfl
+    rw[this]
+    simp
   }
   rw[this]
   have : 2*{re := a1, im := 0} = ({re := 2*a1, im := 0}:ℂ) := by{
