@@ -255,6 +255,10 @@ lemma point_abs_point_lies_on_circle{C : CCircle}{p : Point}(h : Lies_on_circle 
   exact (lies_on_circle_through p (Center C) (Radius C)).1 h
 }
 
+lemma point_abs_lies_on_circle_same{C : CCircle}{a b : Point}(ha : Lies_on_circle a C)(hb : Lies_on_circle b C): point_abs (Center C) a = point_abs (Center C) b := by{
+  rw[point_abs_point_lies_on_circle ha, point_abs_point_lies_on_circle hb]
+}
+
 lemma point_on_circle_simp{C : CCircle}{p : Point}(h : point_abs (Center C) p = Radius C): Lies_on_circle p C := by{
   unfold Lies_on_circle
   rw[circle_is_circle_through C]

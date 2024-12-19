@@ -41,3 +41,7 @@ That would make much more sense for a variety of reasons.-/
 --WRITE INSTANCE TO GET RID OF PADD AND PNEG
 --instance : Add Point := ⟨padd⟩
 --local (or different) ifix:65 " +' " => HAdd.hAdd
+
+
+
+--MAYBE REWRITE THE PROOF OF THALES MEM; IT IS VERY SUS
