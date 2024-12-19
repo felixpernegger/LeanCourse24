@@ -131,9 +131,52 @@ lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2
 /-the halt of an angle is not unique!!-/
 
 lemma half_arg{z : ℂ}{t : ℝ}(h: (↑z.arg: Real.Angle) + (↑z.arg: Real.Angle) = t): z.arg = (↑(t/2): Real.Angle) ∨ z.arg = (↑(t/2 + Real.pi): Real.Angle) := by{
-  #check Real.Angle.angle_eq_iff_two_pi_dvd_sub
+  have : ↑z.arg +  (↑z.arg: Real.Angle) = (↑(z.arg+z.arg) : Real.Angle) := by{simp}
+  rw[this] at h
+  clear this
+  obtain ⟨k,kh⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 h
+  have s1: t = 2*z.arg - 2*k*Real.pi := by{linarith}
+  rw[s1]
+  ring_nf
+  by_cases td: Even k
+  left
+  obtain ⟨m,mh⟩ := even_iff_exists_two_mul.1 td
+  rw[mh]
+  simp
+  have : (↑(2 * ↑m * Real.pi): Real.Angle) = (↑0:Real.Angle) := by{
+    apply Real.Angle.angle_eq_iff_two_pi_dvd_sub.2
+    use m
+    ring
+  }
+  rw[this, sub_zero]
 
-  sorry
+  right
+  have s1: Odd k := by{exact Int.not_even_iff_odd.mp td}
+  unfold Odd at s1
+  obtain ⟨m,mh⟩ := s1
+  rw[mh]
+  simp
+  have t0: (↑z.arg : Real.Angle) - ↑((2 * ↑m + 1) * Real.pi) + ↑Real.pi = ↑z.arg + (- ↑((2 * ↑m + 1) * Real.pi) + ↑Real.pi) := by{
+    set s := Real.pi
+    set u := 2*(↑m : ℝ)+1
+    set p := z.arg
+    clear s1 mh h kh td
+    ring_nf
+    set u := (↑m:ℝ) * s * 2 + s
+    rw[add_comm]
+    nth_rw 2[add_comm]
+    rw[sub_eq_add_neg]
+    nth_rw 1[add_comm]
+    nth_rw 2[add_comm]
+    rw[add_assoc, add_comm (↑p:Real.Angle) (↑s:Real.Angle), ← add_assoc]
+  }
+  have g: - ↑((2 * ↑m + 1) * Real.pi) + (↑Real.pi:Real.Angle) = 0 := by{
+    apply Real.Angle.angle_eq_iff_two_pi_dvd_sub.2
+    use -m
+    simp
+    ring
+  }
+  rw[t0,g, add_zero]
 }
 
 /-We prove several elementary but very important properties:-/
