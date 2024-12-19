@@ -17,8 +17,6 @@ lemma pmidpoint_abs_left(a b : Point): point_abs a (pmidpoint a b) = 1/2 * (poin
   simp
   unfold Complex.abs
   simp
-  unfold Complex.normSq
-  simp
   ring_nf
   calc
    √(a1 * b1 * (-1 / 2) + a1 ^ 2 * (1 / 4) + b1 ^ 2 * (1 / 4) + a2 * b2 * (-1 / 2) + a2 ^ 2 * (1 / 4) + b2 ^ 2 * (1 / 4)) = √((1/4)*((-(a1 * b1 * 2) + a1 ^ 2 + (b1 ^ 2 - a2 * b2 * 2) + a2 ^ 2 + b2 ^ 2))) := by{ring_nf}
@@ -40,8 +38,6 @@ lemma pmidpoint_abs_right(a b : Point): point_abs (pmidpoint a b) b = 1/2 * (poi
   obtain ⟨b1,b2⟩ := b
   simp
   unfold Complex.abs
-  simp
-  unfold Complex.normSq
   simp
   ring_nf
   have : (a1 * b1 * (-1 / 2) + a1 ^ 2 * (1 / 4) + b1 ^ 2 * (1 / 4) + a2 * b2 * (-1 / 2) + a2 ^ 2 * (1 / 4) + b2 ^ 2 * (1 / 4)) = 1/4 * (-(a1 * b1 * 2) + a1 ^ 2 + (b1 ^ 2 - a2 * b2 * 2) + a2 ^ 2 + b2 ^ 2) := by{ring}
