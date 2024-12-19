@@ -128,6 +128,13 @@ lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2
   assumption
 }
 
+/-the halt of an angle is not unique!!-/
+
+lemma half_arg{z : ℂ}{t : ℝ}(h: z.arg + z.arg = t): z.arg = (↑(t/2): Real.Angle) ∨ z.arg = (↑(t/2 + Real.pi): Real.Angle) := by{
+  #check Real.Angle.angle_eq_iff_two_pi_dvd_sub
+  sorry
+}
+
 /-We prove several elementary but very important properties:-/
 
 lemma angle_self(a b : Point): Angle a b a = 0 := by{

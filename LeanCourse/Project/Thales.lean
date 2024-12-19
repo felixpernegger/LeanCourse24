@@ -133,39 +133,23 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
     exact thales_neq_midpoint ab hp
     assumption
   }
-  rw[g]
-  #check angle_pmidpoint_right
-  #check angle_pmidpoint_left
-  rw[← thales_same_angles_left hp] at *
-  nth_rw 2[angle_symm]
-  nth_rw 4[angle_symm]
+  rw[← thales_same_angles_left hp] at g
   nth_rw 3[angle_symm] at g
-  rw[← thales_same_angles_right hp] at *
+  rw[← thales_same_angles_right hp] at g
   have t1: p ≠ pmidpoint a b := by{exact thales_neq_midpoint ab hp}
-  rw[angle_pmidpoint_left ab ah] at *
-  rw[angle_pmidpoint_right ab bh] at *
-  nth_rw 2[angle_symm]
-  nth_rw 4[angle_symm]
+  rw[angle_pmidpoint_left ab ah] at g
+  rw[angle_pmidpoint_right ab bh] at g
   nth_rw 3[angle_symm] at g
   simp at *
   have z: pairwise_different_point3 a p b := by{
     unfold pairwise_different_point3
     tauto
   }
-  #check angle_sum_point1'
-  rw[← angle_sum_point1' z] at g
-
-
-  /-rw[angle_pmidpoint_left ab ah, angle_pmidpoint_right ab bh]
-  have t2: pairwise_different_point3 a p b := by{
-    unfold pairwise_different_point3
-    tauto
+  rw[add_comm] at g
+  rw[← anglesum_point1' z] at g
+  have u: Angle a p b + Angle a p b = Real.pi := by{
+    nth_rw 1[g]
+    simp
   }
-  rw[anglesum_points3]
-  have t2: pairwise_different_point3 a b p := by{
-    unfold pairwise_different_point3
-    tauto
-  }
-  -/
-
+  sorry
 }
