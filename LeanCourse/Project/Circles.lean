@@ -122,7 +122,8 @@ lemma diameter_ex (z : Point)(R : PosReal) : ∃(a b : Point), (Lies_on_circle a
 /-We can state the uniqueness of the radius (and later center) in a very nice way, as we've already
 shown that every Circle has the form Circle_through z R-/
 
-theorem radius_unique (z : Point)(R : PosReal) : R = Radius (Circle_through z R) := by{
+theorem radius_unique (z : Point)(R : PosReal) : Radius (Circle_through z R) = R := by{
+  symm
   obtain ⟨p,ph⟩ := radius_is_radius (Circle_through z R)
   obtain ⟨a,b,ah,bh,ab⟩ := diameter_ex z R
   obtain ⟨c,d,ch,dh,cd⟩ := diameter_ex p (Radius (Circle_through z R))
@@ -148,9 +149,11 @@ theorem radius_unique (z : Point)(R : PosReal) : R = Radius (Circle_through z R)
 /-A sometimes maybe faster way to use this is the following:-/
 lemma radius_unique_spec {z z' : Point}{R R' : PosReal}(h: Circle_through z R = Circle_through z' R') : R = R' := by{
   have R1: R = Radius (Circle_through z R) := by{
+    symm
     exact radius_unique z R
   }
   have R2: R' = Radius (Circle_through z' R') := by{
+    symm
     exact radius_unique z' R'
   }
   rw[h] at R1
@@ -200,7 +203,8 @@ lemma center_unique_spec {p q : Point}{R S : PosReal}(h: Circle_through p R = Ci
   contradiction
 }
 
-theorem center_unique (z : Point)(R : PosReal) : z = Center (Circle_through z R) := by{
+theorem center_unique (z : Point)(R : PosReal) : Center (Circle_through z R) = z := by{
+  symm
   obtain ⟨r,rh⟩  := center_is_center (Circle_through z R)
   exact center_unique_spec rh
 }
