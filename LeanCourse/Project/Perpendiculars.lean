@@ -498,6 +498,13 @@ theorem perp_through_unique (L R : Line)(p : Point)(h: Perpendicular L R ∧ Lie
   ext
   rw[h]
 }
+/-if L R are parallel, the perp throughs are the same-/
+lemma perp_through_of_parallels{L R : Line}(a : Point)(LR: Parallel L R): perp_through L a = perp_through R a := by{
+  apply perp_through_unique
+  constructor
+  apply parallel_perp L LR (perp_through_is_perp L a)
+  exact point_lies_on_perp_through L a
+}
 
 /-The perpendicular through any point is never parallel, which we will use afterwards:-/
 lemma perp_through_not_parallel(L : Line)(p : Point): ¬ Parallel L (perp_through L p) := by{
@@ -847,4 +854,13 @@ lemma foot_real_line(p : Point): foot p real_line = Point.mk (p.x.re) := by{
   }
   rw[s2]
   exact line_through_mem_right h0
+}
+
+lemma foot_parallel_twice{L R : Line}(LR : Parallel L R){a : Point}(ah: Lies_on a L): foot (foot a R) L = a := by{
+  symm
+  apply foot_unique
+  constructor
+  · assumption
+  rw[perp_through_of_parallels (foot a R) LR, foot_perp_through R a, ← perp_through_of_parallels a LR]
+  exact point_lies_on_perp_through L a
 }
