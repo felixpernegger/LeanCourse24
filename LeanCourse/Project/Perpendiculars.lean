@@ -877,7 +877,11 @@ lemma foot_if_perp_points{p a b : Point}(ab : a ≠ b)(h: perp_points a p a b): 
       exact perp_through_is_perp (Line_through ab) p
       exact perp_through_is_perp (Line_through ab) a
     }
-    #check lines_eq_ex
+    apply lines_eq_parallel_point_ex u
+    use p
+    constructor
+    · exact point_lies_on_perp_through (Line_through ab) p
+    sorry --this is actually pretty tricky, i might just need a few more lemmata fr
   }
   rw[g]
   exact point_lies_on_perp_through (Line_through ab) a
