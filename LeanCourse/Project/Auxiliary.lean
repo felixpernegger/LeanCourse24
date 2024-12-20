@@ -338,3 +338,32 @@ theorem line_center_unique {L R T : Line}{p : Point}(h : Copunctal L R T)(hp : L
   rw[h] at this
   tauto
 }
+
+/-Also at this point maybe note perp triangle points are noncolinear:-/
+
+lemma perp_points_not_colinear{a b p : Point}(h: pairwise_different_point3 a b p)(h': perp_points p a p b): noncolinear a b p := by{
+  contrapose h
+  unfold pairwise_different_point3 noncolinear perp_points at *
+  simp at *
+
+  apply colinear_perm12 at h
+  apply colinear_perm13 at h
+  apply (colinear_alt p a b).1 at h
+  have n: (p.x - a.x) / (p.x - b.x) = 0 := by{exact Eq.symm (Complex.ext (id (Eq.symm h')) (id (Eq.symm h)))}
+  simp at n
+  obtain n|n := n
+  · have : p = a := by{
+    ext
+    calc
+      p.x = p.x - (p.x - a.x) := by{rw[n];ring}
+        _= a.x := by{ring}
+    }
+    tauto
+  have : p = b := by{
+    ext
+    calc
+      p.x = p.x - (p.x - b.x) := by{rw[n];ring}
+        _= b.x := by{ring}
+    }
+  tauto
+}
