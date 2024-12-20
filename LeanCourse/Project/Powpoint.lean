@@ -119,6 +119,10 @@ lemma qpowline_symm(C O : CCircle): qPowLine O C = qPowLine C O := by{
 }
 #check concentric_symm
 
+lemma powline_symm{C O : CCircle}(h : ¬Concentric C O): PowLine h = PowLine (not_concentric_symm h) := by{
+  rw[← qpowline_simp, ← qpowline_simp, qpowline_symm]
+}
+
 theorem powline_perp{C O : CCircle}(h : ¬Concentric C O): Perpendicular (qLine_through (Center C) (Center O)) (PowLine h) := by{
   sorry
 }
