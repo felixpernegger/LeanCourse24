@@ -221,6 +221,11 @@ lemma circle_is_circle_through(C : CCircle): C = Circle_through (Center C) (Radi
   assumption
 }
 
+/-therefor all in all:-/
+theorem circle_unique{C O : CCircle}(h: Center C = Center O)(h': Radius C = Radius O): C = O := by{
+  rw[circle_is_circle_through C, circle_is_circle_through O, h, h']
+}
+
 /-A quick way to check if a point is on a circle:-/
 
 lemma lies_on_circle_through(p z : Point)(R : PosReal): Lies_on_circle p (Circle_through z R) ↔ point_abs z p = R := by{
@@ -230,7 +235,7 @@ lemma lies_on_circle_through(p z : Point)(R : PosReal): Lies_on_circle p (Circle
 
 /-Therefore if two circles with same center contain the same point, they are equal-/
 
-lemma same_center_point{C O : CCircle}(p : Point)(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): Radius C = Radius O := by{
+lemma same_center_point_radius{C O : CCircle}(p : Point)(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): Radius C = Radius O := by{
   rw[circle_is_circle_through C] at hC
   rw[circle_is_circle_through O] at hO
   have t1: point_abs (Center C) p = Radius C := by{
@@ -242,6 +247,11 @@ lemma same_center_point{C O : CCircle}(p : Point)(h : Center C = Center O)(hC : 
   rw[h] at t1
   ext
   rw[← t1,← t2]
+}
+
+lemma same_center_point{C O : CCircle}(p : Point)(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): C = O := by{
+  apply circle_unique h
+  exact same_center_point_radius p h hC hO
 }
 
 /-So we can check if two circles are the same by simply checking if their radius and center are the same:-/

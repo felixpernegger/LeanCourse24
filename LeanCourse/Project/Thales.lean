@@ -230,5 +230,5 @@ theorem thales_inverse{a b p : Point}(h: perp_points p a p b): Lies_on_circle p 
   · rw[← this]
     exact (circle_around_lies_on u).2.2
   suffices : Center (Circle_around u) = pmidpoint a b
-  apply?
+  apply same_center_point p
 }
