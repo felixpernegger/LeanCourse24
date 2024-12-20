@@ -207,3 +207,28 @@ lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Li
   apply point_abs_same_sq
   linarith
 }
+
+theorem thales_inverse{a b p : Point}(h: perp_points p a p b): Lies_on_circle p (Thales_circle a b) := by{
+  by_cases ah: p = a
+  · rw[ah]
+    exact thales_mem_left a b
+  by_cases bh: p = b
+  · rw[bh]
+    exact thales_mem_right a b
+  by_cases ab: a = b
+  rw[ab] at h
+  unfold perp_points at h
+  have : p.x-b.x ≠ 0 := by{exact sub_neq_zero bh}
+  field_simp at h
+
+  have t: pairwise_different_point3 a b p := by{
+    unfold pairwise_different_point3
+    tauto
+  }
+  have u: noncolinear a b p := by{sorry}
+  suffices : Circle_around u = Thales_circle a b
+  · rw[← this]
+    exact (circle_around_lies_on u).2.2
+  suffices : Center (Circle_around u) = pmidpoint a b
+  apply?
+}

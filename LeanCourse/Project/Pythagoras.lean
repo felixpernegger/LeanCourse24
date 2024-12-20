@@ -262,6 +262,95 @@ lemma in_between_imp_colinear{a b x : Point}(h : in_between a b x): colinear a b
   linarith
 }
 
+/-This also gives us a way to relative quickly show something is the midpoint:-/
+lemma pmidpoint_simp {a b p : Point}(ah: point_abs p a = 1/2 * point_abs a b)(bh: point_abs p b = 1/2 * point_abs a b): p = pmidpoint a b := by{
+  by_cases ab : a = b
+  · rw[ab, point_abs_self] at ah
+    simp at ah
+    have : p = b := by{exact abs_zero_imp_same p b ah}
+    rw[ab,this]
+    symm
+    exact pmidpoint_self b
+  have s1: colinear a b p := by{
+    apply in_between_imp_colinear
+    unfold in_between
+    rw[point_abs_symm a p, ah, bh]
+    ring
+  }
+  apply colinear_perm23 at s1
+  apply (colinear_alt2 a p b).1 at s1
+  simp [*] at s1
+
+  obtain ⟨t,th⟩ := s1
+  have ph: p = go_along a b (t * point_abs a b) := by{
+    rw[th]
+    unfold go_along dir padd p_scal_mul
+    simp
+    have : point_abs a b ≠ 0 := by{
+      contrapose ab
+      simp at *
+      exact abs_zero_imp_same a b ab
+    }
+    have : (↑(point_abs a b) : ℂ) ≠ 0 := by{
+      contrapose this
+      simp at *
+      assumption
+    }
+    field_simp
+    ring
+  }
+  rw[point_abs_symm p a, ph, go_along_abs1 ab (t*(point_abs a b))] at ah
+  have t1: abs t = 1 / 2 := by{
+    have u1: 0 < point_abs a b := by{exact point_abs_neq ab}
+    have u2: 0 ≤ point_abs a b := by{linarith}
+    have t3: |t * point_abs a b| = abs t * point_abs a b := by{
+      calc
+        abs (t* point_abs a b) = abs t * abs (point_abs a b) := by{exact abs_mul t (point_abs a b)}
+          _= abs t * point_abs a b := by{rw[abs_of_nonneg u2]}
+    }
+    rw[t3] at ah
+    field_simp at ah
+    have : abs t = 1/2 * (1/(point_abs a b)) *(abs t * point_abs a b * 2) := by{
+      field_simp
+      ring
+    }
+    rw[this,ah]
+    field_simp
+    ring
+  }
+  rw[point_abs_symm p b, ph, go_along_abs2] at bh
+  have t4: abs (1-t) = 1 /2 := by{
+    have :  |point_abs a b - t * point_abs a b| = abs (1-t) * point_abs a b := by{
+      calc
+        |point_abs a b - t * point_abs a b| = abs ((1-t)*(point_abs a b)) := by{ring_nf}
+          _= abs (1-t) * abs (point_abs a b) := by{exact abs_mul (1-t) (point_abs a b)}
+          _= abs (1-t) * point_abs  a b := by{rw[abs_of_nonneg (point_abs_pos a b)]}
+    }
+    rw[bh] at this
+    have e: 0 < point_abs a b := by{exact point_abs_neq ab}
+    calc
+      (abs (1-t)) = (1/(point_abs a b)) * (abs (1-t) * point_abs a b) := by{field_simp}
+        _= 1/(point_abs a b) * (1/2 * point_abs a b) := by{rw[this]}
+        _= 1 / 2 := by{field_simp}
+  }
+  apply eq_or_eq_neg_of_abs_eq at t1
+  apply eq_or_eq_neg_of_abs_eq at t4
+  obtain t1|t1 := t1
+  swap
+  rw[t1] at t4
+  simp at t4
+  contrapose t4
+  norm_num
+
+  rw[t1] at th
+  rw[th]
+  ext
+  unfold pmidpoint
+  simp
+  ring
+  assumption
+}
+
 /-To simplify usage, we finish off with a few specifications for pythagoras:-/
 
 lemma pythagoras_points_bc {a b c : Point}(h : perp_points a b a c): (point_abs b c)  = √((point_abs a b)^2 + (point_abs c a)^2) := by{

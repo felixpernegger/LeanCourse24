@@ -230,7 +230,7 @@ lemma lies_on_circle_through(p z : Point)(R : PosReal): Lies_on_circle p (Circle
 
 /-Therefore if two circles with same center contain the same point, they are equal-/
 
-lemma same_center_point{C O : CCircle}{p : Point}(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): Radius C = Radius O := by{
+lemma same_center_point{C O : CCircle}(p : Point)(h : Center C = Center O)(hC : Lies_on_circle p C)(hO: Lies_on_circle p O): Radius C = Radius O := by{
   rw[circle_is_circle_through C] at hC
   rw[circle_is_circle_through O] at hO
   have t1: point_abs (Center C) p = Radius C := by{
