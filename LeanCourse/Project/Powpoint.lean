@@ -143,7 +143,7 @@ lemma powline_intersection2{C O : CCircle}(h : ¬Concentric C O){p : Point}(hp :
   rw[(powpoint_lies_on p C).1 hp.1, (powpoint_lies_on p O).1 hp.2]
 }
 
-lemma powline_intersection3{C O : CCircle}(h : ¬Concentric C O){p : Point}{q : Point}(hp : Lies_on_circle p C ∧ Lies_on_circle p O)(hq : Lies_on_circle q C ∧ Lies_on_circle q O)(pq : p ≠ q): Line_through pq = PowLine h := by{
+lemma powline_intersection3{C O : CCircle}(h : ¬Concentric C O)(p q : Point)(hp : Lies_on_circle p C ∧ Lies_on_circle p O)(hq : Lies_on_circle q C ∧ Lies_on_circle q O)(pq : p ≠ q): Line_through pq = PowLine h := by{
   symm
   apply line_through_unique
   constructor

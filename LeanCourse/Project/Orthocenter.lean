@@ -16,6 +16,24 @@ lemma thales_foot_lies_on{a b : Point}{L : Line}(h : Lies_on a L): Lies_on_circl
   exact perp_points_foot a b h
 }
 
+/-The thales circle of a triangle are nonconenctric:-/
+lemma thales_not_concentric{a b c : Point}(h : noncolinear a b c): ¬Concentric (Thales_circle a b) (Thales_circle a c) := by{
+  unfold Concentric
+  rw[thales_center, thales_center]
+  contrapose h
+  have : b = c := by{
+    unfold pmidpoint at h
+    field_simp at h
+    ext
+    assumption
+  }
+  unfold noncolinear
+  simp
+  apply colinear_self
+  tauto
+}
+
+
 /-the altidues of 3 noncolinear points are not parallel:-/
 
 lemma altitudes_not_paralllel_points{a b c : Point}(h : noncolinear a b c): ¬Parallel (perp_through (qLine_through a b) c) (perp_through (qLine_through a c) b) := by{
@@ -39,5 +57,16 @@ lemma altitudes_not_paralllel_points{a b c : Point}(h : noncolinear a b c): ¬Pa
   simp [*]
   exact noncolinear_not_parallel1 h
 }
+#check PowLine
 
-#check Midtriangle
+/-Because now the altidues are just the powlines of the thales circles:-/
+theorem altitude_powline{a b c : Point}(h : noncolinear a b c): perp_through (qLine_through b c) a = PowLine (thales_non_concentric h) := by{
+  #check PowLine
+  sorry
+}
+
+theorem altitudes_copunctal_point{a b c : Point}(h : noncolinear a b c): Copunctal (perp_through (qLine_through b c) a) (perp_through (qLine_through c a) b) (perp_through (qLine_through b a) c) := by{
+  sorry
+}
+
+#check midtriangle_noncolinear_point
