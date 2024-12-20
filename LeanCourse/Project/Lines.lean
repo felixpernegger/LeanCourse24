@@ -249,6 +249,22 @@ lenght proportions and how they realtie to areas proportions-/
 def Copunctal (L R S : Line) : Prop :=
   Set.encard (L.range ∩ R.range ∩ S.range) = 1
 
+/-We can permutate those:-/
+lemma copunctal_perm12(L R S : Line)(h: Copunctal L R S): Copunctal R L S := by{
+  unfold Copunctal at *
+  rw[inter_assoc, inter_comm, inter_assoc, inter_comm S.range, ← inter_assoc, h]
+}
+
+lemma copunctal_perm23(L R S : Line)(h: Copunctal L R S): Copunctal L S R := by{
+  unfold Copunctal at *
+  rw[inter_assoc, inter_comm S.range, ←inter_assoc, h]
+}
+
+lemma copunctal_perm13(L R S : Line)(h: Copunctal L R S): Copunctal S R L := by{
+  unfold Copunctal at *
+  rw[inter_assoc, inter_comm, inter_comm R.range, h]
+}
+
 /- With those two lemmas together every Line can be written as a Line_through (i couldnt manage to get it into one lemma, which would have been nice of course)-/
 
 /-We can shift Lines. These are exactly the parallel lines:-/
