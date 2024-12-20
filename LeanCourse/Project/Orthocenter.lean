@@ -104,7 +104,6 @@ theorem altitude_powline{a b c : Point}(h : noncolinear a b c): perp_through (qL
 }
 
 /-The respective thales circle are cnoncolinear:-/
-#check cnoncolinear
 lemma thales_cnoncolinear{a b c : Point}(h : noncolinear a b c): cnoncolinear (Thales_circle b c) (Thales_circle c a) (Thales_circle a b) := by{
   unfold cnoncolinear
   repeat
@@ -114,22 +113,47 @@ lemma thales_cnoncolinear{a b c : Point}(h : noncolinear a b c): cnoncolinear (T
 }
 
 theorem altitudes_copunctal_point{a b c : Point}(h : noncolinear a b c): Copunctal (perp_through (qLine_through b c) a) (perp_through (qLine_through c a) b) (perp_through (qLine_through b a) c) := by{
-  #check powline_copunctal
+  have acbc: ¬Concentric (Thales_circle a c) (Thales_circle c b) := by{
+    apply noncolinear_perm13 at h
+    apply noncolinear_perm23 at h
+    rw[thales_symm c a]
+    exact thales_not_concentric h
+  }
+  have bcab: ¬Concentric (Thales_circle c b) (Thales_circle b a) := by{
+    rw[thales_symm b c]
+    apply noncolinear_perm12 at h
+    apply noncolinear_perm23 at h
+    exact thales_not_concentric h
+  }
   rw[altitude_powline]
   apply noncolinear_perm12 at h
   rw[altitude_powline]
+  have : PowLine (not_concentric_symm (thales_not_concentric h)) = PowLine bcab := by{
+    rw[← qpowline_simp, ← qpowline_simp, thales_symm b c]
+  }
+  rw[this]
   apply noncolinear_perm23 at h
   apply noncolinear_perm12 at h
   rw[altitude_powline]
+  have : PowLine (thales_not_concentric h) = PowLine acbc := by{
+    rw[← qpowline_simp, ← qpowline_simp, qpowline_symm, thales_symm]
+  }
+  rw[this]
   apply copunctal_perm23
-  #check PowLine
-  nth_rw 2[powline_symm]
-  #check Copunctal
-  --apply powline_copunctal
-  sorry
-
   repeat
-    assumption
+    rw[← qpowline_simp]
+
+  rw[thales_symm]
+  exact powline_copunctal (thales_cnoncolinear h)
+
+  assumption
+
+  apply noncolinear_perm23
+  assumption
+
+  assumption
 }
 
-#check midtriangle_noncolinear_point
+/-Therefore we can define the Orthocenter of a triangle:-/
+
+--but not now
