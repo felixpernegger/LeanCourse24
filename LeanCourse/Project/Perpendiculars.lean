@@ -872,9 +872,12 @@ lemma foot_if_perp_points{p a b : Point}(ab : a ≠ b)(h: perp_points a p a b): 
   constructor
   · exact line_through_mem_left ab
   have g: perp_through (Line_through ab) p = perp_through (Line_through ab) a := by{
-    symm
-    apply perp_through_unique
-    sorry
+    have u: Parallel (perp_through (Line_through ab) p) (perp_through (Line_through ab) a) := by{
+      apply perp_perp (Line_through ab)
+      exact perp_through_is_perp (Line_through ab) p
+      exact perp_through_is_perp (Line_through ab) a
+    }
+    #check lines_eq_ex
   }
   rw[g]
   exact point_lies_on_perp_through (Line_through ab) a

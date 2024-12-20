@@ -972,6 +972,14 @@ lemma lines_eq_parallel_point{L R : Line}(p : Point)(hp : Lies_on p L ∧ Lies_o
   rw[h0]
 }
 
+/-or in other words:-/
+
+lemma lines_eq_parallel_point_ex{L R : Line}(LR: Parallel L R): (∃(p: Point), Lies_on p L ∧ Lies_on p R) → L = R := by{
+  intro h
+  obtain ⟨p,hp⟩ := h
+  exact lines_eq_parallel_point p hp LR
+}
+
 
 /-With this we can now talk about Intersections of lines:-/
 
