@@ -205,6 +205,23 @@ lemma midtriangle_noncolinear (T : Triangle): noncolinear (pmidpoint T.b T.c) (p
   linarith
 }
 
+lemma midtriangle_noncolinear_point{a b c : Point}(h : noncolinear a b c): noncolinear (pmidpoint b c) (pmidpoint c a) (pmidpoint a b) := by{
+  unfold pmidpoint at *
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨b1,b2⟩ := b
+  obtain ⟨c1,c2⟩ := c
+  simp at *
+  unfold noncolinear at *
+  unfold colinear at *
+  unfold det at *
+  unfold conj at *
+  unfold starRingEnd at *
+  simp at *
+  contrapose h
+  push_neg at *
+  linarith
+}
+
 def Midtriangle : Triangle → Triangle :=
   fun T ↦ Triangle.mk (pmidpoint T.b T.c) (pmidpoint T.c T.a) (pmidpoint T.a T.b) (midtriangle_noncolinear T)
 
