@@ -121,6 +121,9 @@ theorem altitudes_copunctal_point{a b c : Point}(h : noncolinear a b c): Copunct
   apply noncolinear_perm23 at h
   apply noncolinear_perm12 at h
   rw[altitude_powline]
+  apply copunctal_perm23
+  #check PowLine
+  nth_rw 2[powline_symm]
   #check Copunctal
   --apply powline_copunctal
   sorry

@@ -16,6 +16,12 @@ lemma concentric_symm{C O : CCircle}(h : Concentric C O): Concentric O C := by{
   tauto
 }
 
+lemma not_concentric_symm{C O : CCircle}(h : ¬Concentric C O): ¬Concentric O C := by{
+  contrapose h
+  simp at *
+  exact concentric_symm h
+}
+
 /-Fot the ifrst few things we basically copy the Tangents section-/
 
 def CTangent(C O : CCircle) : Prop :=
