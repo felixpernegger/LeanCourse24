@@ -666,7 +666,7 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
     exact (circle_around_lies_on h).1
   }
   have : Radius (Circle_through z R) = Radius (Circle_around h) := by{
-    exact same_center_point t hCa ha
+    exact same_center_point a t hCa ha
   }
   exact circle_same_simp t this
 }
