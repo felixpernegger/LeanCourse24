@@ -855,7 +855,7 @@ lemma foot_real_line(p : Point): foot p real_line = Point.mk (p.x.re) := by{
   rw[s2]
   exact line_through_mem_right h0
 }
-
+/- in parallel lines, "foot'ing" twice is the identity:-/
 lemma foot_parallel_twice{L R : Line}(LR : Parallel L R){a : Point}(ah: Lies_on a L): foot (foot a R) L = a := by{
   symm
   apply foot_unique
@@ -863,4 +863,19 @@ lemma foot_parallel_twice{L R : Line}(LR : Parallel L R){a : Point}(ah: Lies_on 
   · assumption
   rw[perp_through_of_parallels (foot a R) LR, foot_perp_through R a, ← perp_through_of_parallels a LR]
   exact point_lies_on_perp_through L a
+}
+
+/- Read this as: "in perp triangles, the foots are just the corner"-/
+lemma foot_if_perp_points{p a b : Point}(ab : a ≠ b)(h: perp_points a p a b): foot p (Line_through ab) = a := by{
+  symm
+  apply foot_unique
+  constructor
+  · exact line_through_mem_left ab
+  have g: perp_through (Line_through ab) p = perp_through (Line_through ab) a := by{
+    symm
+    apply perp_through_unique
+    sorry
+  }
+  rw[g]
+  exact point_lies_on_perp_through (Line_through ab) a
 }

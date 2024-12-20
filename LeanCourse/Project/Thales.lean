@@ -199,6 +199,11 @@ lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Li
   have s2: point_abs b a ^ 2 + point_abs (foot b R) b ^ 2 = point_abs (foot a R) a ^ 2 + point_abs (foot b R) (foot a R) ^ 2 := by{
     rw[← pythagoras_points p2, ← pythagoras_points p3]
   }
-  --repeat for other corners
-  sorry
+  rw[point_abs_symm b a, point_abs_symm (foot b R) (foot a R)] at s2
+  constructor
+  · apply point_abs_same_sq
+    rw[point_abs_symm a (foot a R), point_abs_symm b (foot b R)]
+    linarith
+  apply point_abs_same_sq
+  linarith
 }
