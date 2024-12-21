@@ -728,6 +728,25 @@ lemma posrad_is_circle_around{C : CCircle}(h : PosRad C): ∃(a b c : Point), (n
   simp
 }
 
+/-We can permutate of course:-/
+lemma circle_around_perm12{a b c : Point}(h : noncolinear a b c): Circle_around h = Circle_around (noncolinear_perm12 h) := by{
+  apply circle_around_unique
+  have : Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{exact circle_around_lies_on h}
+  tauto
+}
+
+lemma circle_around_perm13{a b c : Point}(h : noncolinear a b c): Circle_around h = Circle_around (noncolinear_perm13 h) := by{
+  apply circle_around_unique
+  have : Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{exact circle_around_lies_on h}
+  tauto
+}
+
+lemma circle_around_perm23{a b c : Point}(h : noncolinear a b c): Circle_around h = Circle_around (noncolinear_perm23 h) := by{
+  apply circle_around_unique
+  have : Lies_on_circle a (Circle_around h) ∧ Lies_on_circle b (Circle_around h) ∧ Lies_on_circle c (Circle_around h) := by{exact circle_around_lies_on h}
+  tauto
+}
+
 lemma circle_around_is_posrad{a b c : Point}(h : noncolinear a b c): PosRad (Circle_around h) := by{
   apply posrad_point
   use a

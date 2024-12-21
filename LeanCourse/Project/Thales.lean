@@ -235,6 +235,62 @@ lemma perp_points_pmidpoint{a b p : Point}(h : perp_points p a p b): perp_points
   rw[this, h]
 }
 
+/-We will need following lemma:-/
+lemma perp_points_midpoint_center_diff{a b p : Point}(h : pairwise_different_point3 a b p)(h' : perp_points p a p b): (pmidpoint p a) ≠ (Center (Circle_around (perp_points_not_colinear h h'))) := by{
+  by_contra h0
+  have g: Thales_circle p a = Circle_around (perp_points_not_colinear h h') := by{
+    apply same_center_point p
+    · · rw[thales_center, h0]
+    · exact thales_mem_left p a
+    exact (circle_around_lies_on (perp_points_not_colinear h h')).2.2
+  }
+  have go: Lies_on_circle b (Thales_circle p a) := by{rw[g]; exact (circle_around_lies_on (perp_points_not_colinear h h')).2.1}
+  have goa: perp_points b p b a := by{exact thales_theorem go}
+  apply perp_points_perm_front at goa
+  have goal: Parallel (Line_through h.2.2) (Line_through (Ne.symm h.1)) := by{
+    apply perp_perp (Line_through h.2.1)
+    · apply (perp_quot h.2.1 h.2.2).2
+      apply perp_points_perm_front
+      apply perp_points_perm_switch
+      assumption
+    apply (perp_quot h.2.1 (Ne.symm h.1)).2
+    apply perp_points_perm_front
+    assumption
+  }
+  have p0: (Line_through h.2.2).range ∩ (Line_through (Ne.symm h.1)).range = ∅ ∨ (Line_through h.2.2).range = (Line_through (Ne.symm h.1)).range := by{exact (parallel_def (Line_through h.right.right) (Line_through (Ne.symm h.left))).mp goal}
+  obtain p0|p0 := p0
+  have q0: a ∈ ∅ := by{
+    rw[← p0]
+    simp
+    constructor
+    · suffices: Lies_on a (Line_through h.2.2)
+      · unfold Lies_on at this
+        assumption
+      exact line_through_mem_right h.2.2
+    suffices : Lies_on a (Line_through (Ne.symm h.1))
+    · unfold Lies_on at this
+      assumption
+    exact line_through_mem_right (Ne.symm h.1)
+  }
+  contradiction
+
+  have u: noncolinear a b p := by{exact perp_points_not_colinear h h'}
+  contrapose u
+  unfold noncolinear
+  simp
+  have pn: (Line_through h.2.2) = (Line_through (Ne.symm h.1)) := by{
+    ext
+    rw[p0]
+  }
+  have oh: Lies_on p (Line_through (Ne.symm h.1)) := by{
+    rw[← pn]
+    exact line_through_mem_left h.2.2
+  }
+  unfold Lies_on Line_through at oh
+  simp at oh
+  apply colinear_perm12
+  assumption
+}
 
 /-the central lemma is now the following:-/
 lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' : perp_points p a p b): Center (Circle_around (perp_points_not_colinear h h')) = pmidpoint a b := by{
@@ -312,7 +368,7 @@ lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' 
     rw[point_abs_symm]
     rw[(parallel_same_abs_foot i1 (line_through_mem_right h.2.1) (pmidpoint_lies_on h.2.1)).2]
     have r: (pmidpoint p a) ≠ (Center (Circle_around u)) := by{
-        sorry --this is pretty hard, probably seperate lemma :()
+        exact perp_points_midpoint_center_diff h h'
       }
     have : (foot p (perp_bisector ((h.2.2)))) = pmidpoint a p := by{
       have mb: pmidpoint b p ≠ b := by{exact pmidpoint_diff_left h.2.1}
@@ -366,7 +422,38 @@ lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' 
       rw[this]
       apply foot_if_perp_points
       have : Perpendicular (qLine_through (Center (Circle_around u)) (pmidpoint b p)) (qLine_through (Center (Circle_around u)) (pmidpoint p a)) := by{
-        sorry
+        have r'': (Center (Circle_around u)) ≠ (pmidpoint b p) := by{
+          symm
+          apply pairwise_different_point3_perm12 at h
+          #check Circle_around
+          #check perp_points_midpoint_center_diff
+          sorry
+        }
+        simp [*]
+        have q1: Line_through r'' = perp_bisector h.2.1 := by{
+          symm
+          apply line_through_unique
+          constructor
+          · exact (center_circle_around_lies_on_perp_bisector u).2.1
+          exact pmidpoint_lies_on_perp_bisector h.right.left
+        }
+        rw[q1]
+        have q2: Line_through r' = perp_bisector h.2.2 := by{
+          symm
+          apply line_through_unique
+          constructor
+          · rw[perp_bisector_symm]
+            exact (center_circle_around_lies_on_perp_bisector u).2.2
+          exact pmidpoint_lies_on_perp_bisector h.right.right
+        }
+        rw[q2]
+        apply perp_parallel (Line_through h.2.1)
+        · exact perp_bisector_is_perp h.right.left
+        apply perp_perp (Line_through h.2.2)
+        · apply (perp_quot h.2.2 h.2.1).2
+          apply perp_points_perm_back
+          assumption
+        exact perp_bisector_is_perp h.right.right
       }
       exact perp_all this (qline_through_mem_left (Center (Circle_around u)) (pmidpoint b p)) (qline_through_mem_right (Center (Circle_around u)) (pmidpoint b p)) (qline_through_mem_left (Center (Circle_around u)) (pmidpoint p a)) (qline_through_mem_right (Center (Circle_around u)) (pmidpoint p a))
     }
