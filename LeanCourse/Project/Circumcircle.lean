@@ -677,6 +677,13 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
   exact circle_same_simp t this
 }
 
+/-The center of the circle_around lies on all perp bisectors, we only do the first one as one can just permutate to get the other:-/
+lemma center_circle_around_lies_on_perp_bisector{a b c : Point}(h : noncolinear a b c): Lies_on (Center (Circle_around h)) (perp_bisector (noncolinear_imp_pairwise_different12 h)) := by{
+  apply center_lies_on_perp_bisector
+  exact (circle_around_lies_on h).1
+  exact (circle_around_lies_on h).2.1
+}
+
 /-Every circle of positive radius is a circumcircle/circle_around!-/
 lemma posrad_is_circle_around{C : CCircle}(h : PosRad C): ∃(a b c : Point), (noncolinear a b c) ∧ (Lies_on_circle a C ∧ Lies_on_circle b C ∧ Lies_on_circle c C):= by{
   use Point.mk ((Center C).x + (Radius C))
