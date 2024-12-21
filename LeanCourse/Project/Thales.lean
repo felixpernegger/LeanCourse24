@@ -164,6 +164,9 @@ theorem thales_theorem{a b p : Point}(hp : Lies_on_circle p (Thales_circle a b))
 
 /-The inverse also holds. We first show rectangles have same lengths in a specific way:-/
 
+/-Note: The inverse can also be shown by sort of reversing the last angle chase, however we take a slightly more
+involved approach which doesnt utilise angles and just cluclates lenghts.-/
+
 lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Lies_on a L)(bh : Lies_on b L): point_abs a (foot a R) = point_abs b (foot b R) ∧ point_abs a b = point_abs (foot a R) (foot b R) := by{
   have p1: perp_points a b a (foot a R) := by{
     nth_rw 1[← foot_parallel_twice LR ah]
@@ -208,12 +211,39 @@ lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Li
   linarith
 }
 
+/-Another small thing we will use:-/
+lemma perp_points_pmidpoint{a b p : Point}(h : perp_points p a p b): perp_points p (pmidpoint p a) p (pmidpoint p b) := by{
+  by_cases ah: p = a
+  · rw[ah, pmidpoint_self]
+    apply perp_points_self
+    tauto
+  by_cases bh: p = b
+  · rw[bh, pmidpoint_self]
+    apply perp_points_self
+    tauto
+  unfold pmidpoint perp_points at *
+  simp
+  have s1: p.x - b.x ≠ 0 := by{exact sub_neq_zero bh}
+  have : (p.x - (p.x + a.x) / 2) / (p.x - (p.x + b.x) / 2) = ((p.x-a.x)/(p.x-b.x)) := by{
+    field_simp
+    have : (p.x * 2 - (p.x + b.x)) = p.x-b.x := by{ring}
+    rw[this]
+    field_simp
+    ring
+  }
+  rw[this, h]
+}
+
 
 /-the central lemma is now the following:-/
 lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' : perp_points p a p b): Center (Circle_around (perp_points_not_colinear h h')) = pmidpoint a b := by{
   have u: noncolinear a b p := by{exact perp_points_not_colinear h h'}
   suffices : point_abs (Center (Circle_around u)) a = 1/2 * point_abs a b ∧ point_abs (Center (Circle_around u)) b = 1/2 * point_abs a b
   · exact pmidpoint_simp this.1 this.2
+  rw[← point_abs_pmidpoint_pmidpoint a b p, pythagoras_points_bc (perp_points_pmidpoint h')]
+  #check pmidpoint_abs_right
+  #check pythagoras_points
+  rw[pmidpoint_abs_left, pmidpoint_symm b p, pmidpoint_abs_right]
   sorry
 }
 

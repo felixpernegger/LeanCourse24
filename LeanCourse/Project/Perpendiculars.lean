@@ -864,25 +864,3 @@ lemma foot_parallel_twice{L R : Line}(LR : Parallel L R){a : Point}(ah: Lies_on 
   rw[perp_through_of_parallels (foot a R) LR, foot_perp_through R a, ← perp_through_of_parallels a LR]
   exact point_lies_on_perp_through L a
 }
-
-/- Read this as: "in perp triangles, the foots are just the corner"-/
-lemma foot_if_perp_points{p a b : Point}(ab : a ≠ b)(h: perp_points a p a b): foot p (Line_through ab) = a := by{
-  symm
-  apply foot_unique
-  constructor
-  · exact line_through_mem_left ab
-  have g: perp_through (Line_through ab) p = perp_through (Line_through ab) a := by{
-    have u: Parallel (perp_through (Line_through ab) p) (perp_through (Line_through ab) a) := by{
-      apply perp_perp (Line_through ab)
-      exact perp_through_is_perp (Line_through ab) p
-      exact perp_through_is_perp (Line_through ab) a
-    }
-    apply lines_eq_parallel_point_ex u
-    use p
-    constructor
-    · exact point_lies_on_perp_through (Line_through ab) p
-    sorry --this is actually pretty tricky, i might just need a few more lemmata fr
-  }
-  rw[g]
-  exact point_lies_on_perp_through (Line_through ab) a
-}
