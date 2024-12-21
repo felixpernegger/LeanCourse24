@@ -224,6 +224,22 @@ lemma point_line_abs_eq_point_abs_iff(p a : Point)(L : Line)(ah : Lies_on a L) :
   rw[h]
 }
 
+/-for practical purposes the following lemma is useful in that sense:-/
+lemma sqrt_sum_eq_og{x y : ℝ}(h: √(x^2+y^2)≤y): x = 0 := by{
+  have hy : 0 ≤ y := by{
+    calc
+      0 ≤ √(x ^ 2 + y ^ 2) := by{exact Real.sqrt_nonneg (x ^ 2 + y ^ 2)}
+        _≤ y := by{assumption}
+  }
+  have hxy: 0 ≤ x^2+y^2 := by{nlinarith}
+  suffices : x^2 + y^2 ≤ y^2
+  · nlinarith
+  calc
+    x^2+y^2 = √(x^2+y^2) * √(x^2+y^2) := by{simp [*]}
+      _≤ y*y := by{apply mul_le_mul; assumption; assumption; exact Real.sqrt_nonneg (x ^ 2 + y ^ 2); assumption}
+      _= y^2 := by{ring}
+}
+
 /-Another use case is the promised reversion of colinear_imp_in_between-/
 
 lemma in_between_imp_colinear{a b x : Point}(h : in_between a b x): colinear a b x := by{
@@ -389,4 +405,30 @@ lemma pythagoras_ca {T : Triangle}(h: RightTriangle T): (abs_tri_ca T) = √((ab
   rw[pythagoras h]
   have : 0 ≤ abs_tri_ca T := by{unfold abs_tri_ca; exact point_abs_pos T.c T.a}
   simp [*]
+}
+
+/-Some stuff also of interest using pythagoras:-/
+
+/- Read this as: "in perp triangles, the foots are just the corner"-/
+lemma foot_if_perp_points{p a b : Point}(ab : a ≠ b)(h: perp_points a p a b): foot p (Line_through ab) = a := by{
+  by_cases ap: a = p
+  · rw[← ap]
+    exact foot_point_on_line (line_through_mem_left ab)
+  have u: Parallel (perp_through (Line_through ab) p) (perp_through (Line_through ab) a) := by{
+    apply perp_perp (Line_through ab)
+    exact perp_through_is_perp (Line_through ab) p
+    exact perp_through_is_perp (Line_through ab) a
+  }
+  apply abs_zero_imp_same
+  have r: perp_points a (foot p (Line_through ab)) a p:= by{
+    exact perp_all (perp_symm ((perp_quot ap ab).2 h)) (line_through_mem_left ab) (foot_on_line (Line_through ab) p) (line_through_mem_left ap) (line_through_mem_right ap)
+  }
+  have le: √(point_abs a (foot p (Line_through ab)) ^ 2 + point_abs p a ^ 2) ≤ point_abs p a := by{
+    rw[← pythagoras_points_bc r]
+    have : point_line_abs p (Line_through ab) ≤ point_abs p a := by{exact point_line_abs_leq_point_abs p a (line_through_mem_left ab)}
+    unfold point_line_abs at this
+    rwa[point_abs_symm]
+  }
+  rw[point_abs_symm]
+  exact sqrt_sum_eq_og le
 }
