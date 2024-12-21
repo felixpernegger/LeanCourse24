@@ -85,8 +85,6 @@ lemma altitudes_not_paralllel_points{a b c : Point}(h : noncolinear a b c): ¬Pa
   simp [*]
   exact noncolinear_not_parallel1 h
 }
-#check PowLine
-#check powline_intersection3
 
 /-Because now the altidues are just the powlines of the thales circles:-/
 theorem altitude_powline{a b c : Point}(h : noncolinear a b c): perp_through (qLine_through b c) a = PowLine (thales_not_concentric h) := by{
