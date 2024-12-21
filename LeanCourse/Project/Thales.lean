@@ -268,8 +268,11 @@ lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' 
     }
     #check perp_all
     #check pmidpoint_lies_on_perp_bisector
-    #check perp_all this (line_through_mem_left ma) (line_through_mem_right ma) (pmidpoint_lies_on_perp_bisector ap)
-    exact perp_all this (line_through_mem_left ma) (line_through_mem_right ma)
+    --apply noncolinear_perm23 at u
+    have e: Lies_on (Center (Circle_around u)) (perp_bisector ap) := by{
+      sorry
+    }
+    exact perp_all this (line_through_mem_left ma) (line_through_mem_right ma) (pmidpoint_lies_on_perp_bisector ap) e
   }
   have p2: perp_points (pmidpoint b p) b (pmidpoint b p) (Center (Circle_around u)) := by{
     sorry
