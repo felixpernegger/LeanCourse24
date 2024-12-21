@@ -425,9 +425,9 @@ lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' 
         have r'': (Center (Circle_around u)) ≠ (pmidpoint b p) := by{
           symm
           apply pairwise_different_point3_perm12 at h
-          #check Circle_around
-          #check perp_points_midpoint_center_diff
-          sorry
+          rw[circle_around_perm12, pmidpoint_symm]
+          apply perp_points_perm_switch at h'
+          exact perp_points_midpoint_center_diff h h'
         }
         simp [*]
         have q1: Line_through r'' = perp_bisector h.2.1 := by{
