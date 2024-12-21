@@ -329,6 +329,12 @@ theorem perp_bisector_def (a b p : Point)(ab : a ≠ b): (point_abs p a = point_
   rw[← pmidpoint_same_abs a b, point_abs_symm a (pmidpoint a b)]
 }
 
+/-In particular the center of two points on a circle lies on the perp bisector:-/
+lemma center_lies_on_perp_bisector{a b : Point}{C : CCircle}(ab : a ≠ b)(ah : Lies_on_circle a C)(bh : Lies_on_circle b C): Lies_on (Center C) (perp_bisector ab) := by{
+  apply (perp_bisector_def a b (Center C) ab).1
+  exact point_abs_lies_on_circle_same ah bh
+}
+
 /- perp bisectiors are Parallel iff the respective lines are parallel:-/
 
 lemma perp_bisector_parallel{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): Parallel (perp_bisector ab) (perp_bisector cd) ↔ Parallel (Line_through ab) (Line_through cd) := by{

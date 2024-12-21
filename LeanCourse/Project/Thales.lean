@@ -241,10 +241,49 @@ lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' 
   suffices : point_abs (Center (Circle_around u)) a = 1/2 * point_abs a b ∧ point_abs (Center (Circle_around u)) b = 1/2 * point_abs a b
   · exact pmidpoint_simp this.1 this.2
   rw[← point_abs_pmidpoint_pmidpoint a b p, pythagoras_points_bc (perp_points_pmidpoint h')]
-  #check pmidpoint_abs_right
-  #check pythagoras_points
   rw[pmidpoint_abs_left, pmidpoint_symm b p, pmidpoint_abs_right]
-  sorry
+  nth_rw 1[← pmidpoint_abs_right p a]
+  nth_rw 2[← pmidpoint_abs_left b p]
+  have p1: perp_points (pmidpoint a p) a (pmidpoint a p) (Center (Circle_around u)) := by{
+    have ap: a ≠ p := by{
+      unfold pairwise_different_point3 at h
+      tauto
+    }
+    have ma: (pmidpoint a p) ≠ a := by{
+      exact pmidpoint_diff_left ap
+    }
+    have : Perpendicular (Line_through ma) (perp_bisector ap) := by{
+      have : Line_through ma = Line_through ap := by{
+        apply line_through_unique
+        constructor
+        · exact line_through_mem_right ma
+        unfold Lies_on Line_through
+        simp
+        apply colinear_perm13
+        apply colinear_perm12
+        exact pmidpoint_colinear a p
+      }
+      rw[this]
+      exact perp_bisector_is_perp ap
+    }
+    #check perp_all
+    #check pmidpoint_lies_on_perp_bisector
+    #check perp_all this (line_through_mem_left ma) (line_through_mem_right ma) (pmidpoint_lies_on_perp_bisector ap)
+    exact perp_all this (line_through_mem_left ma) (line_through_mem_right ma)
+  }
+  have p2: perp_points (pmidpoint b p) b (pmidpoint b p) (Center (Circle_around u)) := by{
+    sorry
+  }
+  have s1: (1 / 2 * point_abs b p) = point_abs (pmidpoint a p) (Center (Circle_around u)) := by{
+    sorry
+  }
+  rw[s1, point_abs_symm (pmidpoint a p) (Center (Circle_around u)), pmidpoint_symm, ← pythagoras_points_bc p1, point_abs_symm]
+  have s2: (1 / 2 * point_abs p a) = point_abs (pmidpoint b p) (Center (Circle_around u)) := by{
+    sorry
+  }
+  rw[s2, point_abs_symm (pmidpoint b p) (Center (Circle_around u)), add_comm, point_abs_symm b, ← pythagoras_points_bc p2, point_abs_symm b]
+
+  simp
 }
 
 theorem thales_inverse{a b p : Point}(h: perp_points p a p b): Lies_on_circle p (Thales_circle a b) := by{
