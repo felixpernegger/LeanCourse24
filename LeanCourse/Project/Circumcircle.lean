@@ -641,7 +641,7 @@ theorem circle_around_unique{a b c : Point}{C : CCircle}(h : noncolinear a b c)(
     exact noncolinear_imp_pairwise_different12 h
   }
   have bc: b ≠ c := by{
-    exact noncolinear_imp_pairwise_different23 h
+    exact (noncolinear_imp_pairwise_different23 h)
   }
   have ac: a ≠ c := by{
     exact noncolinear_imp_pairwise_different13 h
@@ -687,6 +687,8 @@ lemma center_circle_around_lies_on_perp_bisector{a b c : Point}(h : noncolinear 
   · rw[perp_bisector_symm]
     apply center_lies_on_perp_bisector
     exact (circle_around_lies_on h).2.2
+    exact (circle_around_lies_on h).2.1
+    exact Ne.symm (noncolinear_imp_pairwise_different23 h)
   apply center_lies_on_perp_bisector
   exact (circle_around_lies_on h).1
   exact (circle_around_lies_on h).2.2
