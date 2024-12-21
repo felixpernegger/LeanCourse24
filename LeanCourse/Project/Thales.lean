@@ -208,6 +208,7 @@ lemma parallel_same_abs_foot{L R : Line}{a b : Point}(LR : Parallel L R)(ah : Li
   linarith
 }
 
+
 /-the central lemma is now the following:-/
 lemma perp_points_center{a b p : Point}(h : pairwise_different_point3 a b p)(h' : perp_points p a p b): Center (Circle_around (perp_points_not_colinear h h')) = pmidpoint a b := by{
   have u: noncolinear a b p := by{exact perp_points_not_colinear h h'}

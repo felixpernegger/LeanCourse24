@@ -326,6 +326,27 @@ lemma point_abs_pmidpoint(a b : Point): point_abs a (pmidpoint a b) = 1/2 * poin
   ring_nf
 }
 
+lemma point_abs_scal(a b : Point)(s : ℂ): point_abs (p_scal_mul s a) (p_scal_mul s b) = Complex.abs s * point_abs a b := by{
+  unfold p_scal_mul
+  obtain ⟨s1,s2⟩ := s
+  obtain ⟨a1,a2⟩ := a
+  obtain ⟨b1,b2⟩ := b
+  unfold point_abs Complex.abs Complex.normSq
+  simp
+  ring_nf
+  calc
+    √(-(s1 ^ 2 * a1 * b1 * 2) + (s1 ^ 2 * a1 ^ 2 - s1 ^ 2 * a2 * b2 * 2) + s1 ^ 2 * a2 ^ 2 + s1 ^ 2 * b1 ^ 2 +
+              (s1 ^ 2 * b2 ^ 2 - a1 * s2 ^ 2 * b1 * 2) +
+            (a1 ^ 2 * s2 ^ 2 - s2 ^ 2 * a2 * b2 * 2) +
+          s2 ^ 2 * a2 ^ 2 +
+        s2 ^ 2 * b1 ^ 2 +
+      s2 ^ 2 * b2 ^ 2) = √((s1 ^ 2 + s2 ^ 2) *(-(a1 * b1 * 2) + (a1 ^ 2 - a2 * b2 * 2) + a2 ^ 2 + b1 ^ 2 + b2 ^ 2)) := by{ring_nf}
+        _= √(s1^2+s2^2) * √(-(a1 * b1 * 2) + (a1 ^ 2 - a2 * b2 * 2) + a2 ^ 2 + b1 ^ 2 + b2 ^ 2) := by{
+          rw[Real.sqrt_mul]
+          nlinarith
+        }
+}
+
 /-The absolute value of a point is the obvious thing:-/
 def pabs : Point → ℝ :=
   fun a ↦ Complex.abs a.x
@@ -581,7 +602,7 @@ def colinear (a b c : Point) : Prop :=
 def noncolinear (a b c : Point) : Prop :=
   ¬colinear a b c
 
-/-An alternative very useful notion will be given shorty -/
+/-An alternative very useful notion will be given shortly -/
 
 lemma colinear_perm12 (a b c : Point)(h: colinear a b c) : colinear b a c := by{
   unfold colinear at *
@@ -746,6 +767,17 @@ lemma pmidpoint_diff_right{a b : Point}(ab : a ≠ b): pmidpoint a b ≠ b := by
   contrapose ab
   simp at *
   exact (pmidpoint_same_imp_same_right ab)
+}
+
+/-As a preview to similar triangles, note the following:-/
+lemma point_abs_pmidpoint_pmidpoint(a b p): point_abs (pmidpoint p a) (pmidpoint p b) = 1/2 * point_abs a b := by{
+  have g: point_abs (pmidpoint p a) (pmidpoint p b) = point_abs (p_scal_mul (1/2) a) (p_scal_mul (1/2) b) := by{
+    unfold pmidpoint p_scal_mul point_abs
+    simp
+    ring_nf
+  }
+  rw[g, point_abs_scal a b (1/2)]
+  simp
 }
 
 
