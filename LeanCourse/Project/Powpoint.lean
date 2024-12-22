@@ -172,7 +172,7 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
   clear s3
   have ab: a ≠ b := by{unfold a b Concentric at *; assumption}
   obtain ⟨R,hR⟩ := colinear_go_along ab (in_between_imp_colinear h')
-  rw[point_abs_symm, hR, go_along_abs1]
+  rw[point_abs_symm, hR, go_along_abs1 ab]
   unfold r at *
   set r' := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))
   have rr': r' = r := by{
@@ -191,10 +191,7 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
   · intro h
     rw[h]
   intro h
-  sorry
-
-
-  assumption
+  exact go_along_inj ab h
 }
 
 #check Line_through
