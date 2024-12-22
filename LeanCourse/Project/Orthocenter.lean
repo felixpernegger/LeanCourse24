@@ -198,3 +198,10 @@ lemma orthocenter_lies_on_altC(T : Triangle): Lies_on (Orthocenter T) (Altitude_
   unfold Orthocenter
   exact line_center_on_line3 (altitudes_copunctal T)
 }
+
+--theorem orthocenter_unique(T : Triangle)
+
+/-The euler line of a triangle is the line through orthocenter and circumcentre (among others!)-/
+
+def Euler_line: Triangle → Line :=
+  fun T ↦ qLine_through (Orthocenter T) (Circumcenter T)
