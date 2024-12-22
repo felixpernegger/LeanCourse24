@@ -2,7 +2,7 @@ import LeanCourse.Project.CTangent
 import Mathlib
 
 open Function Set Classical
-
+set_option linter.unusedTactic false
 noncomputable section
 
 /-In this section we introduce the power of a point respective a circle.
@@ -75,6 +75,47 @@ this really is a line (otherwis it would be either the whole plane or nothing)
 def PowLine: CCircle → CCircle → Line :=
   fun C O ↦ perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) (((Radius C)^2-(Radius O)^2+(point_abs (Center C) (Center O))^2)/(2*(point_abs (Center C) (Center O)))))
 -/
+
+/-To define the powline (set set of points in respect to two noncentric circles where powpint to the circles is the same), we have to observe followung
+characterization:-/
+
+theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point): PowPoint p C = PowPoint p O ↔ Lies_on p (perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) (((Radius C)^2-(Radius O)^2+(point_abs (Center C) (Center O))^2)/(2*(point_abs (Center C) (Center O)))))) := by{
+  set q := (foot p (qLine_through (Center C) (Center O)))
+  have p1: perp_points (Center C) q p q := by{
+    exact perp_points_foot (Center C) p (qline_through_mem_left (Center C) (Center O))
+  }
+  have p2: perp_points (Center O) q p q:= by{
+    exact perp_points_foot (Center O) p (qline_through_mem_right (Center C) (Center O))
+  }
+  apply perp_points_perm_front at p1
+  apply perp_points_perm_front at p2
+  apply perp_points_perm_back at p1
+  apply perp_points_perm_back at p2
+  unfold PowPoint
+  rw[point_abs_symm p (Center C), point_abs_symm p (Center O), pythagoras_points p1, pythagoras_points p2]
+  have s1: point_abs q (Center C) ^ 2 + point_abs p q ^ 2 - ↑(Radius C) ^ 2 =
+    point_abs q (Center O) ^ 2 + point_abs p q ^ 2 - ↑(Radius O) ^ 2 ↔ point_abs q (Center C) ^ 2  - point_abs q (Center O) ^ 2 =
+    ↑(Radius C) ^ 2  - ↑(Radius O) ^ 2 := by{
+      constructor
+      intro h
+      linarith
+
+      intro h
+      linarith
+  }
+  have s2: Lies_on p (perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O))))) ↔ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))) := by{
+    #check foot_on_line
+    sorry
+  }
+  suffices : point_abs q (Center C) ^ 2  - point_abs q (Center O) ^ 2 =
+    ↑(Radius C) ^ 2  - ↑(Radius O) ^ 2 ↔
+q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O))))
+
+  · tauto
+
+  sorry
+}
+
 #check Line_through
 def PowLine {C O : CCircle}(h : ¬Concentric C O) : Line where
   range := {p | PowPoint p C = PowPoint p O}

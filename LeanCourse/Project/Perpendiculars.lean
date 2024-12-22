@@ -864,3 +864,12 @@ lemma foot_parallel_twice{L R : Line}(LR : Parallel L R){a : Point}(ah: Lies_on 
   rw[perp_through_of_parallels (foot a R) LR, foot_perp_through R a, ← perp_through_of_parallels a LR]
   exact point_lies_on_perp_through L a
 }
+
+lemma lies_on_line_iff_foot_same(p : Point)(L : Line): Lies_on p L ↔ foot p L = p := by{
+  constructor
+  · intro h
+    exact foot_point_on_line h
+  intro h
+  rw[← h]
+  exact foot_on_line L p
+}
