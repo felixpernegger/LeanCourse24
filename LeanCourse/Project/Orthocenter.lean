@@ -153,5 +153,48 @@ theorem altitudes_copunctal_point{a b c : Point}(h : noncolinear a b c): Copunct
 }
 
 /-Therefore we can define the Orthocenter of a triangle:-/
+/-(First a point version)-/
 
---but not now
+def Ortc_point{a b c : Point}(h : noncolinear a b c): Point :=
+  Line_center (altitudes_copunctal_point h)
+
+def Altitude_A : Triangle → Line :=
+  fun T ↦ perp_through (tri_bc T) T.a
+
+def Altitude_B : Triangle → Line :=
+  fun T ↦ perp_through (tri_ca T) T.b
+
+def Altitude_C : Triangle → Line :=
+  fun T ↦ perp_through (tri_ab T) T.c
+
+--maybe show the usual stuff here but eh
+
+theorem altitudes_copunctal(T : Triangle): Copunctal (Altitude_A T) (Altitude_B T) (Altitude_C T) := by{
+  unfold Altitude_A Altitude_B Altitude_C tri_ab tri_bc tri_ca
+  obtain ⟨a,b,c,h⟩ := T
+  simp
+  repeat
+    rw[← qline_through_line_through]
+  rw[qline_through_symm a b]
+  exact altitudes_copunctal_point h
+}
+
+/-And now finally:-/
+
+def Orthocenter: Triangle → Point :=
+  fun T ↦ Line_center (altitudes_copunctal T)
+
+lemma orthocenter_lies_on_altA(T : Triangle): Lies_on (Orthocenter T) (Altitude_A T) := by{
+  unfold Orthocenter
+  exact line_center_on_line1 (altitudes_copunctal T)
+}
+
+lemma orthocenter_lies_on_altB(T : Triangle): Lies_on (Orthocenter T) (Altitude_B T) := by{
+  unfold Orthocenter
+  exact line_center_on_line2 (altitudes_copunctal T)
+}
+
+lemma orthocenter_lies_on_altC(T : Triangle): Lies_on (Orthocenter T) (Altitude_C T) := by{
+  unfold Orthocenter
+  exact line_center_on_line3 (altitudes_copunctal T)
+}
