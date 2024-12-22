@@ -511,3 +511,15 @@ lemma go_along_lies_on{a b : Point}{L : Line}(R : ℝ)(h : Lies_on a L ∧ Lies_
   simp
   exact go_along_colinear a b R
 }
+
+lemma go_along_inj{a b : Point}(ab : a ≠ b)(r r' : ℝ)(h: go_along a b r = go_along a b r') : r = r' := by{
+  unfold go_along dir padd p_scal_mul at *
+  simp at h
+  obtain h|h|h := h
+  · · assumption
+  · contrapose h
+    exact sub_neq_zero (Ne.symm ab)
+  contrapose ab
+  simp
+  exact abs_zero_imp_same a b h
+}

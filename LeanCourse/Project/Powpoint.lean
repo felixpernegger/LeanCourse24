@@ -76,10 +76,25 @@ def PowLine: CCircle → CCircle → Line :=
   fun C O ↦ perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) (((Radius C)^2-(Radius O)^2+(point_abs (Center C) (Center O))^2)/(2*(point_abs (Center C) (Center O)))))
 -/
 
+/-first small lemma (better suited elsewhere, but whatever)-/
+
+lemma in_between_go_along{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between a b (go_along a b r)) : 0 ≤ r ∧ r ≤ point_abs a b := by{
+  unfold in_between at h
+  have absub : 0 < point_abs a b := by{exact point_abs_neq ab}
+  rw[← point_abs_symm b, go_along_abs1 ab, go_along_abs2 ab] at h
+  have g1: 0 ≤ r := by{
+    sorry
+  }
+  have g2: r ≤ point_abs a b := by{
+    sorry
+  }
+  tauto
+}
+
 /-To define the powline (set set of points in respect to two noncentric circles where powpint to the circles is the same), we have to observe followung
 characterization:-/
 
-theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point): PowPoint p C = PowPoint p O ↔ Lies_on p (perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) (((Radius C)^2-(Radius O)^2+(point_abs (Center C) (Center O))^2)/(2*(point_abs (Center C) (Center O)))))) := by{
+theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point)(h' : in_between (Center C) (Center O) (foot p (qLine_through (Center C) (Center O)))): PowPoint p C = PowPoint p O ↔ Lies_on p (perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) (((Radius C)^2-(Radius O)^2+(point_abs (Center C) (Center O))^2)/(2*(point_abs (Center C) (Center O)))))) := by{
   set q := (foot p (qLine_through (Center C) (Center O)))
   have p1: perp_points (Center C) q p q := by{
     exact perp_points_foot (Center C) p (qline_through_mem_left (Center C) (Center O))
@@ -125,9 +140,61 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
 
   set a := Center C
   set b := Center O
-  set r := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))
+  set r := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs a b ^ 2) / (2 * point_abs a b))
   set c := go_along a b r
+  clear s1 s2
+  have : point_abs q b = point_abs a b - point_abs q a := by{
+    unfold in_between at h'
+    rw[point_abs_symm q a]
+    linarith
+  }
+  rw[this]
+  clear this
+  have : point_abs q a ^ 2 - (point_abs a b - point_abs q a) ^ 2 = 2* (point_abs a b) * (point_abs q a) - (point_abs a b)^2:= by{ring}
+  rw[this]
+  clear this
+  have t1: point_abs a b ≠ 0 := by{
+    unfold a b Concentric at *
+    contrapose h
+    simp at *
+    exact abs_zero_imp_same (Center C) (Center O) h
+  }
+  have s3: 2 * point_abs a b * point_abs q a - point_abs a b ^ 2 = ↑(Radius C) ^ 2 - ↑(Radius O) ^ 2  ↔ point_abs q a = (↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs a b ^2)/(2*point_abs a b) := by{
+    field_simp
+    constructor
+    · intro h
+      linarith
+    intro h
+    linarith
+  }
+  suffices : point_abs q a = (↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs a b ^2)/(2*point_abs a b) ↔ q = c
+  · tauto
+  clear s3
+  have ab: a ≠ b := by{unfold a b Concentric at *; assumption}
+  obtain ⟨R,hR⟩ := colinear_go_along ab (in_between_imp_colinear h')
+  rw[point_abs_symm, hR, go_along_abs1]
+  unfold r at *
+  set r' := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))
+  have rr': r' = r := by{
+    unfold r r'
+    rfl
+  }
+  rw[rr']
+  unfold c
+  have : abs R = R := by{
+    simp
+    rw[hR] at h'
+    exact (in_between_go_along ab h').1
+  }
+  rw[this]
+  constructor
+  · intro h
+    rw[h]
+  intro h
   sorry
+
+
+  assumption
 }
 
 #check Line_through
