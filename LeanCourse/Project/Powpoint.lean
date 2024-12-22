@@ -83,10 +83,35 @@ lemma in_between_go_along{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between a b
   have absub : 0 < point_abs a b := by{exact point_abs_neq ab}
   rw[← point_abs_symm b, go_along_abs1 ab, go_along_abs2 ab] at h
   have g1: 0 ≤ r := by{
-    sorry
+    by_contra h0
+    simp at h0
+    have : point_abs a b < point_abs a b := by{
+      calc
+        point_abs a b < point_abs a b - r := by{linarith}
+          _= abs (point_abs a b - r) := by{
+            symm
+            simp
+            linarith
+          }
+          _≤ abs r + abs (point_abs a b - r) := by{simp}
+          _= point_abs a b := by{rw[h]}
+    }
+    linarith
   }
   have g2: r ≤ point_abs a b := by{
-    sorry
+    by_contra h0
+    simp [*] at *
+    have : abs r = r := by{simp [*]}
+    rw[this] at h
+    have : abs (point_abs a b - r) < 0 := by{
+      calc
+        abs (point_abs a b - r) = -r + (r+ abs (point_abs a b - r)) := by{ring}
+          _= -r + point_abs a b := by{rw[h]}
+          _< - point_abs a b + point_abs a b := by{linarith}
+          _= 0 := by{ring}
+    }
+    contrapose this
+    simp
   }
   tauto
 }
