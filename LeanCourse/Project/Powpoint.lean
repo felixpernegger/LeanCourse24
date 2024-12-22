@@ -104,7 +104,6 @@ theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point): PowP
       linarith
   }
   have s2: Lies_on p (perp_through (qLine_through (Center C) (Center O)) (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O))))) ↔ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))) := by{
-    #check foot_on_line
     set r := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))
     unfold q
     set a := Center C
@@ -115,8 +114,8 @@ theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point): PowP
       unfold L c
       exact go_along_lies_on_qline_through a b r
     }
-    #check go_along
-    sorry
+    symm
+    exact is_foot_iff_on_perp_through p c L s3
   }
   suffices : point_abs q (Center C) ^ 2  - point_abs q (Center O) ^ 2 =
     ↑(Radius C) ^ 2  - ↑(Radius O) ^ 2 ↔
@@ -124,6 +123,10 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
 
   · tauto
 
+  set a := Center C
+  set b := Center O
+  set r := ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) / (2 * point_abs (Center C) (Center O)))
+  set c := go_along a b r
   sorry
 }
 
