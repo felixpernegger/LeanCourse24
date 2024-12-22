@@ -338,3 +338,18 @@ example(T Q : Triangle)(h: Perspective T Q): colinear (qqIntersection (tri_ab T)
 
 --this is still wrong fuck
 -/
+
+lemma go_along_lies_on_line_through{a b : Point}(ab : a ≠ b)(r : ℝ): Lies_on (go_along a b r) (Line_through ab) := by{
+  apply go_along_lies_on
+  constructor
+  · exact line_through_mem_left ab
+  exact line_through_mem_right ab
+}
+
+lemma go_along_lies_on_qline_through(a b : Point)(r : ℝ): Lies_on (go_along a b r) (qLine_through a b) := by{
+  by_cases ab : a=b
+  · rw[ab, go_along_self]
+    exact qline_through_mem_left b b
+  simp [*]
+  exact go_along_lies_on_line_through ab r
+}
