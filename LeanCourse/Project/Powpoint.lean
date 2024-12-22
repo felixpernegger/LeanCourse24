@@ -113,7 +113,7 @@ theorem same_powpoint_char{C O : CCircle}(h : ¬Concentric C O)(p : Point): PowP
     set L := qLine_through a b
     have s3: Lies_on c L := by{
       unfold L c
-      sorry
+      exact go_along_lies_on_qline_through a b r
     }
     #check go_along
     sorry

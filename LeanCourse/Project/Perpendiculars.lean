@@ -873,3 +873,23 @@ lemma lies_on_line_iff_foot_same(p : Point)(L : Line): Lies_on p L ↔ foot p L 
   rw[← h]
   exact foot_on_line L p
 }
+
+lemma is_foot_iff_on_perp_through(p a: Point)(L : Line)(ah: Lies_on a L): foot p L = a ↔ Lies_on p (perp_through L a) := by{
+  constructor
+  · intro h
+    rw[← h, foot_perp_through]
+    exact point_lies_on_perp_through L p
+  intro h
+  symm
+  apply foot_unique
+  constructor
+  · assumption
+  have : perp_through L a = perp_through L p := by{
+    apply perp_through_unique
+    constructor
+    · exact perp_through_is_perp L a
+    assumption
+  }
+  rw[← this]
+  exact point_lies_on_perp_through L a
+}
