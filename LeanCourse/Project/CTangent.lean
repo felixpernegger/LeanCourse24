@@ -856,8 +856,12 @@ lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(
   simp
   exact point_abs_pos (Center C) (Center O)
 
-  #check in_between
-  sorry
+  unfold PosRad in_between at *
+  simp at *
+  have : CTangent_point h' = Center C := by{
+    exact ctangent_radius_zero_left h' hC
+  }
+  rw[this, point_abs_self, zero_add]
 }
 
 theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent C O ↔ Radius O - Radius C = point_abs (Center C) (Center O) := by{

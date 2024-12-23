@@ -271,7 +271,7 @@ def in_between (a b x : Point) : Prop :=
 
 lemma in_between_self_left(a b : Point): in_between a b a := by{
   unfold in_between
-  rw[point_abs_self]
+  rw[point_abs_self, zero_add]
 }
 
 lemma in_between_self_right(a b : Point): in_between a b b := by{
