@@ -269,6 +269,16 @@ lemma area_add_side (a b c x : Point)(bc : b≠c)(h : Lies_on x (Line_through bc
 def in_between (a b x : Point) : Prop :=
   point_abs  a x + point_abs x b = point_abs a b
 
+lemma in_between_self_left(a b : Point): in_between a b a := by{
+  unfold in_between
+  rw[point_abs_self]
+}
+
+lemma in_between_self_right(a b : Point): in_between a b b := by{
+  unfold in_between
+  rw[point_abs_self, point_abs_symm, add_zero]
+}
+
 /-The wording of this is of course a bit unfortunate, but putting x in the middle wouldnt be
 mich better in my opinion-/
 

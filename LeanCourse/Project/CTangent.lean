@@ -837,3 +837,40 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
   rw[this] at qC
   rw[qC]
 }
+
+/-If they are "inside tangent" (i dont introduce a new predicate for this, as its not symmetric and not necessary), we
+get a similar result:-/
+
+lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(h' : CTangent C O): in_between (CTangent_point h') (Center O) (Center C) := by{
+  by_cases hC: PosRad C
+  by_cases hO: PosRad O
+  sorry
+
+
+  unfold PosRad at hO
+  unfold inside_circle at h
+  simp at *
+  exfalso
+  rw[hO] at h
+  contrapose h
+  simp
+  exact point_abs_pos (Center C) (Center O)
+
+  #check in_between
+  sorry
+}
+
+theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent C O ↔ Radius O - Radius C = point_abs (Center C) (Center O) := by{
+  constructor
+  · intro h'
+    have : in_between (CTangent_point h') (Center O) (Center C) := by{
+      exact inside_ctangent_in_between h h'
+    }
+    unfold in_between at this
+    have t:  point_abs (Center C) (Center O) = point_abs (CTangent_point h') (Center O) - point_abs (CTangent_point h') (Center C) := by{
+      linarith
+    }
+    rw[t, point_abs_symm (CTangent_point h'), point_abs_ctangent_right h', point_abs_symm (CTangent_point h'), point_abs_ctangent_left h']
+
+  sorry
+}
