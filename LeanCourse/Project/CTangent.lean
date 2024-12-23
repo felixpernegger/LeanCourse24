@@ -843,14 +843,6 @@ get a similar result:-/
 
 lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(h' : CTangent C O): in_between (CTangent_point h') (Center O) (Center C) := by{
   by_cases hC: PosRad C
-  swap
-  · have : CTangent_point h' = Center C := by{
-      unfold PosRad at hC
-      simp at hC
-      exact ctangent_radius_zero_left h' hC
-    }
-    rw[this]
-    exact in_between_self_left (Center C) (Center O)
   by_cases hO: PosRad O
   obtain h0|h0|h0 := colinear_imp_in_between2 (Center C) (Center O) (CTangent_point h') (ctangent_colinear h')
   · exfalso
