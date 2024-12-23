@@ -2,7 +2,7 @@ import LeanCourse.Project.Tangents
 import Mathlib
 
 open Function Set Classical
-
+set_option linter.unusedTactic false
 noncomputable section
 
 /-Here deal with Tangential Circles.
@@ -817,8 +817,23 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
     unfold in_between
     rwa[point_abs_point_lies_on_circle qC, point_abs_symm, point_abs_point_lies_on_circle qO]
   }
-  #check colinear_go_along
-  #check in_between
-  #check in_between_go_along
-  sorry
+  have col: colinear (Center C) (Center O) q := by{exact in_between_imp_colinear s1}
+  by_cases CO: Center C = Center O
+  · rw[CO] at s1
+    unfold in_between at s1
+    rw[point_abs_symm, point_abs_self] at s1
+    simp at s1
+    have hq: q = Center O := by{exact abs_zero_imp_same q (Center O) s1}
+    rw[hq, ←CO, go_along_self]
+  obtain ⟨r,hr⟩ := colinear_go_along CO col
+  rw[hr]
+  rw[hr] at s1 qC
+  apply point_abs_point_lies_on_circle at qC
+  rw[go_along_abs1 CO] at qC
+  have : abs r = r := by{
+    simp
+    exact (in_between_go_along CO s1).1
+  }
+  rw[this] at qC
+  rw[qC]
 }
