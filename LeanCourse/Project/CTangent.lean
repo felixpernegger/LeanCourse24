@@ -789,6 +789,7 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
     simp at hC
     rw[hC]
     simp
-    rw[go_along]
+    #check PosRad
+    sorry
 
 }

@@ -319,6 +319,12 @@ lemma lies_on_radius_zero{C : CCircle}{p : Point}(hC : Radius C = 0)(hp : Lies_o
   exact abs_zero_imp_same (Center C) p hp
 }
 
+lemma center_lies_on_radius_zero{C : CCircle}(hC : Radius C = 0): Lies_on_circle (Center C) C := by{
+  refine point_on_circle_simp ?h
+  rw[point_abs_self, hC]
+  simp
+}
+
 lemma lies_on_not_posrad{C : CCircle}{p : Point}(hC : ¬PosRad C)(hp : Lies_on_circle p C): p = Center C := by{
   unfold PosRad at hC
   simp at hC
