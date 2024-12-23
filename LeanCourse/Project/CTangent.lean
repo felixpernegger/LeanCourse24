@@ -685,7 +685,6 @@ lemma ctangent_radius_zero{C O : CCircle}(h': Radius O = 0): CTangent C O ↔ Li
   tauto
 }
 
-#check inside_circle
 /-We say circle are "coutside" if neither center is within the other circle:-/
 def COutside(C O : CCircle): Prop :=
   ¬inside_circle (Center C) O ∧ ¬inside_circle (Center O) C
@@ -791,28 +790,35 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
     simp
     exact center_lies_on_radius_zero hC
   constructor
-  · by_cases hC : PosRad O
+  · by_cases hO : PosRad O
     refine point_on_circle_simp ?h.right.h
     rw[go_along_abs2, ← h']
     simp
     by_contra h0
     rw[h0, point_abs_self] at h'
-    unfold PosRad at hC
+    unfold PosRad at hO
     have : 0 ≤ Radius C := by{exact zero_le (Radius C)}
     have : (0:ℝ) < 0 := by{
       calc
-        (0:ℝ) < (↑(Radius O) :ℝ) + Radius C := by{exact Right.add_pos_of_pos_of_nonneg hC this}
+        (0:ℝ) < (↑(Radius O) :ℝ) + Radius C := by{exact Right.add_pos_of_pos_of_nonneg hO this}
         _= 0 := by{rw[add_comm, h']}
     }
     norm_num at this
 
-    unfold PosRad at hC
-    simp at hC
-    rw[hC] at h'
+    unfold PosRad at hO
+    simp at hO
+    rw[hO] at h'
     simp at *
     rw[h']
-    #check go_along
-    sorry
+    simp
+    exact center_lies_on_radius_zero hO
   intro q ⟨qC,qO⟩
+  have s1: in_between (Center C) (Center O) q := by{
+    unfold in_between
+    rwa[point_abs_point_lies_on_circle qC, point_abs_symm, point_abs_point_lies_on_circle qO]
+  }
+  #check colinear_go_along
+  #check in_between
+  #check in_between_go_along
   sorry
 }
