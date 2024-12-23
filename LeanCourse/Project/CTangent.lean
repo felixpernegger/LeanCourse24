@@ -996,3 +996,5 @@ theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O)(hl: Radiu
   }
   rw[hr,this]
 }
+
+/-As one of the above cases always occurs (one easily checks that), this classfies ctangent circles in a certain way-/
