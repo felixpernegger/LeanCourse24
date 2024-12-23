@@ -840,16 +840,65 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
 
 /-If they are "inside tangent" (i dont introduce a new predicate for this, as its not symmetric and not necessary), we
 get a similar result:-/
-
-lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(h' : CTangent C O): in_between (CTangent_point h') (Center O) (Center C) := by{
+/-(i got a bit confused here, better not look at the details of this horrendous code lol)-/
+lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(h' : CTangent C O)(h'': Radius C ≤ Radius O): in_between (CTangent_point h') (Center O) (Center C) := by{
   by_cases hC: PosRad C
   by_cases hO: PosRad O
+  have CO: Center C ≠ Center O := by{
+    by_contra h0
+    have: Concentric C O := by{exact h0}
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h'}
+    tauto
+  }
   obtain h0|h0|h0 := colinear_imp_in_between2 (Center C) (Center O) (CTangent_point h') (ctangent_colinear h')
   · exfalso
-    sorry
+    have col: colinear (Center C) (Center O) (CTangent_point h') := by{
+      exact ctangent_colinear h'
+    }
+    obtain ⟨r,hr⟩ := colinear_go_along CO col
+    rw[hr] at h0
+    obtain ⟨rh1,rh2⟩ := in_between_go_along CO h0
+    unfold inside_circle at h
+    have hh: r = Radius C := by{
+      have t1: Lies_on_circle (go_along (Center C) (Center O) r) C := by{
+        rw[← hr]
+        exact ctangent_mem_left h'
+      }
+      apply point_abs_point_lies_on_circle at t1
+      rw[go_along_abs1 CO] at t1
+      rw[← t1]
+      symm
+      simp
+      assumption
+    }
+    rw[hh] at h0 rh2 hr
+    clear hh col rh1 r
+    rw[← hr] at h0
+    unfold in_between at h0
+    rw[point_abs_ctangent_left h', point_abs_symm, point_abs_ctangent_right h'] at h0
+    have : 0 ≤ Radius C := by{exact zero_le (Radius C)}
+    have : 0 ≤ Radius O := by{exact zero_le (Radius O)}
+    rw[← h0] at h
+    simp at h
+    contrapose h
+    simp
   · exact in_between_symm h0
-  sorry
-
+  exfalso
+  unfold in_between at h0
+  rw[point_abs_symm, point_abs_ctangent_right h', point_abs_symm (CTangent_point h'), point_abs_ctangent_left h'] at h0
+  have g: (↑(Radius C) : ℝ) ≤ Radius O := by{
+    exact h''
+  }
+  rw[← h0] at g
+  simp at g
+  have : Center O = Center C := by{
+    refine abs_zero_imp_same (Center O) (Center C) ?h
+    apply le_antisymm
+    · assumption
+    exact point_abs_pos (Center O) (Center C)
+  }
+  symm at this
+  contradiction
 
   unfold PosRad at hO
   unfold inside_circle at h
@@ -868,12 +917,12 @@ lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(
   rw[this, point_abs_self, zero_add]
 }
 
-theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent C O ↔ (Radius O - Radius C = point_abs (Center C) (Center O))∧ ¬Concentric C O := by{
+theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O)(hl: Radius C ≤ Radius O): CTangent C O ↔ (Radius O - Radius C = point_abs (Center C) (Center O))∧ ¬Concentric C O := by{
   constructor
   · intro h'
     constructor
     have : in_between (CTangent_point h') (Center O) (Center C) := by{
-      exact inside_ctangent_in_between h h'
+      exact inside_ctangent_in_between h h' hl
     }
     unfold in_between at this
     have t:  point_abs (Center C) (Center O) = point_abs (CTangent_point h') (Center O) - point_abs (CTangent_point h') (Center C) := by{
