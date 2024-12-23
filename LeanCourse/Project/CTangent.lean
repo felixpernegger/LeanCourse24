@@ -789,7 +789,30 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
     simp at hC
     rw[hC]
     simp
-    #check PosRad
-    sorry
+    exact center_lies_on_radius_zero hC
+  constructor
+  · by_cases hC : PosRad O
+    refine point_on_circle_simp ?h.right.h
+    rw[go_along_abs2, ← h']
+    simp
+    by_contra h0
+    rw[h0, point_abs_self] at h'
+    unfold PosRad at hC
+    have : 0 ≤ Radius C := by{exact zero_le (Radius C)}
+    have : (0:ℝ) < 0 := by{
+      calc
+        (0:ℝ) < (↑(Radius O) :ℝ) + Radius C := by{exact Right.add_pos_of_pos_of_nonneg hC this}
+        _= 0 := by{rw[add_comm, h']}
+    }
+    norm_num at this
 
+    unfold PosRad at hC
+    simp at hC
+    rw[hC] at h'
+    simp at *
+    rw[h']
+    #check go_along
+    sorry
+  intro q ⟨qC,qO⟩
+  sorry
 }

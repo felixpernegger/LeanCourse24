@@ -529,3 +529,8 @@ lemma go_along_inj{a b : Point}(ab : a ≠ b){r r' : ℝ}(h: go_along a b r = go
   unfold padd p_scal_mul
   simp
 }
+
+@[simp] lemma go_along_point_abs(a b : Point): go_along a b (point_abs a b) = b := by{
+  rw[go_along_symm, point_abs_symm]
+  simp
+}
