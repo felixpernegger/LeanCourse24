@@ -158,6 +158,15 @@ lemma linear_trans_point_colinear(a b : Point){u v r : Point}(h : colinear u v r
   simp
 }
 
+/-therefore also noncolinear:-/
+lemma linear_trans_point_noncolinear(a b : Point)(ah : a ≠ zero){u v r : Point}(h : noncolinear u v r): noncolinear (Linear_trans_point a b u) (Linear_trans_point a b v) (Linear_trans_point a b r) := by{
+  contrapose h
+  unfold noncolinear at *
+  simp at *
+  rw[← linear_trans_point_inv_left a b ah u, ← linear_trans_point_inv_left a b ah v, ← linear_trans_point_inv_left a b ah r]
+  exact linear_trans_point_colinear (lt_inv1 a b) (lt_inv2 a b) h
+}
+
 --lemma linear_trans_set_inv_left
 
 def Linear_trans_set : Point → Point → Set Point → Set Point :=
