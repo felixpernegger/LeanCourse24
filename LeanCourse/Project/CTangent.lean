@@ -864,9 +864,10 @@ lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(
   rw[this, point_abs_self, zero_add]
 }
 
-theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent C O ↔ Radius O - Radius C = point_abs (Center C) (Center O) := by{
+theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent C O ↔ (Radius O - Radius C = point_abs (Center C) (Center O))∧ ¬Concentric C O := by{
   constructor
   · intro h'
+    constructor
     have : in_between (CTangent_point h') (Center O) (Center C) := by{
       exact inside_ctangent_in_between h h'
     }
@@ -876,5 +877,40 @@ theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent
     }
     rw[t, point_abs_symm (CTangent_point h'), point_abs_ctangent_right h', point_abs_symm (CTangent_point h'), point_abs_ctangent_left h']
 
+    by_contra h0
+    have : ¬PosRad C ∧ ¬PosRad O := by{exact concentric_ctangent h0 h'}
+    unfold PosRad Concentric inside_circle at *
+    simp at this
+    rw[this.2, h0, point_abs_self] at h
+    simp at *
+
+  intro ⟨h',h''⟩
+  apply ctangent_simp_ex
+  use go_along (Center C) (Center O) (- Radius C)
+  constructor
+  · refine point_on_circle_simp ?h.left.h
+    unfold Concentric at h''
+    rw[go_along_abs1 h'']
+    simp
+  constructor
+  · apply point_on_circle_simp
+    unfold Concentric at h''
+    rw[go_along_abs2 h'', ← h']
+    simp
+
+  intro q ⟨qC,qO⟩
+  have s1: in_between (Center O) q (Center C) := by{
+    unfold in_between
+    rw[point_abs_symm, ← h', point_abs_point_lies_on_circle qC, point_abs_point_lies_on_circle qO]
+    ring
+  }
+  have col: colinear (Center O) q (Center C) := by{exact in_between_imp_colinear s1}
+  apply colinear_perm13 at col
+  apply colinear_perm23 at col
+  unfold Concentric at h''
+  obtain ⟨r,hr⟩ := colinear_go_along h'' col
+  rw[hr] at s1
+  unfold in_between at s1
+  rw[go_along_abs1 h'', go_along_abs2 h'', point_abs_symm] at s1
   sorry
 }
