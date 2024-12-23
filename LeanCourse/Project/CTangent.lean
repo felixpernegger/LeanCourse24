@@ -843,7 +843,19 @@ get a similar result:-/
 
 lemma inside_ctangent_in_between{C O : CCircle}(h : inside_circle (Center C) O)(h' : CTangent C O): in_between (CTangent_point h') (Center O) (Center C) := by{
   by_cases hC: PosRad C
+  swap
+  · have : CTangent_point h' = Center C := by{
+      unfold PosRad at hC
+      simp at hC
+      exact ctangent_radius_zero_left h' hC
+    }
+    rw[this]
+    exact in_between_self_left (Center C) (Center O)
   by_cases hO: PosRad O
+  obtain h0|h0|h0 := colinear_imp_in_between2 (Center C) (Center O) (CTangent_point h') (ctangent_colinear h')
+  · exfalso
+    sorry
+  · exact in_between_symm h0
   sorry
 
 
@@ -911,6 +923,35 @@ theorem inside_ctangent{C O : CCircle}(h : inside_circle (Center C) O): CTangent
   obtain ⟨r,hr⟩ := colinear_go_along h'' col
   rw[hr] at s1
   unfold in_between at s1
-  rw[go_along_abs1 h'', go_along_abs2 h'', point_abs_symm] at s1
-  sorry
+  rw[hr] at qC
+  apply point_abs_point_lies_on_circle at qC
+  rw[go_along_abs1 h''] at qC
+  have g: abs r = -r := by{
+    simp
+    rw[go_along_abs1 h'', go_along_abs2 h'', point_abs_symm] at s1
+    set d := point_abs (Center C) (Center O)
+    clear qC hr col qO h q
+    have t1: 0 < d := by{
+      unfold d
+      exact point_abs_neq h''
+    }
+    by_contra h0
+    simp at h0
+    have : abs r = r := by{
+      simp
+      linarith
+    }
+    rw[this] at s1
+    clear this
+    have : d-r = d+r ∨ d-r = -(d+r) := by{
+      exact eq_or_eq_neg_of_abs_eq (id (Eq.symm s1))
+    }
+    obtain t|t := this
+    linarith
+    linarith
+  }
+  have : -Radius C = r := by{
+    linarith
+  }
+  rw[hr,this]
 }
