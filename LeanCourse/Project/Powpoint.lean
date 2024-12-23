@@ -575,11 +575,7 @@ lemma powline_symm{C O : CCircle}(h : ¬Concentric C O): PowLine h = PowLine (no
 
 theorem powline_perp{C O : CCircle}(h : ¬Concentric C O): Perpendicular (qLine_through (Center C) (Center O)) (PowLine h) := by{
   rw[powline_ex]
-  exact
-    perp_through_is_perp (qLine_through (Center C) (Center O))
-      (go_along (Center C) (Center O)
-        ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + point_abs (Center C) (Center O) ^ 2) /
-          (2 * point_abs (Center C) (Center O))))
+  apply perp_through_is_perp
 }
 
 lemma powline_unique{C O : CCircle}(h : ¬Concentric C O){p : Point}(hp : PowPoint p C = PowPoint p O): perp_through (qLine_through (Center C) (Center O)) p = PowLine h := by{
