@@ -355,7 +355,6 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
   exact (in_between_go_along' h h')
 }
 
-#check Line_through
 def PowLine {C O : CCircle}(h : ¬Concentric C O) : Line where
   range := {p | PowPoint p C = PowPoint p O}
   span := by{

@@ -46,6 +46,23 @@ def one : Point
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1
 
+/-A way to prove something is tangential is the following:-/
+lemma tangential_simp_ex{s v : Set Point}(h : ∃(p : Point), p ∈ s ∧ p ∈ v ∧ (∀(q : Point), q ∈ s ∧ q ∈ v → q = p)): Tangential s v := by{
+  obtain ⟨p,ps,pv,ph⟩ := h
+  unfold Tangential
+  apply le_antisymm
+  · by_contra h0
+    simp at h0
+    obtain ⟨a,b,ah,bh,ab⟩ := Set.one_lt_encard_iff.1 h0
+    simp at ah bh
+    rw[ph a ah, ph b bh] at ab
+    contradiction
+  simp
+  use p
+  simp
+  tauto
+}
+
 /-Tangential implies nonempty:-/
 
 lemma tangential_nonempty{s v : Set Point}(h : Tangential s v): (s ∩ v).Nonempty := by{

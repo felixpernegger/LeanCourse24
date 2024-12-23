@@ -27,6 +27,10 @@ lemma not_concentric_symm{C O : CCircle}(h : ¬Concentric C O): ¬Concentric O C
 def CTangent(C O : CCircle) : Prop :=
   Tangential C.range O.range
 
+lemma ctangent_simp_ex{C O : CCircle}(h : ∃(p : Point), Lies_on_circle p C ∧ Lies_on_circle p O ∧ (∀(q : Point), Lies_on_circle q C ∧ Lies_on_circle q O → q = p)): CTangent C O := by{
+  sorry
+}
+
 def CTangent_point{C O : CCircle}(h : CTangent C O): Point := by{
   unfold CTangent at h
   exact (Tangential_point h)
@@ -626,18 +630,141 @@ This isnt super nice, because there are two different cases:
 The circles are tangent "from the outside" or from the inside. Therefore we first introduce some
 more predicates. First we will with the edge case of one circle lying of the other:-/
 
-lemma ctangent_radius_zero{C O : CCircle}(h : Lies_on_circle (Center O) C): CTangent C O ↔ Radius O = 0 := by{
+lemma ctangent_radius_zero{C O : CCircle}(h': Radius O = 0): CTangent C O ↔ Lies_on_circle (Center O) C := by{
   constructor
-  intro h'
-  sorry
+  · intro h
+    rw[← ctangent_radius_zero_right h h']
+    exact ctangent_mem_left h
 
-  intro h'
+  intro h
   unfold CTangent Tangential
   by_contra h0
   by_cases h1: (C.range ∩ O.range).encard < 1
-  have : (C.range ∩ O.range) = ∅ := by{sorry}
-  sorry
-  sorry
+  have : (C.range ∩ O.range) = ∅ := by{
+    have : (C.range ∩ O.range).encard = 0 := by{
+      exact ENat.lt_one_iff_eq_zero.mp h1
+    }
+    exact encard_eq_zero.mp this
+  }
+  have t: Center O ∈ C.range ∩ O.range := by{
+    simp
+    constructor
+    · unfold Lies_on_circle at h
+      assumption
+    suffices : Lies_on_circle (Center O) O
+    · unfold Lies_on_circle at this
+      assumption
+    refine point_on_circle_simp ?this.h
+    rw[h', point_abs_self]
+    simp
+  }
+  rw[this] at t
+  contradiction
+
+  have : 1 < (C.range ∩ O.range).encard := by{
+    contrapose h0
+    simp
+    simp at h0
+    apply le_antisymm
+    · assumption
+    exact le_of_not_lt h1
+  }
+  obtain ⟨a,b,ah,bh,ab⟩ := Set.one_lt_encard_iff.1 this
+  have ha: Lies_on_circle a O := by{
+    unfold Lies_on_circle
+    simp at ah
+    tauto
+  }
+  have hb: Lies_on_circle b O := by{
+    unfold Lies_on_circle
+    simp at bh
+    tauto
+  }
+  rw[lies_on_radius_zero h' ha, lies_on_radius_zero h' hb] at ab
+  tauto
 }
 
-/-FINISH THIS OMG THIS IS HORRIBLE-/
+#check inside_circle
+/-We say circle are "coutside" if neither center is within the other circle:-/
+def COutside(C O : CCircle): Prop :=
+  ¬inside_circle (Center C) O ∧ ¬inside_circle (Center O) C
+
+lemma coutside_symm{C O : CCircle}(h: COutside C O): COutside O C := by{
+  unfold COutside at *
+  tauto
+}
+
+lemma coutside_point_abs_left{C O : CCircle}(h: COutside C O): Radius C ≤ point_abs (Center C) (Center O) := by{
+  unfold COutside inside_circle at h
+  simp at h
+  rw[point_abs_symm]
+  exact h.2
+}
+
+lemma coutside_point_abs_right{C O : CCircle}(h: COutside C O): Radius O ≤ point_abs (Center C) (Center O) := by{
+  unfold COutside inside_circle at h
+  simp at h
+  exact h.1
+}
+
+/-With this we can characterize ctangent circles which are coutside:-/
+
+lemma coutside_ctangent_in_between{C O : CCircle}(h : COutside C O)(h' : CTangent C O): in_between (Center C) (Center O) (CTangent_point h') := by{
+  by_cases hC : PosRad C
+  by_cases hO : PosRad O
+  obtain h0|h0|h0 := colinear_imp_in_between2 (Center C) (Center O) (CTangent_point h') (ctangent_colinear h')
+  · · assumption
+  · exfalso
+    unfold in_between at h0
+    rw[point_abs_ctangent_left h', point_abs_ctangent_right h'] at h0
+    rw[point_abs_symm] at h0
+    have g: Radius O < Radius O := by{
+      calc
+        Radius O ≤ point_abs (Center C) (Center O) := by{exact coutside_point_abs_right h}
+          _< point_abs (Center C) (Center O) + Radius C := by{simp;exact hC}
+          _= Radius O := by{rw[h0]}
+    }
+    simp at g
+  exfalso
+  unfold in_between at h0
+  rw[point_abs_symm, point_abs_ctangent_right h', point_abs_symm (CTangent_point h'), point_abs_ctangent_left h', point_abs_symm] at h0
+  have g: Radius C < Radius C := by{
+    calc
+      Radius C ≤ point_abs (Center C) (Center O) := by{exact coutside_point_abs_left h}
+        _< Radius O + point_abs (Center C) (Center O) := by{simp;exact hO}
+        _= Radius C := by{rw[h0]}
+  }
+  simp at g
+
+  have : CTangent_point h' = Center O := by{
+    unfold PosRad at hO
+    simp at hO
+    exact ctangent_radius_zero_right h' hO
+  }
+  rw[this]
+  unfold in_between
+  simp
+  exact point_abs_self (Center O)
+
+  have : CTangent_point h' = Center C := by{
+    unfold PosRad at hC
+    simp at hC
+    exact ctangent_radius_zero_left h' hC
+  }
+  rw[this]
+  unfold in_between
+  simp
+  exact point_abs_self (Center C)
+}
+
+theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Radius C + Radius O = point_abs (Center C) (Center O) := by{
+  constructor
+  · intro h'
+    have : in_between (Center C) (Center O) (CTangent_point h') := by{
+      exact coutside_ctangent_in_between h h'
+    }
+    unfold in_between at this
+    rw[← this, point_abs_ctangent_left h', point_abs_symm, point_abs_ctangent_right h']
+  intro h'
+  sorry
+}
