@@ -523,3 +523,9 @@ lemma go_along_inj{a b : Point}(ab : a ≠ b){r r' : ℝ}(h: go_along a b r = go
   simp
   exact abs_zero_imp_same a b h
 }
+
+@[simp] lemma go_along_zero(a b : Point): go_along a b 0 = a := by{
+  unfold go_along
+  unfold padd p_scal_mul
+  simp
+}

@@ -28,7 +28,8 @@ def CTangent(C O : CCircle) : Prop :=
   Tangential C.range O.range
 
 lemma ctangent_simp_ex{C O : CCircle}(h : ∃(p : Point), Lies_on_circle p C ∧ Lies_on_circle p O ∧ (∀(q : Point), Lies_on_circle q C ∧ Lies_on_circle q O → q = p)): CTangent C O := by{
-  sorry
+  unfold Lies_on_circle CTangent at *
+  exact tangential_simp_ex h
 }
 
 def CTangent_point{C O : CCircle}(h : CTangent C O): Point := by{
@@ -766,5 +767,28 @@ theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Rad
     unfold in_between at this
     rw[← this, point_abs_ctangent_left h', point_abs_symm, point_abs_ctangent_right h']
   intro h'
-  sorry
+  apply ctangent_simp_ex
+  use go_along (Center C) (Center O) (Radius C)
+  constructor
+  · by_cases hC : PosRad C
+    refine point_on_circle_simp ?h.left.h
+    rw[go_along_abs1]
+    simp
+    by_contra h0
+    rw[h0, point_abs_self] at h'
+    unfold PosRad at hC
+    have : 0 ≤ Radius O := by{exact zero_le (Radius O)}
+    have : (0:ℝ) < 0 := by{
+      calc
+        (0:ℝ) < (↑(Radius C) :ℝ) + Radius O := by{exact Right.add_pos_of_pos_of_nonneg hC this}
+        _= 0 := by{rw[h']}
+    }
+    norm_num at this
+
+    unfold PosRad at hC
+    simp at hC
+    rw[hC]
+    simp
+    rw[go_along]
+
 }
