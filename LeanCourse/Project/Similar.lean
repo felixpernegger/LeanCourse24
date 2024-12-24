@@ -428,3 +428,17 @@ lemma linear_trans_tri_inj(a b: Point)(ah : a ≠ zero){T Q : Triangle}(h : Line
 }
 
 /-Importantly, angles are preserved. Ww've proved this already earlier, but here the triangle version:-/
+lemma linear_trans_tri_angle_a(a b : Point)(ah : a ≠ zero)(T : Triangle): Angle_A (Linear_trans_tri a b T) = Angle_A T := by{
+  unfold Angle_A Linear_trans_tri
+  simp [*, linear_trans_angle]
+}
+
+lemma linear_trans_tri_angle_b(a b : Point)(ah : a ≠ zero)(T : Triangle): Angle_B (Linear_trans_tri a b T) = Angle_B T := by{
+  unfold Angle_B Linear_trans_tri
+  simp [*, linear_trans_angle]
+}
+
+lemma linear_trans_tri_angle_c(a b : Point)(ah : a ≠ zero)(T : Triangle): Angle_C (Linear_trans_tri a b T) = Angle_C T := by{
+  unfold Angle_C Linear_trans_tri
+  simp [*, linear_trans_angle]
+}
