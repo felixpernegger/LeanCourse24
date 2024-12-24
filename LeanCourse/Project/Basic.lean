@@ -42,6 +42,11 @@ def zero : Point
 def one : Point
   := Point.mk 1
 
+lemma one_neq_zero : one ≠ zero := by{
+  unfold one zero
+  simp
+}
+
 /- Natural definition for tangential of sets in a general manner-/
 def Tangential (s v : Set Point) : Prop :=
   Set.encard (s ∩ v) = 1

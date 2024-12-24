@@ -365,3 +365,8 @@ def Linear_trans_tri: Point → Point → Triangle → Triangle :=
 
 def dSimilar(T Q : Triangle): Prop :=
   ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T
+
+lemma linear_trans_tri_id(T : Triangle): Linear_trans_tri one zero T = T := by{
+  sorry
+}
+#check
