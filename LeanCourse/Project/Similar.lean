@@ -442,3 +442,35 @@ lemma linear_trans_tri_angle_c(a b : Point)(ah : a ≠ zero)(T : Triangle): Angl
   unfold Angle_C Linear_trans_tri
   simp [*, linear_trans_angle]
 }
+
+/-Now being dSimilar is an equivalence relation:-/
+
+lemma dsimilar_refl(T : Triangle): dSimilar T T := by{
+  unfold dSimilar
+  use one
+  use zero
+  constructor
+  · exact one_neq_zero
+  simp
+}
+
+lemma dsimilar_symm{T Q : Triangle}(h: dSimilar T Q): dSimilar Q T := by{
+  unfold dSimilar at *
+  obtain ⟨a,b,ah,h⟩ := h
+  use lt_inv1 a b
+  use lt_inv2 a b
+  constructor
+  · exact lt_inv1_not_zero a b ah
+  rw[h, linear_trans_tri_inv_left a b ah]
+}
+
+lemma dsimilar_trans{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dSimilar T R := by{
+  unfold dSimilar at *
+  obtain ⟨a,b,ah,ab⟩ := TQ
+  obtain ⟨c,d,ch,cd⟩ := QR
+  rw[cd,ab,linear_trans_tri_comp]
+  use (pmul c a)
+  use (padd (pmul c b) d)
+  constructor
+  · exact?
+}

@@ -180,6 +180,21 @@ lemma pmul_comm(a b : Point): pmul a b = pmul b a := by{
   ring
 }
 
+lemma pmul_neq_zero{a b : Point}(ah : a ≠ zero)(bh : b ≠ zero): pmul a b ≠ zero := by{
+  by_contra h0
+  unfold pmul zero at *
+  simp at *
+  obtain h0|h0 := h0
+  · contrapose ah
+    simp
+    ext
+    tauto
+  contrapose bh
+  simp
+  ext
+  tauto
+}
+
 /-And associative:-/
 
 lemma padd_assoc (a b c : Point): padd (padd a b) c = padd a (padd b c) := by{
