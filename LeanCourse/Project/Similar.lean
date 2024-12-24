@@ -366,7 +366,65 @@ def Linear_trans_tri: Point → Point → Triangle → Triangle :=
 def dSimilar(T Q : Triangle): Prop :=
   ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T
 
-lemma linear_trans_tri_id(T : Triangle): Linear_trans_tri one zero T = T := by{
-  sorry
+@[simp] lemma linear_trans_tri_id(T : Triangle): Linear_trans_tri one zero T = T := by{
+  unfold Linear_trans_tri
+  simp
 }
-#check
+
+lemma linear_trans_tri_eq(T : Triangle){a b c d : Point}(h1: a = c)(h2: b = d): Linear_trans_tri a b T = Linear_trans_tri c d T := by{rw[h1,h2]}
+
+lemma linear_trans_tri_id_simp(T : Triangle){a b : Point}(ah : a = one)(bh : b = zero): Linear_trans_tri a b T = T := by{
+  rw[ah,bh]
+  simp
+}
+
+lemma linear_trans_tri_comp(a b : Point)(ah : a ≠ zero)(c d : Point)(ch : c ≠ zero)(T : Triangle): Linear_trans_tri a b (Linear_trans_tri c d T) = Linear_trans_tri (pmul a c) (padd (pmul a d) b) T := by{
+  unfold Linear_trans_tri
+  simp [*, linear_trans_point_comp]
+  have : pmul a c ≠ zero := by{
+    unfold pmul zero at *
+    simp at *
+    constructor
+    · contrapose ah
+      simp at *
+      ext
+      rw[ah]
+    contrapose ch
+    simp at *
+    ext
+    rw[ch]
+  }
+  simp [this]
+}
+
+lemma linear_trans_tri_inv_left(a b : Point)(ah : a ≠ zero)(T : Triangle): Linear_trans_tri (lt_inv1 a b) (lt_inv2 a b) (Linear_trans_tri a b T) = T := by{
+  unfold Linear_trans_tri
+  simp [*, linear_trans_point_inv_left, lt_inv1_not_zero]
+}
+
+lemma linear_trans_tri_inv_right(a b : Point)(ah : a ≠ zero)(T : Triangle): Linear_trans_tri a b (Linear_trans_tri (lt_inv1 a b) (lt_inv2 a b) T) = T := by{
+  unfold Linear_trans_tri
+  simp [*, linear_trans_point_inv_right, lt_inv1_not_zero]
+}
+
+lemma linear_trans_tri_inj(a b: Point)(ah : a ≠ zero){T Q : Triangle}(h : Linear_trans_tri a b T = Linear_trans_tri a b Q): T = Q := by{
+  unfold Linear_trans_tri at h
+  simp [*, linear_trans_point_inj] at *
+  ext
+  have : T.a = Q.a := by{
+    apply linear_trans_point_inj a b ah h.1
+    }
+  simp [*]
+
+  have : T.b = Q.b := by{
+    apply linear_trans_point_inj a b ah h.2.1
+    }
+  simp [*]
+
+  have : T.c = Q.c := by{
+    apply linear_trans_point_inj a b ah h.2.2
+    }
+  simp [*]
+}
+
+/-Importantly, angles are preserved. Ww've proved this already earlier, but here the triangle version:-/
