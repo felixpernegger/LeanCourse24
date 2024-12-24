@@ -42,7 +42,7 @@ def zero : Point
 def one : Point
   := Point.mk 1
 
-lemma one_neq_zero : one ≠ zero := by{
+@[simp] lemma one_neq_zero : one ≠ zero := by{
   unfold one zero
   simp
 }
