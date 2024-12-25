@@ -503,14 +503,10 @@ if T and Q are similar, the a,b translating them are unique.-/
 that 2 pairs of points we have unique linear trans between them-/
 
 /-We do this in some steps:-/
-lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): ∃(u v : Point), u ≠ zero ∧ Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d := by{
+lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b): ∃(u v : Point), Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d := by{
   use Point.mk ((c.x-d.x)/(a.x-b.x))
   use Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x))
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
-  have cdsub: c.x-d.x ≠ 0 := by{exact sub_neq_zero cd}
-  constructor
-  · unfold zero
-    simp [*]
   unfold Linear_trans_point padd pmul
   field_simp
   constructor
@@ -522,9 +518,8 @@ lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): �
   ring
 }
 
-lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d){u v : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d): u = Point.mk ((c.x-d.x)/(a.x-b.x)) ∧ v = Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x)) := by{
+lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b){u v : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d): u = Point.mk ((c.x-d.x)/(a.x-b.x)) ∧ v = Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x)) := by{
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
-  have cdsub: c.x-d.x ≠ 0 := by{exact sub_neq_zero cd}
   unfold Linear_trans_point padd pmul at *
   have s1 : ({ x := ({ x := u.x * a.x } : Point).x + v.x }: Point).x = c.x ∧ ({ x := ({ x := u.x * b.x } : Point).x + v.x } : Point).x = d.x := by{
     rw[uv.1,uv.2]
@@ -554,8 +549,8 @@ lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d){u 
       }
 }
 
-lemma two_pairs_linear_trans_unique{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d){u v r s : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d)(rs : Linear_trans_point r s a = c ∧ Linear_trans_point r s b = d): u = r ∧ v = s := by{
-  rw[(two_pairs_linears_trans_ex ab cd uv).1, (two_pairs_linears_trans_ex ab cd rs).1, (two_pairs_linears_trans_ex ab cd uv).2, (two_pairs_linears_trans_ex ab cd rs).2]
+lemma two_pairs_linear_trans_unique(a b c d : Point)(ab : a ≠ b){u v r s : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d)(rs : Linear_trans_point r s a = c ∧ Linear_trans_point r s b = d): u = r ∧ v = s := by{
+  rw[(two_pairs_linears_trans_ex ab uv).1, (two_pairs_linears_trans_ex ab rs).1, (two_pairs_linears_trans_ex ab uv).2, (two_pairs_linears_trans_ex ab rs).2]
   tauto
 }
 
@@ -598,12 +593,72 @@ def qShift_factor(T Q : Triangle) : Point :=
 }
 
 /-This satistfies the usual stuff:-/
-lemma scale_factor_neq_zero{T Q : Triangle}(h: dSimilar T Q): Shift_factor h ≠ zero := by{
-  obtain ⟨b,bh1,bh2⟩ := (scale_factor_ex_shift h)
-  simp at *
-  contrapose bh1
-  simp at *
-  rw[← bh1]
-  clear bh1 bh2
-  sorry
+@[simp] lemma scale_factor_neq_zero{T Q : Triangle}(h: dSimilar T Q): Scale_factor h ≠ zero := by{
+  exact (Exists.choose_spec (scale_factor_ex_shift h)).1
+}
+
+lemma scale_factor_shift_factor{T Q : Triangle}(h: dSimilar T Q): Linear_trans_tri (Scale_factor h) (Shift_factor h) T = Q := by{
+  unfold Shift_factor
+  exact (Exists.choose_spec (scale_factor_ex_shift h)).2
+}
+
+/-The scale and shift factor are unique!-/
+lemma factors_imp_similar{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q) : dSimilar T Q := by{
+  unfold dSimilar
+  use u
+  use v
+  tauto
+}
+
+theorem scale_factor_shift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q): u = Scale_factor (factors_imp_similar uh uv) ∧ v = Shift_factor (factors_imp_similar uh uv) := by{
+  have h: dSimilar T Q := by{
+    unfold dSimilar
+    use u
+    use v
+    tauto
+  }
+  have ab: T.a ≠ T.b := by{
+    exact tri_diff_ab T
+  }
+  apply two_pairs_linear_trans_unique T.a T.b Q.a Q.b ab
+  unfold Linear_trans_tri at uv
+  obtain ⟨a,b,c,hT⟩ := T
+  obtain ⟨r,s,t,hQ⟩ := Q
+  simp [*] at *
+  obtain ⟨uv1,uv2,uv3,uv4⟩ := uv
+  tauto
+
+  have g: Linear_trans_tri (Scale_factor h) (Shift_factor h) T = Q := by{exact scale_factor_shift_factor h}
+  unfold Linear_trans_tri at *
+  obtain ⟨a,b,c,hT⟩ := T
+  obtain ⟨r,s,t,hQ⟩ := Q
+  simp [*] at *
+  tauto
+}
+
+/-Or more simply:-/
+lemma scale_and_ex_imp_dsimilar{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): dSimilar T Q := by{
+  obtain ⟨v,vh⟩ := uh'
+  unfold dSimilar
+  use u
+  use v
+  tauto
+}
+
+theorem scale_factor_unique{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): u = Scale_factor (scale_and_ex_imp_dsimilar uh uh') := by{
+  obtain ⟨v,vh⟩ := uh'
+  exact (scale_factor_shift_factor_unique uh vh).1
+}
+
+lemma shift_and_ex_imp_dsimilar{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): dSimilar T Q := by{
+  obtain ⟨u,uh⟩ := vh
+  unfold dSimilar
+  use u
+  use v
+  tauto
+}
+
+theorem shift_factor_unique{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): v = Shift_factor (shift_and_ex_imp_dsimilar vh) := by{
+  obtain ⟨u,uh1,uh2⟩ := vh
+  exact (scale_factor_shift_factor_unique uh1 uh2).2
 }
