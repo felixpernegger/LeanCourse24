@@ -572,5 +572,38 @@ def Scale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
 
 lemma scale_factor_ex_shift{T Q : Triangle}(h : dSimilar T Q): ∃(b : Point), Scale_factor h ≠ zero ∧ Linear_trans_tri (Scale_factor h) b T = Q := by{
   unfold Scale_factor
+  obtain ⟨b,bh1,bh2⟩ := Exists.choose_spec (similar_imp_ex h)
+  use b
+  tauto
+}
+
+def Shift_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
+  choose (scale_factor_ex_shift h)
+
+/-And quick versions:-/
+def qScale_factor(T Q : Triangle) : Point :=
+  if h : dSimilar T Q then Scale_factor h else zero
+
+def qShift_factor(T Q : Triangle) : Point :=
+  if h : dSimilar T Q then Shift_factor h else zero
+
+@[simp] lemma qscale_factor_simp{T Q : Triangle}(h : dSimilar T Q): qScale_factor T Q = Scale_factor h := by{
+  unfold qScale_factor
+  simp [*]
+}
+
+@[simp] lemma qshift_factor_simp{T Q : Triangle}(h : dSimilar T Q): qShift_factor T Q = Shift_factor h := by{
+  unfold qShift_factor
+  simp [*]
+}
+
+/-This satistfies the usual stuff:-/
+lemma scale_factor_neq_zero{T Q : Triangle}(h: dSimilar T Q): Shift_factor h ≠ zero := by{
+  obtain ⟨b,bh1,bh2⟩ := (scale_factor_ex_shift h)
+  simp at *
+  contrapose bh1
+  simp at *
+  rw[← bh1]
+  clear bh1 bh2
   sorry
 }
