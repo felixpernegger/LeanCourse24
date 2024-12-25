@@ -75,13 +75,13 @@ lemma oldsimilar_conj {T Q : Triangle}(h : oldSimilar T Q): oldSimilar (tri_conj
 /-To obtain the scaling factor we define a function for arbitrary triangles. This works as at there has to be at least one "pair" where eahc coordinates are nonzero-/
 
 /-
-def scale_factor : Triangle → Triangle → ℝ :=
+def dscale_factor : Triangle → Triangle → ℝ :=
   fun T Q ↦ max (max (Complex.abs (T.a.x / Q.a.x)) (Complex.abs (T.b.x / Q.b.x))) (Complex.abs (T.c.x / Q.c.x))
 
 /-With this we can prove that lengths scale according to this:-/
-lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (abs_tri_ab T) = (scale_factor T Q) * (abs_tri_ab Q) := by{
+lemma ab_scal (T Q : Triangle)(h : oldSimilar T Q) : (abs_tri_ab T) = (dscale_factor T Q) * (abs_tri_ab Q) := by{
   apply oldsimilar_symm at h
-  unfold scale_factor
+  unfold dscale_factor
   unfold abs_tri_ab
   unfold oldSimilar at h
   unfold point_abs
@@ -141,7 +141,7 @@ def directSimilar (T Q : Triangle) : Prop :=
 
 lemma oldsimilar_imp_directsimilar {T Q : Triangle} (h: oldSimilar T Q) : directSimilar T Q := by{
   use Point.mk 0
-  rw[tri_shift_zero]
+  rw[tri_dshift_zero]
   assumption
 }
 
@@ -149,7 +149,7 @@ lemma oldsimilar_imp_directsimilar {T Q : Triangle} (h: oldSimilar T Q) : direct
 
 lemma directsimilar_refl (T : Triangle) : directSimilar T T :=  by{
   use Point.mk 0
-  rw[tri_shift_zero]
+  rw[tri_dshift_zero]
   exact oldsimilar_refl T
 }
 
@@ -556,50 +556,50 @@ lemma two_pairs_linear_trans_unique(a b c d : Point)(ab : a ≠ b){u v r s : Poi
 
 /-Now we define the "scale factor" between similar triangles.
 As we will need to first variable "a" way more often we call
-the 1st (a) scale factor and the 2nd (b) shift_factor:-/
+the 1st (a) scale factor and the 2nd (b) dshift_factor:-/
 lemma similar_imp_ex{T Q : Triangle}(h : dSimilar T Q): ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T := by{
   unfold dSimilar at h
   assumption
 }
 
-def Scale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
+def dScale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
   choose (similar_imp_ex h)
 
-lemma scale_factor_ex_shift{T Q : Triangle}(h : dSimilar T Q): ∃(b : Point), Scale_factor h ≠ zero ∧ Linear_trans_tri (Scale_factor h) b T = Q := by{
-  unfold Scale_factor
+lemma dscale_factor_ex_shift{T Q : Triangle}(h : dSimilar T Q): ∃(b : Point), dScale_factor h ≠ zero ∧ Linear_trans_tri (dScale_factor h) b T = Q := by{
+  unfold dScale_factor
   obtain ⟨b,bh1,bh2⟩ := Exists.choose_spec (similar_imp_ex h)
   use b
   tauto
 }
 
-def Shift_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
-  choose (scale_factor_ex_shift h)
+def dShift_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
+  choose (dscale_factor_ex_shift h)
 
 /-And quick versions:-/
-def qScale_factor(T Q : Triangle) : Point :=
-  if h : dSimilar T Q then Scale_factor h else zero
+def qdScale_factor(T Q : Triangle) : Point :=
+  if h : dSimilar T Q then dScale_factor h else zero
 
-def qShift_factor(T Q : Triangle) : Point :=
-  if h : dSimilar T Q then Shift_factor h else zero
+def qdShift_factor(T Q : Triangle) : Point :=
+  if h : dSimilar T Q then dShift_factor h else zero
 
-@[simp] lemma qscale_factor_simp{T Q : Triangle}(h : dSimilar T Q): qScale_factor T Q = Scale_factor h := by{
-  unfold qScale_factor
+@[simp] lemma qdscale_factor_simp{T Q : Triangle}(h : dSimilar T Q): qdScale_factor T Q = dScale_factor h := by{
+  unfold qdScale_factor
   simp [*]
 }
 
-@[simp] lemma qshift_factor_simp{T Q : Triangle}(h : dSimilar T Q): qShift_factor T Q = Shift_factor h := by{
-  unfold qShift_factor
+@[simp] lemma qdshift_factor_simp{T Q : Triangle}(h : dSimilar T Q): qdShift_factor T Q = dShift_factor h := by{
+  unfold qdShift_factor
   simp [*]
 }
 
 /-This satistfies the usual stuff:-/
-@[simp] lemma scale_factor_neq_zero{T Q : Triangle}(h: dSimilar T Q): Scale_factor h ≠ zero := by{
-  exact (Exists.choose_spec (scale_factor_ex_shift h)).1
+@[simp] lemma dscale_factor_neq_zero{T Q : Triangle}(h: dSimilar T Q): dScale_factor h ≠ zero := by{
+  exact (Exists.choose_spec (dscale_factor_ex_shift h)).1
 }
 
-lemma scale_factor_shift_factor{T Q : Triangle}(h: dSimilar T Q): Linear_trans_tri (Scale_factor h) (Shift_factor h) T = Q := by{
-  unfold Shift_factor
-  exact (Exists.choose_spec (scale_factor_ex_shift h)).2
+lemma dscale_factor_dshift_factor{T Q : Triangle}(h: dSimilar T Q): Linear_trans_tri (dScale_factor h) (dShift_factor h) T = Q := by{
+  unfold dShift_factor
+  exact (Exists.choose_spec (dscale_factor_ex_shift h)).2
 }
 
 /-The scale and shift factor are unique!-/
@@ -610,7 +610,7 @@ lemma factors_imp_similar{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Lin
   tauto
 }
 
-theorem scale_factor_shift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q): u = Scale_factor (factors_imp_similar uh uv) ∧ v = Shift_factor (factors_imp_similar uh uv) := by{
+theorem dscale_factor_dshift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q): u = dScale_factor (factors_imp_similar uh uv) ∧ v = dShift_factor (factors_imp_similar uh uv) := by{
   have h: dSimilar T Q := by{
     unfold dSimilar
     use u
@@ -628,7 +628,7 @@ theorem scale_factor_shift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠
   obtain ⟨uv1,uv2,uv3,uv4⟩ := uv
   tauto
 
-  have g: Linear_trans_tri (Scale_factor h) (Shift_factor h) T = Q := by{exact scale_factor_shift_factor h}
+  have g: Linear_trans_tri (dScale_factor h) (dShift_factor h) T = Q := by{exact dscale_factor_dshift_factor h}
   unfold Linear_trans_tri at *
   obtain ⟨a,b,c,hT⟩ := T
   obtain ⟨r,s,t,hQ⟩ := Q
@@ -637,7 +637,7 @@ theorem scale_factor_shift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠
 }
 
 /-Or more simply:-/
-lemma scale_and_ex_imp_dsimilar{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): dSimilar T Q := by{
+lemma dscale_and_ex_imp_dsimilar{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): dSimilar T Q := by{
   obtain ⟨v,vh⟩ := uh'
   unfold dSimilar
   use u
@@ -645,12 +645,12 @@ lemma scale_and_ex_imp_dsimilar{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' 
   tauto
 }
 
-theorem scale_factor_unique{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): u = Scale_factor (scale_and_ex_imp_dsimilar uh uh') := by{
+theorem dscale_factor_unique{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v T = Q): u = dScale_factor (dscale_and_ex_imp_dsimilar uh uh') := by{
   obtain ⟨v,vh⟩ := uh'
-  exact (scale_factor_shift_factor_unique uh vh).1
+  exact (dscale_factor_dshift_factor_unique uh vh).1
 }
 
-lemma shift_and_ex_imp_dsimilar{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): dSimilar T Q := by{
+lemma dshift_and_ex_imp_dsimilar{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): dSimilar T Q := by{
   obtain ⟨u,uh⟩ := vh
   unfold dSimilar
   use u
@@ -658,7 +658,56 @@ lemma shift_and_ex_imp_dsimilar{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u
   tauto
 }
 
-theorem shift_factor_unique{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): v = Shift_factor (shift_and_ex_imp_dsimilar vh) := by{
+theorem dshift_factor_unique{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v T = Q): v = dShift_factor (dshift_and_ex_imp_dsimilar vh) := by{
   obtain ⟨u,uh1,uh2⟩ := vh
-  exact (scale_factor_shift_factor_unique uh1 uh2).2
+  exact (dscale_factor_dshift_factor_unique uh1 uh2).2
+}
+--(pmul a c) (padd (pmul a d) b)
+/-Under compositions these factors obviously behave like linear_trans_..._comp:-/
+lemma dshift_factor_comp{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dScale_factor (dsimilar_trans TQ QR) = pmul (dScale_factor QR) (dScale_factor TQ) := by{
+  symm
+  apply dscale_factor_unique
+  · exact pmul_neq_zero (dscale_factor_neq_zero QR) (dscale_factor_neq_zero TQ)
+  use padd (pmul (dScale_factor QR) (dShift_factor TQ)) (dShift_factor QR)
+  rw[← linear_trans_tri_comp, dscale_factor_dshift_factor, dscale_factor_dshift_factor]
+  exact dscale_factor_neq_zero QR
+  exact dscale_factor_neq_zero TQ
+}
+
+lemma dscale_factor_comp{T Q R : Triangle}(TQ : dSimilar T Q)(QR: dSimilar Q R): dShift_factor (dsimilar_trans TQ QR) = padd (pmul (dScale_factor QR) (dShift_factor TQ)) (dShift_factor QR) := by{
+  symm
+  apply dshift_factor_unique
+  use pmul (dScale_factor QR) (dScale_factor TQ)
+  constructor
+  · exact pmul_neq_zero (dscale_factor_neq_zero QR) (dscale_factor_neq_zero TQ)
+  rw[← linear_trans_tri_comp, dscale_factor_dshift_factor, dscale_factor_dshift_factor]
+  exact dscale_factor_neq_zero QR
+  exact dscale_factor_neq_zero TQ
+}
+
+/-Therefore scale factors of inverse stuff is lt_inv:-/
+
+lemma dscale_factor_refl(T : Triangle): dScale_factor (dsimilar_refl T) = one := by{
+  symm
+  apply dscale_factor_unique
+  · exact one_neq_zero
+  use zero
+  exact linear_trans_tri_id T
+}
+
+lemma dshift_factor_refl(T : Triangle): dShift_factor (dsimilar_refl T) = zero := by{
+  symm
+  apply dshift_factor_unique
+  use one
+  constructor
+  · exact one_neq_zero
+  exact linear_trans_tri_id T
+}
+
+lemma dscale_factor_symm{T Q : Triangle}(h : dSimilar T Q): dScale_factor (dsimilar_symm h) = lt_inv1 (dScale_factor h) (dShift_factor h) := by{
+  symm
+  apply dscale_factor_unique
+  · exact lt_inv1_not_zero (dScale_factor h) (dShift_factor h) (dscale_factor_neq_zero h)
+  use lt_inv2 (dScale_factor h) (dShift_factor h)
+  rw[← dscale_factor_dshift_factor h]
 }
