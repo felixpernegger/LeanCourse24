@@ -344,8 +344,6 @@ deal with the second notion of similar, which we call "direct similar" or just d
 
 /-We say two triangles are dsimilar iff there is a linear transformation between them:-/
 /-First a "standard trianlge" just for convenience:-/
-#check real_line
-
 def std_triangle : Triangle where
   a := zero
   b := one
@@ -472,5 +470,107 @@ lemma dsimilar_trans{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dSim
   use (pmul c a)
   use (padd (pmul c b) d)
   constructor
-  · exact?
+  · exact pmul_neq_zero ch ah
+  rfl
+  assumption
+  assumption
+}
+
+/-As proven beofre we have same angles:-/
+theorem dsimilar_imp_same_angles{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q ∧ Angle_B T = Angle_B Q ∧ Angle_C T = Angle_C Q := by{
+  unfold dSimilar at h
+  obtain ⟨a,b,ah,h⟩ := h
+  rw[h]
+  simp [*, linear_trans_tri_angle_a, linear_trans_tri_angle_b, linear_trans_tri_angle_c]
+}
+
+lemma dsimilar_angle_a{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q := by{
+  exact (dsimilar_imp_same_angles h).1
+}
+
+lemma dsimilar_angle_b{T Q : Triangle}(h : dSimilar T Q): Angle_B T = Angle_B Q := by{
+  exact (dsimilar_imp_same_angles h).2.1
+}
+
+lemma dsimilar_angle_c{T Q : Triangle}(h : dSimilar T Q): Angle_C T = Angle_C Q := by{
+  exact (dsimilar_imp_same_angles h).2.2
+}
+
+/-Next we want to show the (in my opinion not super obvious) fact that
+if T and Q are similar, the a,b translating them are unique.-/
+
+/-For this we first show (which basically already is the fact)
+that 2 pairs of points we have unique linear trans between them-/
+
+/-We do this in some steps:-/
+lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): ∃(u v : Point), u ≠ zero ∧ Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d := by{
+  use Point.mk ((c.x-d.x)/(a.x-b.x))
+  use Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x))
+  have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
+  have cdsub: c.x-d.x ≠ 0 := by{exact sub_neq_zero cd}
+  constructor
+  · unfold zero
+    simp [*]
+  unfold Linear_trans_point padd pmul
+  field_simp
+  constructor
+  · ext
+    field_simp
+    ring
+  ext
+  field_simp
+  ring
+}
+
+lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d){u v : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d): u = Point.mk ((c.x-d.x)/(a.x-b.x)) ∧ v = Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x)) := by{
+  have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
+  have cdsub: c.x-d.x ≠ 0 := by{exact sub_neq_zero cd}
+  unfold Linear_trans_point padd pmul at *
+  have s1 : ({ x := ({ x := u.x * a.x } : Point).x + v.x }: Point).x = c.x ∧ ({ x := ({ x := u.x * b.x } : Point).x + v.x } : Point).x = d.x := by{
+    rw[uv.1,uv.2]
+    tauto
+  }
+  simp at s1
+  obtain ⟨s1,s2⟩ := s1
+  have t1: u.x * (a.x-b.x) = c.x-d.x := by{
+    ring_nf
+    calc
+      u.x * a.x - u.x * b.x = (u.x * a.x + v.x) - (u.x * b.x + v.x) := by{ring}
+        _= c.x - d.x := by{rw[s1,s2]}
+  }
+  have g1: u.x = (c.x-d.x)/(a.x - b.x) := by{
+    field_simp [t1]
+  }
+  constructor
+  · ext
+    simp [*]
+  ext
+  simp
+  calc
+    v.x = c.x - ((c.x - d.x) / (a.x - b.x)) * a.x := by{rw[← g1,← s1]; ring}
+      _= (a.x * d.x - b.x * c.x) / (a.x - b.x) := by{
+        field_simp
+        ring
+      }
+}
+
+lemma two_pairs_linear_trans_unique{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d){u v r s : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d)(rs : Linear_trans_point r s a = c ∧ Linear_trans_point r s b = d): u = r ∧ v = s := by{
+  rw[(two_pairs_linears_trans_ex ab cd uv).1, (two_pairs_linears_trans_ex ab cd rs).1, (two_pairs_linears_trans_ex ab cd uv).2, (two_pairs_linears_trans_ex ab cd rs).2]
+  tauto
+}
+
+/-Now we define the "scale factor" between similar triangles.
+As we will need to first variable "a" way more often we call
+the 1st (a) scale factor and the 2nd (b) shift_factor:-/
+lemma similar_imp_ex{T Q : Triangle}(h : dSimilar T Q): ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T := by{
+  unfold dSimilar at h
+  assumption
+}
+
+def Scale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
+  choose (similar_imp_ex h)
+
+lemma scale_factor_ex_shift{T Q : Triangle}(h : dSimilar T Q): ∃(b : Point), Scale_factor h ≠ zero ∧ Linear_trans_tri (Scale_factor h) b T = Q := by{
+  unfold Scale_factor
+  sorry
 }
