@@ -167,7 +167,14 @@ lemma linear_trans_point_noncolinear(a b : Point)(ah : a ≠ zero){u v r : Point
   exact linear_trans_point_colinear (lt_inv1 a b) (lt_inv2 a b) h
 }
 
---lemma linear_trans_set_inv_left
+/-Importantly, lenghts are scales with pabs a with linear trans:-/
+lemma linear_trans_point_point_abs(a b u v: Point): point_abs (Linear_trans_point a b u) (Linear_trans_point a b v) = pabs a * (point_abs u v) := by{
+  unfold point_abs Linear_trans_point padd pmul pabs
+  simp
+  calc
+    Complex.abs (a.x*u.x - a.x*v.x)= Complex.abs (a.x*(u.x-v.x)) := by{ring_nf}
+      _= (Complex.abs a.x) * (Complex.abs (u.x-v.x)) := by{exact AbsoluteValue.map_mul Complex.abs a.x (u.x - v.x)}
+}
 
 def Linear_trans_set : Point → Point → Set Point → Set Point :=
   fun a b S ↦ {u | ∃ s ∈ S, u = Linear_trans_point a b s}
