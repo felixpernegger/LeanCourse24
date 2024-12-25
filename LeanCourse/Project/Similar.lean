@@ -664,7 +664,7 @@ theorem dshift_factor_unique{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u �
 }
 --(pmul a c) (padd (pmul a d) b)
 /-Under compositions these factors obviously behave like linear_trans_..._comp:-/
-lemma dshift_factor_comp{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dScale_factor (dsimilar_trans TQ QR) = pmul (dScale_factor QR) (dScale_factor TQ) := by{
+lemma dscale_factor_comp{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dScale_factor (dsimilar_trans TQ QR) = pmul (dScale_factor QR) (dScale_factor TQ) := by{
   symm
   apply dscale_factor_unique
   · exact pmul_neq_zero (dscale_factor_neq_zero QR) (dscale_factor_neq_zero TQ)
@@ -674,7 +674,7 @@ lemma dshift_factor_comp{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): 
   exact dscale_factor_neq_zero TQ
 }
 
-lemma dscale_factor_comp{T Q R : Triangle}(TQ : dSimilar T Q)(QR: dSimilar Q R): dShift_factor (dsimilar_trans TQ QR) = padd (pmul (dScale_factor QR) (dShift_factor TQ)) (dShift_factor QR) := by{
+lemma dshift_factor_comp{T Q R : Triangle}(TQ : dSimilar T Q)(QR: dSimilar Q R): dShift_factor (dsimilar_trans TQ QR) = padd (pmul (dScale_factor QR) (dShift_factor TQ)) (dShift_factor QR) := by{
   symm
   apply dshift_factor_unique
   use pmul (dScale_factor QR) (dScale_factor TQ)
@@ -704,10 +704,34 @@ lemma dshift_factor_refl(T : Triangle): dShift_factor (dsimilar_refl T) = zero :
   exact linear_trans_tri_id T
 }
 
+/-For the two lemmas here, rw bugged, so i had to do it a bit weirdly.-/
 lemma dscale_factor_symm{T Q : Triangle}(h : dSimilar T Q): dScale_factor (dsimilar_symm h) = lt_inv1 (dScale_factor h) (dShift_factor h) := by{
   symm
   apply dscale_factor_unique
   · exact lt_inv1_not_zero (dScale_factor h) (dShift_factor h) (dscale_factor_neq_zero h)
   use lt_inv2 (dScale_factor h) (dShift_factor h)
-  rw[← dscale_factor_dshift_factor h]
+  have t: Linear_trans_tri (dScale_factor h) (dShift_factor h) T = Q := by{exact dscale_factor_dshift_factor h}
+  have tt: Linear_trans_tri (lt_inv1 (dScale_factor h) (dShift_factor h)) (lt_inv2 (dScale_factor h) (dShift_factor h))
+    (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) =
+  T := by{
+    exact linear_trans_tri_inv_left (dScale_factor h) (dShift_factor h) (dscale_factor_neq_zero h) T
+  }
+  rw[t] at tt
+  assumption
+}
+
+lemma dshift_factor_symm{T Q : Triangle}(h : dSimilar T Q): dShift_factor (dsimilar_symm h) = lt_inv2 (dScale_factor h) (dShift_factor h) := by{
+  symm
+  apply dshift_factor_unique
+  use lt_inv1 (dScale_factor h) (dShift_factor h)
+  constructor
+  · exact lt_inv1_not_zero (dScale_factor h) (dShift_factor h) (dscale_factor_neq_zero h)
+  have t: Linear_trans_tri (dScale_factor h) (dShift_factor h) T = Q := by{exact dscale_factor_dshift_factor h}
+  have tt: Linear_trans_tri (lt_inv1 (dScale_factor h) (dShift_factor h)) (lt_inv2 (dScale_factor h) (dShift_factor h))
+    (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) =
+  T := by{
+    exact linear_trans_tri_inv_left (dScale_factor h) (dShift_factor h) (dscale_factor_neq_zero h) T
+  }
+  rw[t] at tt
+  assumption
 }
