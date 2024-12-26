@@ -219,6 +219,11 @@ lemma tri_not_parallel_ca_ab(T : Triangle): ¬Parallel (tri_ca T) (tri_ab T) := 
   exact tri_c_not_on_ab T
 }
 
+lemma tri_not_parallel_ab_ca(T : Triangle): ¬Parallel (tri_ab T) (tri_ca T) := by{
+  apply not_parallel_symm
+  exact tri_not_parallel_ca_ab T
+}
+
 /-With vetrices being the intersections:-/
 lemma tri_b_intersection_ab_bc(T : Triangle): Intersection (tri_not_parallel_ab_bc T) = T.b := by{
   symm
@@ -232,27 +237,28 @@ lemma tri_b_intersection_bc_ab(T : Triangle): Intersection (tri_not_parallel_bc_
   simp [tri_a_on_ab, tri_a_on_ca, tri_b_on_ab, tri_b_on_bc, tri_c_on_ca, tri_c_on_bc]
 }
 
-lemma tri_b_intersection_bc_ca(T : Triangle): Intersection (tri_not_parallel_bc_ca T) = T.c := by{
+lemma tri_c_intersection_bc_ca(T : Triangle): Intersection (tri_not_parallel_bc_ca T) = T.c := by{
   symm
   apply intersection_unique
   simp [tri_a_on_ab, tri_a_on_ca, tri_b_on_ab, tri_b_on_bc, tri_c_on_ca, tri_c_on_bc]
 }
 
-lemma tri_b_intersection_ca_bc(T : Triangle): Intersection (tri_not_parallel_ca_bc T) = T.c := by{
+lemma tri_c_intersection_ca_bc(T : Triangle): Intersection (tri_not_parallel_ca_bc T) = T.c := by{
   symm
   apply intersection_unique
   simp [tri_a_on_ab, tri_a_on_ca, tri_b_on_ab, tri_b_on_bc, tri_c_on_ca, tri_c_on_bc]
 }
 
-lemma tri_b_intersection_ca_ab(T : Triangle): Intersection (tri_not_parallel_ca_ab T) = T.a := by{
+lemma tri_a_intersection_ca_ab(T : Triangle): Intersection (tri_not_parallel_ca_ab T) = T.a := by{
   symm
   apply intersection_unique
   simp [tri_a_on_ab, tri_a_on_ca, tri_b_on_ab, tri_b_on_bc, tri_c_on_ca, tri_c_on_bc]
 }
 
-lemma tri_not_parallel_ab_ca(T : Triangle): ¬Parallel (tri_ab T) (tri_ca T) := by{
-  apply not_parallel_symm
-  exact tri_not_parallel_ca_ab T
+lemma tri_a_intersection_ab_ca(T : Triangle): Intersection (tri_not_parallel_ab_ca T) = T.a := by{
+  symm
+  apply intersection_unique
+  simp [tri_a_on_ab, tri_a_on_ca, tri_b_on_ab, tri_b_on_bc, tri_c_on_ca, tri_c_on_bc]
 }
 
 /-We can shift and scale Triangles:-/

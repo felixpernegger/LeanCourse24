@@ -854,5 +854,5 @@ theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB:
     exact linear_trans_angle u v s1 T.a T.b T.c
   }
 
-  sorry
+  rw[← tri_c_intersection_ab_bc]
 }
