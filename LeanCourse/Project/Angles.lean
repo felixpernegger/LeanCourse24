@@ -129,13 +129,44 @@ lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2
 
 lemma arg_zero{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑0 : Real.Angle)): z.arg = 0 := by{
   obtain ⟨k,kh⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 h
+  have : 0 ≤ Real.pi := by{exact Real.pi_nonneg}
   simp at kh
   rw[kh]
   simp
   right
   apply le_antisymm
-  sorry
-  sorry
+  · by_contra h0
+    simp at h0
+    have k1: 1 ≤ k := by{exact h0}
+    have g: 2*Real.pi ≤ z.arg := by{
+      rw[kh]
+      field_simp
+      norm_cast
+    }
+    have g': z.arg ≤ Real.pi := by{exact Complex.arg_le_pi z}
+    have : 2*Real.pi ≤ Real.pi := by{linarith}
+    field_simp at this
+  by_contra h0
+  simp at h0
+  have k1: k ≤ -1 := by{exact Lean.Omega.Int.add_le_zero_iff_le_neg.mp h0}
+  have g: z.arg ≤ -2*Real.pi := by{
+    rw[kh]
+    field_simp
+    calc
+      2 * Real.pi * ↑k = Real.pi * (2 * ↑k) := by{ring}
+        _≤ Real.pi * (2* -1) := by{
+          refine (mul_le_mul_iff_of_pos_left ?a0).mpr ?_
+          · exact Real.pi_pos
+          simp
+          norm_cast
+          simp
+          linarith
+        }
+        _= -(2*Real.pi) := by{ring}
+  }
+  have g': -Real.pi < z.arg := by{exact Complex.neg_pi_lt_arg z}
+  have : -Real.pi < -2 * Real.pi := by{linarith}
+  field_simp at this
 }
 
 /-the halt of an angle is not unique!!-/
