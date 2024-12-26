@@ -735,3 +735,35 @@ lemma dshift_factor_symm{T Q : Triangle}(h : dSimilar T Q): dShift_factor (dsimi
   rw[t] at tt
   assumption
 }
+
+/-The lenghts of the sides of traingles are scaling with scale factor!-/
+
+/-Once again rw is bugging with dscale_factor_dshift_factor, so I use an (unnecessary) have tactic...-/
+lemma dsimilar_abs_tri_ab{T Q : Triangle}(h : dSimilar T Q): abs_tri_ab Q = (pabs (dScale_factor h)) * (abs_tri_ab T) := by{
+  have : abs_tri_ab (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) = abs_tri_ab Q := by{
+    rw[dscale_factor_dshift_factor h]
+  }
+  rw[← this]
+  unfold Linear_trans_tri abs_tri_ab
+  simp [dscale_factor_neq_zero, linear_trans_point_point_abs]
+}
+
+lemma dsimilar_abs_tri_bc{T Q : Triangle}(h : dSimilar T Q): abs_tri_bc Q = (pabs (dScale_factor h)) * (abs_tri_bc T) := by{
+  have : abs_tri_bc (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) = abs_tri_bc Q := by{
+    rw[dscale_factor_dshift_factor h]
+  }
+  rw[← this]
+  unfold Linear_trans_tri abs_tri_bc
+  simp [dscale_factor_neq_zero, linear_trans_point_point_abs]
+}
+
+lemma dsimilar_abs_tri_ca{T Q : Triangle}(h : dSimilar T Q): abs_tri_ca Q = (pabs (dScale_factor h)) * (abs_tri_ca T) := by{
+  have : abs_tri_ca (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) = abs_tri_ca Q := by{
+    rw[dscale_factor_dshift_factor h]
+  }
+  rw[← this]
+  unfold Linear_trans_tri abs_tri_ca
+  simp [dscale_factor_neq_zero, linear_trans_point_point_abs]
+}
+
+#check area_points

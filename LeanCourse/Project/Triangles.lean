@@ -156,7 +156,7 @@ def tri_conj : Triangle → Triangle :=
 def area_points : Point → Point → Point → ℝ :=
   fun a b c ↦ -1/4  * det a b c
 
-def area_tri : Triangle → ℂ :=
+def area_tri : Triangle → ℝ :=
   fun T ↦ area_points T.a T.b T.c
 
 /- It is very important that the above expression is the *signed* area, not the abosulte value. So it can take negative values-/
