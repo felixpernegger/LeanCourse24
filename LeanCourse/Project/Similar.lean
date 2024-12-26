@@ -766,4 +766,32 @@ lemma dsimilar_abs_tri_ca{T Q : Triangle}(h : dSimilar T Q): abs_tri_ca Q = (pab
   simp [dscale_factor_neq_zero, linear_trans_point_point_abs]
 }
 
-#check area_points
+/-And so does the area: (squared)-/
+
+lemma dsimilar_area_tri{T Q : Triangle}(h : dSimilar T Q): area_tri Q = (pabs (dScale_factor h))^2 * area_tri T := by{
+  have : area_tri (Linear_trans_tri (dScale_factor h) (dShift_factor h) T) = area_tri Q := by{
+    rw[dscale_factor_dshift_factor]
+  }
+  rw[← this]
+  unfold area_tri Linear_trans_tri area_points det conj Linear_trans_point pmul padd pabs
+  simp [dscale_factor_neq_zero]
+  ring_nf
+  field_simp
+  set a1 := T.a.x.re
+  set a2 := T.a.x.im
+  set b1 := T.b.x.re
+  set b2 := T.b.x.im
+  set c1 := T.c.x.re
+  set c2 := T.c.x.im
+  unfold Complex.abs Complex.normSq
+  simp
+  set s1 := (dScale_factor h).x.re
+  set s2 := (dScale_factor h).x.im
+  ring_nf
+  have : √(s1 ^ 2 + s2 ^ 2) ^ 2 = s1^2 + s2^2 := by{
+    refine Real.sq_sqrt ?h
+    nlinarith
+  }
+  rw[this]
+  ring
+}
