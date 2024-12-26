@@ -115,6 +115,42 @@ lemma tri_b_not_on_ca(T : Triangle): ¬(Lies_on T.b (tri_ca T)) := by{
   assumption
 }
 
+/-The sides arent parallel (help me):-/
+lemma tri_not_parallel_ab_bc(T : Triangle): ¬Parallel (tri_ab T) (tri_bc T) := by{
+  by_contra h0
+  apply (parallel_def (tri_ab T) (tri_bc T)).1 at h0
+  obtain h0|h0 := h0
+  suffices g: T.b ∈ (tri_ab T).range ∩ (tri_bc T).range
+  · rw[h0] at g
+    exact g
+  simp
+  constructor
+  suffices: Lies_on T.b (tri_ab T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_b_on_ab T
+
+  suffices: Lies_on T.b (tri_bc T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_b_on_bc T
+
+  have g: Lies_on T.a (tri_bc T) := by{
+    unfold Lies_on
+    rw[← h0]
+    suffices: Lies_on T.a (tri_ab T)
+    · unfold Lies_on at this
+      assumption
+    exact tri_a_on_ab T
+  }
+  contrapose g
+  exact tri_a_not_on_bc T
+}
+
+lemma tri_not_parallel_bc_ab(T : Triangle): ¬Parallel (tri_bc T) (tri_ab T) := by{
+  sorry
+}
+
 /-We can shift and scale Triangles:-/
 lemma tri_shift_lemma (T : Triangle)(p : Point): noncolinear (padd T.a p) (padd T.b p) (padd T.c p) := by{
   exact noncolinear_shift p T.noncolinear

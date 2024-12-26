@@ -1221,6 +1221,12 @@ lemma parallel_symm (L R : Line)(h : Parallel L R) : Parallel R L := by{
     assumption
 }
 
+lemma not_parallel_symm(L R : Line)(h : ¬Parallel L R): ¬Parallel R L := by{
+  contrapose h
+  simp at *
+  exact parallel_symm R L h
+}
+
 lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Parallel L S := by{
   unfold Parallel at *
   obtain ⟨p,hp⟩ := LR

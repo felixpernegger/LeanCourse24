@@ -522,7 +522,11 @@ lemma two_pairs_ex_linear_trans(a b c d : Point)(ab : a ≠ b): ∃(u v : Point)
 lemma two_pair_linear_trans_neq_zero{a b c d u v : Point}(cd : c ≠ d)(ac: Linear_trans_point u v a = c)(bd: Linear_trans_point u v b = d): u ≠ zero := by{
   contrapose cd
   simp at *
-  sorry
+  rw[cd] at ac bd
+  rw[← ac, ← bd]
+  unfold Linear_trans_point zero padd pmul
+  ext
+  simp
 }
 
 lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b){u v : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d): u = Point.mk ((c.x-d.x)/(a.x-b.x)) ∧ v = Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x)) := by{
@@ -815,5 +819,40 @@ theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB:
     exact tri_diff_ab Q
   }
   obtain ⟨u,v,tqa,tqb⟩ := two_pairs_ex_linear_trans T.a T.b Q.a Q.b tab
-  have s1:
+  have s1: u ≠ zero := by{
+    exact two_pair_linear_trans_neq_zero qab tqa tqb
+  }
+  suffices goal: Q.c = Linear_trans_point u v T.c
+  · unfold dSimilar
+    use u
+    use v
+    constructor
+    · exact s1
+    unfold Linear_trans_tri
+    simp [*]
+    ext
+    rw[← tqa]
+    simp
+    rw[goal]
+
+  have c1: colinear Q.a Q.c (Linear_trans_point u v T.c) := by{
+    apply angle_out_same_imp_colinear Q.b
+    · exact id (Ne.symm qab)
+    unfold Angle_A at hA
+    rw[angle_symm, angle_symm (Linear_trans_point u v T.c), ← hA, ← tqa, ← tqb]
+    simp
+    symm
+    exact linear_trans_angle u v s1 T.c T.a T.b
+  }
+
+  have c2: colinear Q.b Q.c (Linear_trans_point u v T.c) := by{
+    apply angle_out_same_imp_colinear Q.a
+    · exact qab
+    unfold Angle_B at hB
+    rw[← hB, ← tqa, ← tqb]
+    symm
+    exact linear_trans_angle u v s1 T.a T.b T.c
+  }
+
+  sorry
 }
