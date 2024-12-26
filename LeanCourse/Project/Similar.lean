@@ -503,7 +503,7 @@ if T and Q are similar, the a,b translating them are unique.-/
 that 2 pairs of points we have unique linear trans between them-/
 
 /-We do this in some steps:-/
-lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b): ∃(u v : Point), Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d := by{
+lemma two_pairs_ex_linear_trans(a b c d : Point)(ab : a ≠ b): ∃(u v : Point), Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d := by{
   use Point.mk ((c.x-d.x)/(a.x-b.x))
   use Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x))
   have absub: a.x-b.x ≠ 0 := by{exact sub_neq_zero ab}
@@ -516,6 +516,13 @@ lemma two_pairs_ex_linear_trans{a b c d : Point}(ab : a ≠ b): ∃(u v : Point)
   ext
   field_simp
   ring
+}
+
+/-If c and d are disjoin u ≠ zero:-/
+lemma two_pair_linear_trans_neq_zero{a b c d u v : Point}(cd : c ≠ d)(ac: Linear_trans_point u v a = c)(bd: Linear_trans_point u v b = d): u ≠ zero := by{
+  contrapose cd
+  simp at *
+  sorry
 }
 
 lemma two_pairs_linears_trans_ex{a b c d : Point}(ab : a ≠ b){u v : Point}(uv : Linear_trans_point u v a = c ∧ Linear_trans_point u v b = d): u = Point.mk ((c.x-d.x)/(a.x-b.x)) ∧ v = Point.mk ((a.x*d.x - b.x*c.x)/(a.x-b.x)) := by{
@@ -794,4 +801,19 @@ lemma dsimilar_area_tri{T Q : Triangle}(h : dSimilar T Q): area_tri Q = (pabs (d
   }
   rw[this]
   ring
+}
+
+/-Very very importtantly triangles are dsimilar iff they have same angles.
+The "→" direction we showed already. The other direction is the last thing we will say
+about dsimilar for now.-/
+
+theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q)(hC: Angle_C T = Angle_C Q): dSimilar T Q := by{
+  have tab: T.a ≠ T.b := by{
+    exact tri_diff_ab T
+  }
+  have qab: Q.a ≠ Q.b := by{
+    exact tri_diff_ab Q
+  }
+  obtain ⟨u,v,tqa,tqb⟩ := two_pairs_ex_linear_trans T.a T.b Q.a Q.b tab
+  have s1:
 }
