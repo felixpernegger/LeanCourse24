@@ -127,6 +127,17 @@ lemma arg_neg_pi_div_two{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑(-Real.pi / 2
   assumption
 }
 
+lemma arg_zero{z : ℂ}(h: (↑z.arg : Real.Angle) = (↑0 : Real.Angle)): z.arg = 0 := by{
+  obtain ⟨k,kh⟩ := Real.Angle.angle_eq_iff_two_pi_dvd_sub.1 h
+  simp at kh
+  rw[kh]
+  simp
+  right
+  apply le_antisymm
+  sorry
+  sorry
+}
+
 /-the halt of an angle is not unique!!-/
 
 lemma half_arg{z : ℂ}{t : ℝ}(h: (↑z.arg: Real.Angle) + (↑z.arg: Real.Angle) = t): z.arg = (↑(t/2): Real.Angle) ∨ z.arg = (↑(t/2 + Real.pi): Real.Angle) := by{
@@ -712,6 +723,57 @@ theorem angle_not_in_between'{a b c : Point}(h : in_between b c a)(ha : a ≠ b)
   simp at l
   rw[l]
   field_simp
+}
+
+/-Importantly, also the reverse holds:-/
+theorem angle_zero_imp_colinear{a b c : Point}(h : Angle a b c = 0): colinear a b c := by{
+  apply colinear_perm12
+  apply (colinear_alt b a c).2
+  unfold Angle at h
+  have : (a.x - b.x) / (c.x - b.x) = (b.x - a.x) / (b.x - c.x) := by{
+    by_cases h0: b.x = c.x
+    simp [*]
+
+    have : b.x - c.x ≠ 0 := by{
+      contrapose h0
+      simp at *
+      rw[← add_zero c.x, ← h0]
+      ring
+    }
+    have : c.x - b.x ≠ 0 := by{
+      contrapose h0
+      simp at *
+      rw[← add_zero b.x, ← h0]
+      ring
+    }
+    field_simp
+    ring
+  }
+  rw[← this]
+  set s := (a.x - b.x) / (c.x - b.x)
+  clear this
+  suffices: 0 ≤ s.re ∧ s.im = 0
+  · tauto
+  apply Complex.arg_eq_zero_iff.1
+  exact arg_zero h
+}
+
+/-We can "generalise" this nicely as follows into something actually being used often:-/
+theorem angle_out_same_imp_colinear{a b c : Point}(p : Point)(pa : p ≠ a)(h : Angle p a b = Angle p a c): colinear a b c := by{
+  by_cases ab : a = b
+  · apply colinear_self
+    tauto
+  by_cases ac : a = c
+  · apply colinear_self
+    tauto
+  have ba: b ≠ a := by{tauto}
+  have ca: c ≠ a := by{tauto}
+  apply colinear_perm12
+  apply angle_zero_imp_colinear
+  calc
+    Angle b a c = Angle b a p + Angle p a c := by{rw[angle_add ba pa ca]}
+      _= - Angle p a b + Angle p a c := by{rw[angle_symm]}
+      _= 0 := by{rw[h]; simp}
 }
 
 /-Now we state last theorem in a slightly nicer version:-/
