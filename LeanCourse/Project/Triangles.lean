@@ -148,7 +148,80 @@ lemma tri_not_parallel_ab_bc(T : Triangle): ¬Parallel (tri_ab T) (tri_bc T) := 
 }
 
 lemma tri_not_parallel_bc_ab(T : Triangle): ¬Parallel (tri_bc T) (tri_ab T) := by{
-  sorry
+  apply not_parallel_symm
+  exact tri_not_parallel_ab_bc T
+}
+
+lemma tri_not_parallel_bc_ca(T : Triangle): ¬Parallel (tri_bc T) (tri_ca T) := by{
+  by_contra h0
+  apply (parallel_def (tri_bc T) (tri_ca T)).1 at h0
+  obtain h0|h0 := h0
+  suffices g: T.c ∈ (tri_bc T).range ∩ (tri_ca T).range
+  · rw[h0] at g
+    exact g
+  simp
+  constructor
+  suffices: Lies_on T.c (tri_bc T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_c_on_bc T
+
+  suffices: Lies_on T.c (tri_ca T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_c_on_ca T
+
+  have g: Lies_on T.b (tri_ca T) := by{
+    unfold Lies_on
+    rw[← h0]
+    suffices: Lies_on T.b (tri_bc T)
+    · unfold Lies_on at this
+      assumption
+    exact tri_b_on_bc T
+  }
+  contrapose g
+  exact tri_b_not_on_ca T
+}
+
+lemma tri_not_parallel_ca_bc(T : Triangle): ¬Parallel (tri_ca T) (tri_bc T) := by{
+  apply not_parallel_symm
+  exact tri_not_parallel_bc_ca T
+}
+
+lemma tri_not_parallel_ca_ab(T : Triangle): ¬Parallel (tri_ca T) (tri_ab T) := by{
+  by_contra h0
+  apply (parallel_def (tri_ca T) (tri_ab T)).1 at h0
+  obtain h0|h0 := h0
+  suffices g: T.a ∈ (tri_ca T).range ∩ (tri_ab T).range
+  · rw[h0] at g
+    exact g
+  simp
+  constructor
+  suffices: Lies_on T.a (tri_ca T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_a_on_ca T
+
+  suffices: Lies_on T.a (tri_ab T)
+  · unfold Lies_on at this
+    assumption
+  exact tri_a_on_ab T
+
+  have g: Lies_on T.c (tri_ab T) := by{
+    unfold Lies_on
+    rw[← h0]
+    suffices: Lies_on T.c (tri_ca T)
+    · unfold Lies_on at this
+      assumption
+    exact tri_c_on_ca T
+  }
+  contrapose g
+  exact tri_c_not_on_ab T
+}
+
+lemma tri_not_parallel_ab_ca(T : Triangle): ¬Parallel (tri_ab T) (tri_ca T) := by{
+  apply not_parallel_symm
+  exact tri_not_parallel_ca_ab T
 }
 
 /-We can shift and scale Triangles:-/
