@@ -486,8 +486,9 @@ lemma dsimilar_area_tri{T Q : Triangle}(h : dSimilar T Q): area_tri Q = (pabs (d
 /-Very very importtantly triangles are dsimilar iff they have same angles.
 The "→" direction we showed already. The other direction is the last thing we will say
 about dsimilar for now.-/
+/-(aaa stands for angle angle angle)-/
 
-theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q)(hC: Angle_C T = Angle_C Q): dSimilar T Q := by{
+theorem aaa_dsimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q)(hC: Angle_C T = Angle_C Q): dSimilar T Q := by{
   have tab: T.a ≠ T.b := by{
     exact tri_diff_ab T
   }
@@ -542,18 +543,18 @@ theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB:
 /-Obviously we dont always want to show all 3 angles, because of angle sum 2 suffice already.
 /(We actually didnt evene use hC in the proof above lol)-/
 
-lemma same_angles_imp_dsimilar_ab{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q): dSimilar T Q := by{
-  apply same_angles_imp_dsmimilar hA hB
+lemma aa_dsimilar_ab{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q): dSimilar T Q := by{
+  apply aaa_dsimilar hA hB
   rw[tri_sum_angle_c T, tri_sum_angle_c Q, hA, hB]
 }
 
-lemma same_angles_imp_dsimilar_bc{T Q : Triangle}(hB: Angle_B T = Angle_B Q)(hC: Angle_C T = Angle_C Q): dSimilar T Q := by{
-  refine same_angles_imp_dsmimilar ?_ hB hC
+lemma aa_dsimilar_bc{T Q : Triangle}(hB: Angle_B T = Angle_B Q)(hC: Angle_C T = Angle_C Q): dSimilar T Q := by{
+  refine aaa_dsimilar ?_ hB hC
   rw[tri_sum_angle_a T, tri_sum_angle_a Q, hB, hC]
 }
 
-lemma same_angles_imp_dsimilar_ca{T Q : Triangle}(hC: Angle_C T = Angle_C Q)(hA: Angle_A T = Angle_A Q): dSimilar T Q := by{
-  refine same_angles_imp_dsmimilar hA ?_ hC
+lemma aa_dsimilar_ca{T Q : Triangle}(hC: Angle_C T = Angle_C Q)(hA: Angle_A T = Angle_A Q): dSimilar T Q := by{
+  refine aaa_dsimilar hA ?_ hC
   rw[tri_sum_angle_b T, tri_sum_angle_b Q, hA, hC]
 }
 
@@ -561,7 +562,7 @@ lemma same_angles_imp_dsimilar_ca{T Q : Triangle}(hC: Angle_C T = Angle_C Q)(hA:
 the sides adjacent to it (for this it is actually important we use directed angles):-/
 /-Unfortunately unlike the theorem before this we have no "general" version.
 Furthermore, the proof is kind of ugly because it is not symmetric despite the statment being-/
-theorem same_angle_same_prop_imp_dsimilar_a{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(h: (abs_tri_ab Q)/(abs_tri_ab T) = (abs_tri_ca Q)/(abs_tri_ca T)): dSimilar T Q := by{
+theorem sas_dsimilar_a{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(h: (abs_tri_ab Q)/(abs_tri_ab T) = (abs_tri_ca Q)/(abs_tri_ca T)): dSimilar T Q := by{
   have tab: T.a ≠ T.b := by{exact tri_diff_ab T}
   have qab: Q.a ≠ Q.b := by{exact tri_diff_ab Q}
   have qac: Q.a ≠ Q.c := by{exact tri_diff_ac Q}
@@ -613,9 +614,240 @@ theorem same_angle_same_prop_imp_dsimilar_a{T Q : Triangle}(hA: Angle_A T = Angl
       exact (in_between_go_along qac h').1
     rw[hR] at h'
     apply in_between_symm at h'
-    #check in_between_go_along'
-    sorry
-  sorry
+    rw[go_along_symm] at h'
+    have g: point_abs Q.c Q.a - R ≤ 0 := by{exact in_between_go_along' (Ne.symm qac) h'}
+    have : 0 ≤ point_abs Q.c Q.a := by{exact point_abs_pos Q.c Q.a}
+    linarith
+  rw[← tqa, linear_trans_point_point_abs]
+  have s2: abs_tri_ca Q = (abs_tri_ab Q / abs_tri_ab T)* (abs_tri_ca T) := by{
+    have : abs_tri_ab T ≠ 0 := by{
+      suffices : 0 < abs_tri_ab T
+      · linarith
+      unfold abs_tri_ab
+      exact point_abs_neq tab
+    }
+    have : abs_tri_ca T ≠ 0 := by{
+      suffices : 0 < abs_tri_ca T
+      · linarith
+      unfold abs_tri_ca
+      apply point_abs_neq
+      exact tri_diff_ca T
+    }
+    field_simp at *
+    tauto
+  }
+  rw[s2]
+  unfold abs_tri_ca
+  rw[point_abs_symm]
+  have t1: abs_tri_ab T ≠ 0 := by{
+      suffices : 0 < abs_tri_ab T
+      · linarith
+      unfold abs_tri_ab
+      exact point_abs_neq tab
+  }
+  have t2: 0 < point_abs T.c T.a := by{
+    apply point_abs_neq
+    exact tri_diff_ca T
+  }
+  field_simp
+  suffices: pabs u * abs_tri_ab T = abs_tri_ab Q
+  · rw[← this]
+    ring
+  unfold abs_tri_ab
+  rw[← tqa, ← tqb]
+  exact Eq.symm (linear_trans_point_point_abs u v T.a T.b)
 }
 
---DO THINGY HERE!!! with the sides and angle
+theorem sas_dsimilar_c{T Q : Triangle}(hC: Angle_C T = Angle_C Q)(h: (abs_tri_ca Q)/(abs_tri_ca T) = (abs_tri_bc Q)/(abs_tri_bc T)): dSimilar T Q := by{
+  have tca: T.c ≠ T.a := by{exact tri_diff_ca T}
+  have qca: Q.c ≠ Q.a := by{exact tri_diff_ca Q}
+  have qcb: Q.c ≠ Q.b := by{exact tri_diff_cb Q}
+  obtain ⟨u,v,tqc,tqa⟩ := two_pairs_ex_linear_trans T.c T.a Q.c Q.a tca
+  have s1: u ≠ zero := by{exact two_pair_linear_trans_neq_zero qca tqc tqa}
+
+  suffices goal: Q.b = Linear_trans_point u v T.b
+  · unfold dSimilar
+    use u
+    use v
+    constructor
+    · exact s1
+    unfold Linear_trans_tri
+    simp [s1]
+    ext
+    rw[← tqa]
+    simp
+    rw[goal]
+    simp
+    rw[tqc]
+
+  have c1: colinear Q.c Q.b (Linear_trans_point u v T.b) := by{
+    apply angle_out_same_imp_colinear Q.a
+    · exact id (Ne.symm qca)
+    unfold Angle_C at hC
+    rw[angle_symm, angle_symm (Linear_trans_point u v T.b), ← hC, ← tqc, ← tqa]
+    simp
+    symm
+    exact linear_trans_angle u v s1 T.b T.c T.a
+  }
+  suffices goal: point_abs Q.c (Linear_trans_point u v T.b) = abs_tri_bc Q
+  · obtain⟨R,hR⟩ := colinear_go_along qcb c1
+    rw[hR, go_along_abs1 qcb] at goal
+    suffices g: 0 ≤ R
+    · have : abs R = R := by{simp [g]}
+      rw[hR, ← this, goal]
+      unfold abs_tri_bc
+      rw[point_abs_symm]
+      symm
+      exact go_along_point_abs Q.c Q.b
+    unfold Angle_C at hC
+    have r: Angle Q.b Q.c Q.a = Angle (Linear_trans_point u v T.b) Q.c Q.a := by{
+      rw[← hC, ← tqc, ← tqa]
+      exact Eq.symm (linear_trans_angle u v s1 T.b T.c T.a)
+    }
+    rw[angle_symm, angle_symm Q.a] at r
+    simp at r
+    have qac: Q.a ≠ Q.c := by{exact id (Ne.symm qca)}
+    obtain h'|h' := angle_out_same_in_between Q.a qac r
+    · rw[hR] at h'
+      exact (in_between_go_along qcb h').1
+    rw[hR] at h'
+    apply in_between_symm at h'
+    rw[go_along_symm] at h'
+    have g: point_abs Q.b Q.c - R ≤ 0 := by{exact in_between_go_along' (Ne.symm qcb) h'}
+    have : 0 ≤ point_abs Q.b Q.c := by{exact point_abs_pos Q.b Q.c}
+    linarith
+  rw[← tqc, linear_trans_point_point_abs]
+  have s2: abs_tri_bc Q = (abs_tri_ca Q / abs_tri_ca T)* (abs_tri_bc T) := by{
+    have : abs_tri_ca T ≠ 0 := by{
+      suffices : 0 < abs_tri_ca T
+      · linarith
+      unfold abs_tri_ca
+      exact point_abs_neq tca
+    }
+    have : abs_tri_bc T ≠ 0 := by{
+      suffices : 0 < abs_tri_bc T
+      · linarith
+      unfold abs_tri_bc
+      apply point_abs_neq
+      exact tri_diff_bc T
+    }
+    field_simp at *
+    tauto
+  }
+  rw[s2]
+  unfold abs_tri_bc
+  rw[point_abs_symm]
+  have t1: abs_tri_ca T ≠ 0 := by{
+      suffices : 0 < abs_tri_ca T
+      · linarith
+      unfold abs_tri_ca
+      exact point_abs_neq tca
+  }
+  have t2: 0 < point_abs T.b T.c := by{
+    apply point_abs_neq
+    exact tri_diff_bc T
+  }
+  field_simp
+  suffices: pabs u * abs_tri_ca T = abs_tri_ca Q
+  · rw[← this]
+    ring
+  unfold abs_tri_ca
+  rw[← tqc, ← tqa]
+  exact Eq.symm (linear_trans_point_point_abs u v T.c T.a)
+}
+
+theorem sas_dsimilar_b{T Q : Triangle}(hB: Angle_B T = Angle_B Q)(h: (abs_tri_bc Q)/(abs_tri_bc T) = (abs_tri_ab Q)/(abs_tri_ab T)): dSimilar T Q := by{
+  have tbc: T.b ≠ T.c := by{exact tri_diff_bc T}
+  have qbc: Q.b ≠ Q.c := by{exact tri_diff_bc Q}
+  have qba: Q.b ≠ Q.a := by{exact tri_diff_ba Q}
+  obtain ⟨u,v,tqb,tqc⟩ := two_pairs_ex_linear_trans T.b T.c Q.b Q.c tbc
+  have s1: u ≠ zero := by{exact two_pair_linear_trans_neq_zero qbc tqb tqc}
+
+  suffices goal: Q.a = Linear_trans_point u v T.a
+  · unfold dSimilar
+    use u
+    use v
+    constructor
+    · exact s1
+    unfold Linear_trans_tri
+    simp [*]
+    ext
+    rw[goal]
+    simp
+    rw[← tqc]
+
+  have c1: colinear Q.b Q.a (Linear_trans_point u v T.a) := by{
+    apply angle_out_same_imp_colinear Q.c
+    · exact id (Ne.symm qbc)
+    unfold Angle_B at hB
+    rw[angle_symm, angle_symm (Linear_trans_point u v T.a), ← hB, ← tqb, ← tqc]
+    simp
+    symm
+    exact linear_trans_angle u v s1 T.a T.b T.c
+  }
+  suffices goal: point_abs Q.b (Linear_trans_point u v T.a) = abs_tri_ab Q
+  · obtain⟨R,hR⟩ := colinear_go_along qba c1
+    rw[hR, go_along_abs1 qba] at goal
+    suffices g: 0 ≤ R
+    · have : abs R = R := by{simp [g]}
+      rw[hR, ← this, goal]
+      unfold abs_tri_ab
+      rw[point_abs_symm]
+      symm
+      exact go_along_point_abs Q.b Q.a
+    unfold Angle_B at hB
+    have r: Angle Q.a Q.b Q.c = Angle (Linear_trans_point u v T.a) Q.b Q.c := by{
+      rw[← hB, ← tqb, ← tqc]
+      exact Eq.symm (linear_trans_angle u v s1 T.a T.b T.c)
+    }
+    rw[angle_symm, angle_symm Q.c] at r
+    simp at r
+    have qcb: Q.c ≠ Q.b := by{exact id (Ne.symm qbc)}
+    obtain h'|h' := angle_out_same_in_between Q.c qcb r
+    · rw[hR] at h'
+      exact (in_between_go_along qba h').1
+    rw[hR] at h'
+    apply in_between_symm at h'
+    rw[go_along_symm] at h'
+    have g: point_abs Q.a Q.b - R ≤ 0 := by{exact in_between_go_along' (Ne.symm qba) h'}
+    have : 0 ≤ point_abs Q.a Q.b := by{exact point_abs_pos Q.a Q.b}
+    linarith
+  rw[← tqb, linear_trans_point_point_abs]
+  have s2: abs_tri_ab Q = (abs_tri_bc Q / abs_tri_bc T)* (abs_tri_ab T) := by{
+    have : abs_tri_bc T ≠ 0 := by{
+      suffices : 0 < abs_tri_bc T
+      · linarith
+      unfold abs_tri_bc
+      exact point_abs_neq tbc
+    }
+    have : abs_tri_ab T ≠ 0 := by{
+      suffices : 0 < abs_tri_ab T
+      · linarith
+      unfold abs_tri_ab
+      apply point_abs_neq
+      exact tri_diff_ab T
+    }
+    field_simp at *
+    tauto
+  }
+  rw[s2]
+  unfold abs_tri_ab
+  rw[point_abs_symm]
+  have t1: abs_tri_bc T ≠ 0 := by{
+      suffices : 0 < abs_tri_bc T
+      · linarith
+      unfold abs_tri_bc
+      exact point_abs_neq tbc
+  }
+  have t2: 0 < point_abs T.a T.b := by{
+    apply point_abs_neq
+    exact tri_diff_ab T
+  }
+  field_simp
+  suffices: pabs u * abs_tri_bc T = abs_tri_bc Q
+  · rw[← this]
+    ring
+  unfold abs_tri_bc
+  rw[← tqb, ← tqc]
+  exact Eq.symm (linear_trans_point_point_abs u v T.b T.c)
+}
