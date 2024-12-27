@@ -827,6 +827,35 @@ theorem angle_out_same_imp_colinear{a b c : Point}(p : Point)(pa : p ≠ a)(h : 
       _= 0 := by{rw[h]; simp}
 }
 
+/-If this is the case, furthermore we get that a cannot lie in between b and c:-/
+lemma angle_out_same_in_between{a b c : Point}(p : Point)(pa : p ≠ a)(h : Angle p a b = Angle p a c): in_between a b c ∨  in_between c a b := by{
+  by_cases ab : a = b
+  · right
+    rw[ab]
+    apply in_between_self_right
+  by_cases ac : a = c
+  · left
+    rw[ac]
+    apply in_between_self_left
+  have col: colinear a b c := by{exact angle_out_same_imp_colinear p pa h}
+  have ba: b ≠ a := by{tauto}
+  have ca: c ≠ a := by{tauto}
+  have bac: Angle b a c = 0 := by{
+    calc
+    Angle b a c = Angle b a p + Angle p a c := by{rw[angle_add ba pa ca]}
+      _= - Angle p a b + Angle p a c := by{rw[angle_symm]}
+      _= 0 := by{rw[h]; simp}
+  }
+  obtain h'|h'|h' := colinear_imp_in_between2 a b c col
+  · simp [*]
+  swap
+  · simp [*]
+
+  contrapose bac
+  rw[angle_in_between h' ba ca]
+  exact Real.Angle.pi_ne_zero
+}
+
 /-In particular this implies that in triangles Angle_A etc. arent zero:-/
 lemma tri_angle_a_neq_zero(T : Triangle): Angle_A T ≠ 0 := by{
   unfold Angle_A

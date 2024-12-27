@@ -556,3 +556,42 @@ lemma same_angles_imp_dsimilar_ca{T Q : Triangle}(hC: Angle_C T = Angle_C Q)(hA:
   refine same_angles_imp_dsmimilar hA ?_ hC
   rw[tri_sum_angle_b T, tri_sum_angle_b Q, hA, hC]
 }
+
+/-A second way to check for similar triangles, is to have 1 angle and same proportions of
+the sides adjacent to it (for this it is actually important we use directed angles):-/
+/-Unfortunately unlike the theorem before this we have no "general" version.
+Furthermore, the proof is kind of ugly because it is not symmetric despite the statment being-/
+theorem same_angle_same_prop_imp_dsimilar_a{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(h: (abs_tri_ab Q)/(abs_tri_ab T) = (abs_tri_ca Q)/(abs_tri_ca T)): dSimilar T Q := by{
+  have tab: T.a ≠ T.b := by{exact tri_diff_ab T}
+  have qab: Q.a ≠ Q.b := by{exact tri_diff_ab Q}
+  have qac: Q.a ≠ Q.c := by{exact tri_diff_ac Q}
+  obtain ⟨u,v,tqa,tqb⟩ := two_pairs_ex_linear_trans T.a T.b Q.a Q.b tab
+  have s1: u ≠ zero := by{exact two_pair_linear_trans_neq_zero qab tqa tqb}
+
+  suffices goal: Q.c = Linear_trans_point u v T.c
+  · unfold dSimilar
+    use u
+    use v
+    constructor
+    · exact s1
+    unfold Linear_trans_tri
+    simp [*]
+    ext
+    rw[← tqa]
+    simp
+    rw[goal]
+
+  have c1: colinear Q.a Q.c (Linear_trans_point u v T.c) := by{
+    apply angle_out_same_imp_colinear Q.b
+    · exact id (Ne.symm qab)
+    unfold Angle_A at hA
+    rw[angle_symm, angle_symm (Linear_trans_point u v T.c), ← hA, ← tqa, ← tqb]
+    simp
+    symm
+    exact linear_trans_angle u v s1 T.c T.a T.b
+  }
+  sorry
+  #check colinear_go_along
+}
+
+--DO THINGY HERE!!! with the sides and angle
