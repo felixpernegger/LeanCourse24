@@ -851,3 +851,23 @@ theorem sas_dsimilar_b{T Q : Triangle}(hB: Angle_B T = Angle_B Q)(h: (abs_tri_bc
   rw[← tqb, ← tqc]
   exact Eq.symm (linear_trans_point_point_abs u v T.b T.c)
 }
+
+/-This finishes off the most importnant stuff to say about dsimilar triangles for now.
+There is obvously more to say, in the next section we will do exactly that, but for now
+we introduce "anti-similar" or short asimilar triangles.
+These are triangles which are similar but have reverse orientation, or - more simply put -
+are dsimilar to the conjugated triangle:-/
+
+def aSimilar(T Q : Triangle) : Prop :=
+  dSimilar (tri_conj T) Q
+
+/-This is not an equivalence relation, but still has decent properties:-/
+lemma asimilar_refl(T : Triangle): aSimilar T (tri_conj T) := by{
+  unfold aSimilar
+  exact dsimilar_refl (tri_conj T)
+}
+
+lemma asimilar_symm{T Q : Triangle}(h : aSimilar T Q): aSimilar Q T := by{
+  unfold aSimilar at *
+  sorry
+}
