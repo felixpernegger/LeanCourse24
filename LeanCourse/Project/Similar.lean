@@ -590,8 +590,32 @@ theorem same_angle_same_prop_imp_dsimilar_a{T Q : Triangle}(hA: Angle_A T = Angl
     symm
     exact linear_trans_angle u v s1 T.c T.a T.b
   }
+  suffices goal: point_abs Q.a (Linear_trans_point u v T.c) = abs_tri_ca Q
+  · obtain⟨R,hR⟩ := colinear_go_along qac c1
+    rw[hR, go_along_abs1 qac] at goal
+    suffices g: 0 ≤ R
+    · have : abs R = R := by{simp [g]}
+      rw[hR, ← this, goal]
+      unfold abs_tri_ca
+      rw[point_abs_symm]
+      symm
+      exact go_along_point_abs Q.a Q.c
+    unfold Angle_A at hA
+    have r: Angle Q.c Q.a Q.b = Angle (Linear_trans_point u v T.c) Q.a Q.b := by{
+      rw[← hA, ← tqa, ← tqb]
+      exact Eq.symm (linear_trans_angle u v s1 T.c T.a T.b)
+    }
+    rw[angle_symm, angle_symm Q.b] at r
+    simp at r
+    have qba: Q.b ≠ Q.a := by{exact id (Ne.symm qab)}
+    obtain h'|h' := angle_out_same_in_between Q.b qba r
+    · rw[hR] at h'
+      exact (in_between_go_along qac h').1
+    rw[hR] at h'
+    apply in_between_symm at h'
+    #check in_between_go_along'
+    sorry
   sorry
-  #check colinear_go_along
 }
 
 --DO THINGY HERE!!! with the sides and angle

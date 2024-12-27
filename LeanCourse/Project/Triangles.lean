@@ -752,7 +752,8 @@ lemma in_between_go_along{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between a b
   tauto
 }
 
-lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b (go_along a b r) a) : r ≤ 0 := by{
+lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b (go_along a b r) a) : r ≤ 0 ∧ point_abs a b ≤ r:= by{
+  constructor
   unfold in_between at h
   rw[go_along_abs1 ab, go_along_abs2 ab, point_abs_symm b a] at h
   have z: 0 < point_abs a b := by{exact point_abs_neq ab}
@@ -772,4 +773,6 @@ lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b 
     linarith
   }
   linarith
+
+  sorry
 }
