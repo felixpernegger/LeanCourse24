@@ -862,3 +862,11 @@ theorem same_angles_imp_dsmimilar{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB:
   apply colinear_perm12
   assumption
 }
+
+/-Obviously we dont always want to show all 3 angles, because of angle sum 2 suffice already.
+/(We actually didnt evene use hC in the proof above lol)-/
+
+lemma same_angles_imp_dsimilar_ab{T Q : Triangle}(hA: Angle_A T = Angle_A Q)(hB: Angle_B T = Angle_B Q): dSimilar T Q := by{
+  apply same_angles_imp_dsmimilar hA hB
+  rw[angle_sum]
+}

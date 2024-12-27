@@ -396,6 +396,26 @@ theorem tri_sum_angle(T : Triangle): Angle_A T + Angle_B T + Angle_C T = Real.pi
   rw[anglesum_points this]
 }
 
+/-Once again for all vertices:-/
+lemma tri_sum_angle_a(T : Triangle): Angle_A T = Real.pi - Angle_B T - Angle_C T := by{
+  rw[← tri_sum_angle T]
+  rw[sub_sub, add_assoc]
+  simp
+}
+
+lemma tri_sum_angle_b(T : Triangle): Angle_B T = Real.pi - Angle_C T - Angle_A T := by{
+  rw[← tri_sum_angle T]
+  rw[add_comm, ← add_assoc, add_comm, sub_sub]
+  simp
+}
+
+lemma tri_sum_angle_c(T : Triangle): Angle_C T = Real.pi - Angle_A T - Angle_B T := by{
+  rw[← tri_sum_angle T]
+  symm
+  rw[sub_sub, add_assoc]
+  simp
+}
+
 /-The next step is a bit ugly. We prove that angles along a line are either 0 or pi.
 The case distinction is necessary, becuase the "center" of the angle is eithe rin the middle
 or on the left/right.
