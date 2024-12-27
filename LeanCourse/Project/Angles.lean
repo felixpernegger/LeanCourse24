@@ -827,6 +827,47 @@ theorem angle_out_same_imp_colinear{a b c : Point}(p : Point)(pa : p ≠ a)(h : 
       _= 0 := by{rw[h]; simp}
 }
 
+/-In particular this implies that in triangles Angle_A etc. arent zero:-/
+lemma tri_angle_a_neq_zero(T : Triangle): Angle_A T ≠ 0 := by{
+  unfold Angle_A
+  by_contra h0
+  obtain ⟨a,b,c,h⟩ := T
+  simp at *
+  have col: colinear a b c := by{
+    apply colinear_perm13
+    apply colinear_perm23
+    exact angle_zero_imp_colinear h0
+  }
+  unfold noncolinear at h
+  contradiction
+}
+
+lemma tri_angle_b_neq_zero(T : Triangle): Angle_B T ≠ 0 := by{
+  unfold Angle_B
+  by_contra h0
+  obtain ⟨a,b,c,h⟩ := T
+  simp at *
+  have col: colinear a b c := by{
+    exact angle_zero_imp_colinear h0
+  }
+  unfold noncolinear at h
+  contradiction
+}
+
+lemma tri_angle_c_neq_zero(T : Triangle): Angle_C T ≠ 0 := by{
+  unfold Angle_C
+  by_contra h0
+  obtain ⟨a,b,c,h⟩ := T
+  simp at *
+  have col: colinear a b c := by{
+    apply colinear_perm12
+    apply colinear_perm23
+    exact angle_zero_imp_colinear h0
+  }
+  unfold noncolinear at h
+  contradiction
+}
+
 /-Now we state last theorem in a slightly nicer version:-/
 
 theorem angle_not_in_between{a b c : Point}(h: colinear a b c)(h' : ¬in_between a c b)(ha : a ≠ b)(hc : c ≠ b): Angle a b c = 0 := by{
