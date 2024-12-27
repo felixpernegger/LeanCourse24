@@ -290,7 +290,7 @@ q = (go_along (Center C) (Center O) ((↑(Radius C) ^ 2 - ↑(Radius O) ^ 2 + po
     intro
     linarith
   rw[hR] at h'
-  exact (in_between_go_along' h h').1
+  exact (in_between_go_along' h h')
 }
 
 def PowLine {C O : CCircle}(h : ¬Concentric C O) : Line where
