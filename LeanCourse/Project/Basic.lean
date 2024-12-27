@@ -477,6 +477,11 @@ def pconj : Point → Point :=
   simp
 }
 
+@[simp] lemma pconj_zero: pconj zero = zero := by{
+  unfold zero pconj conj
+  simp
+}
+
 /-We can conjugate arbitriry sets with this:-/
 def set_conj : Set Point → Set Point :=
   fun S ↦ {s | ∃p : S, s = pconj p}

@@ -244,17 +244,33 @@ lemma two_pairs_linear_trans_unique(a b c d : Point)(ab : a ≠ b){u v r s : Poi
 /-Now we define the "scale factor" between similar triangles.
 As we will need to first variable "a" way more often we call
 the 1st (a) scale factor and the 2nd (b) dshift_factor:-/
-lemma similar_imp_ex{T Q : Triangle}(h : dSimilar T Q): ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T := by{
+lemma dsimilar_imp_ex{T Q : Triangle}(h : dSimilar T Q): ∃(a b : Point), a ≠ zero ∧ Q = Linear_trans_tri a b T := by{
   unfold dSimilar at h
   assumption
 }
 
+/-If T and Q are dsimilar, tri_conj T and tri_conj Q are as well.
+We wont need this soon, but later for the more general similairty notion:-/
+
+lemma dsimilar_conj{T Q : Triangle}(h : dSimilar T Q): dSimilar (tri_conj T) (tri_conj Q) := by{
+  unfold dSimilar at *
+  obtain ⟨u,v,uh,h⟩ := h
+  use (pconj u)
+  use (pconj v)
+  constructor
+  · contrapose uh
+    simp at *
+    rw[← pconj_twice u, uh]
+
+
+}
+
 def dScale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
-  choose (similar_imp_ex h)
+  choose (dsimilar_imp_ex h)
 
 lemma dscale_factor_ex_shift{T Q : Triangle}(h : dSimilar T Q): ∃(b : Point), dScale_factor h ≠ zero ∧ Linear_trans_tri (dScale_factor h) b T = Q := by{
   unfold dScale_factor
-  obtain ⟨b,bh1,bh2⟩ := Exists.choose_spec (similar_imp_ex h)
+  obtain ⟨b,bh1,bh2⟩ := Exists.choose_spec (dsimilar_imp_ex h)
   use b
   tauto
 }
