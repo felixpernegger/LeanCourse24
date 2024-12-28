@@ -314,14 +314,14 @@ lemma dscale_factor_dshift_factor{T Q : Triangle}(h: dSimilar T Q): Linear_trans
 }
 
 /-The scale and shift factor are unique!-/
-lemma factors_imp_similar{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q) : dSimilar T Q := by{
+lemma factors_imp_dsimilar{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q) : dSimilar T Q := by{
   unfold dSimilar
   use u
   use v
   tauto
 }
 
-theorem dscale_factor_dshift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q): u = dScale_factor (factors_imp_similar uh uv) ∧ v = dShift_factor (factors_imp_similar uh uv) := by{
+theorem dscale_factor_dshift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v T = Q): u = dScale_factor (factors_imp_dsimilar uh uv) ∧ v = dShift_factor (factors_imp_dsimilar uh uv) := by{
   have h: dSimilar T Q := by{
     unfold dSimilar
     use u
@@ -938,4 +938,57 @@ def qaShift_factor(T Q : Triangle): Point :=
 lemma ascale_factor_neq_zero{T Q : Triangle}(h : aSimilar T Q): aScale_factor h ≠ zero := by{
   unfold aScale_factor
   exact dscale_factor_neq_zero (asimilar_imp_dsimilar_conj h)
+}
+
+#check dscale_factor_dshift_factor
+
+lemma ascale_factor_ashift_factor{T Q : Triangle}(h : aSimilar T Q): Linear_trans_tri (aScale_factor h) (aShift_factor h) (tri_conj T) = Q := by{
+  unfold aSimilar aScale_factor aShift_factor at *
+  exact dscale_factor_dshift_factor h
+}
+
+lemma factors_imp_asimilar{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v (tri_conj T) = Q): aSimilar T Q := by{
+  unfold aSimilar
+  exact factors_imp_dsimilar uh uv
+}
+
+theorem ascale_factor_ashift_factor_unique{T Q : Triangle}{u v : Point}(uh : u ≠ zero)(uv : Linear_trans_tri u v (tri_conj T) = Q): u = aScale_factor (factors_imp_asimilar uh uv) ∧ v = aShift_factor (factors_imp_asimilar uh uv) := by{
+  unfold aScale_factor aShift_factor
+  exact dscale_factor_dshift_factor_unique uh uv
+}
+lemma ascale_and_ex_imp_asimilar{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v (tri_conj T) = Q): aSimilar T Q := by{
+  obtain ⟨v,vh⟩ := uh'
+  unfold aSimilar
+  exact factors_imp_dsimilar uh vh
+}
+
+theorem ascale_factor_unique{T Q : Triangle}{u : Point}(uh : u ≠ zero)(uh' : ∃(v : Point), Linear_trans_tri u v (tri_conj T) = Q): u = aScale_factor (ascale_and_ex_imp_asimilar uh uh') := by{
+  unfold aScale_factor
+  exact dscale_factor_unique uh uh'
+}
+
+lemma ashift_and_ex_imp_asimilar{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v (tri_conj T) = Q): aSimilar T Q := by{
+  unfold aSimilar
+  exact dshift_and_ex_imp_dsimilar vh
+}
+
+theorem ashift_factor_unique{T Q : Triangle}{v : Point}(vh: ∃(u : Point), u ≠ zero ∧ Linear_trans_tri u v (tri_conj T) = Q): v = aShift_factor (ashift_and_ex_imp_asimilar vh) := by{
+  unfold aShift_factor
+  exact dshift_factor_unique vh
+}
+
+--maybe ascale_factor_comp but it is obv problematic
+
+lemma ascale_factor_refl(T : Triangle): aScale_factor (asimilar_refl T) = one := by{
+  unfold aScale_factor
+  exact dscale_factor_refl (tri_conj T)
+}
+
+lemma ashift_factor_refl(T : Triangle): aShift_factor (asimilar_refl T) = zero := by{
+  unfold aShift_factor
+  exact dshift_factor_refl (tri_conj T)
+}
+
+lemma ascale_factor_symm{T Q : Triangle}(h : aSimilar T Q): aScale_factor (asimilar_symm h) = lt_inv1 (aScale_factor h) (aShift_factor h) := by{
+  sorry
 }
