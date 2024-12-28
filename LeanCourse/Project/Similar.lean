@@ -918,3 +918,24 @@ def aScale_factor{T Q : Triangle}(h: aSimilar T Q): Point :=
 
 def aShift_factor{T Q : Triangle}(h: aSimilar T Q): Point :=
   dShift_factor (asimilar_imp_dsimilar_conj h)
+
+def qaScale_factor(T Q : Triangle): Point :=
+  qdScale_factor (tri_conj T) Q
+
+def qaShift_factor(T Q : Triangle): Point :=
+  qdShift_factor (tri_conj T) Q
+
+@[simp] lemma qascale_factor_simp{T Q : Triangle}(h : aSimilar T Q): qaScale_factor T Q = aScale_factor h := by{
+  unfold qaScale_factor aScale_factor aSimilar at *
+  simp [*]
+}
+
+@[simp] lemma qashift_factor_simp{T Q : Triangle}(h : aSimilar T Q): qaShift_factor T Q = aShift_factor h := by{
+  unfold qaShift_factor aShift_factor aSimilar at *
+  simp [*]
+}
+
+lemma ascale_factor_neq_zero{T Q : Triangle}(h : aSimilar T Q): aScale_factor h ≠ zero := by{
+  unfold aScale_factor
+  exact dscale_factor_neq_zero (asimilar_imp_dsimilar_conj h)
+}
