@@ -1082,3 +1082,9 @@ lemma dsimilar_angle_b{T Q : Triangle}(h : dSimilar T Q): Angle_B T = Angle_B Q 
 lemma dsimilar_angle_c{T Q : Triangle}(h : dSimilar T Q): Angle_C T = Angle_C Q := by{
   exact (dsimilar_imp_same_angles h).2.2
 }-/
+
+theorem asimilar_imp_neg_angles{T Q : Triangle}(h : aSimilar T Q): Angle_A Q = - Angle_A T ∧ Angle_B Q = - Angle_B T ∧ Angle_C Q = - Angle_C T := by{
+  unfold aSimilar at h
+  rw[← dsimilar_angle_a h, ← dsimilar_angle_b h, ← dsimilar_angle_c h, tri_conj_angle_a, tri_conj_angle_b, tri_conj_angle_c]
+  simp
+}
