@@ -1000,6 +1000,21 @@ lemma ascale_factor_symm{T Q : Triangle}(h : aSimilar T Q): aScale_factor (asimi
 
 lemma tri_conj_abs_ab(T : Triangle): abs_tri_ab (tri_conj T) = abs_tri_ab T := by{
   unfold tri_conj abs_tri_ab
+  simp [pconj_point_abs]
+}
+
+lemma tri_conj_abs_bc(T : Triangle): abs_tri_bc (tri_conj T) = abs_tri_bc T := by{
+  unfold tri_conj abs_tri_bc
+  simp [pconj_point_abs]
+}
+
+lemma tri_conj_abs_ca(T : Triangle): abs_tri_ca (tri_conj T) = abs_tri_ca T := by{
+  unfold tri_conj abs_tri_ca
+  simp [pconj_point_abs]
+}
+#check area_tri
+lemma tri_conj_area_tri(T : Triangle): area_tri (tri_conj T)= - area_tri T := by{
+  unfold area_tri tri_conj
   simp
-  sorry
+
 }

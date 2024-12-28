@@ -408,7 +408,14 @@ lemma area_add_side (a b c x : Point)(bc : b≠c)(h : Lies_on x (Line_through bc
   linarith
 }
 
+/-If we conjugate points, the area gets negative (this is because
+we work with signed area:)-/
 
+lemma area_point_pconj(a b c : Point): area_points (pconj a) (pconj b) (pconj c) = - area_points a b c := by{
+  unfold area_points det pconj conj
+  simp
+  ring
+}
 
 /- A short notion for a point being in between other:-/
 
