@@ -482,6 +482,12 @@ def pconj : Point → Point :=
   simp
 }
 
+lemma pconj_point_abs(a b : Point): point_abs (pconj a) (pconj b) = point_abs a b := by{
+  unfold pconj conj point_abs Complex.abs Complex.normSq
+  simp
+  ring_nf
+}
+
 /-We can conjugate arbitriry sets with this:-/
 def set_conj : Set Point → Set Point :=
   fun S ↦ {s | ∃p : S, s = pconj p}

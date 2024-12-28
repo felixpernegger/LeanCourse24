@@ -989,6 +989,17 @@ lemma ashift_factor_refl(T : Triangle): aShift_factor (asimilar_refl T) = zero :
   exact dshift_factor_refl (tri_conj T)
 }
 
-lemma ascale_factor_symm{T Q : Triangle}(h : aSimilar T Q): aScale_factor (asimilar_symm h) = lt_inv1 (aScale_factor h) (aShift_factor h) := by{
+lemma ascale_factor_symm{T Q : Triangle}(h : aSimilar T Q): aScale_factor (asimilar_symm h) = pconj (lt_inv1 (aScale_factor h) (aShift_factor h)) := by{
+  sorry
+}
+
+
+--ashift_factor_symm
+
+/-Some props about tri_conj:-/
+
+lemma tri_conj_abs_ab(T : Triangle): abs_tri_ab (tri_conj T) = abs_tri_ab T := by{
+  unfold tri_conj abs_tri_ab
+  simp
   sorry
 }
