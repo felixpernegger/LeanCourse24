@@ -177,7 +177,7 @@ lemma linear_trans_point_point_abs(a b u v: Point): point_abs (Linear_trans_poin
 }
 
 /-if we pconj everything, it stays the same:-/
-lemma linear_trans_point_point_pconj(a b p : Point): pconj (Linear_trans_point a b p) = Linear_trans_point (pconj a) (pconj b) (pconj p) := by{
+lemma linear_trans_point_pconj(a b p : Point): pconj (Linear_trans_point a b p) = Linear_trans_point (pconj a) (pconj b) (pconj p) := by{
   unfold Linear_trans_point padd pmul pconj
   simp
 }

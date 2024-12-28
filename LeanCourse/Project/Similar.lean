@@ -269,7 +269,7 @@ lemma dsimilar_conj{T Q : Triangle}(h : dSimilar T Q): dSimilar (tri_conj T) (tr
   unfold Linear_trans_tri
   simp [*]
   constructor
-  · sorry
+  · rw[linear_trans_point_point]
   sorry
 
 }
