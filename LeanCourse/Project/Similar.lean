@@ -1227,3 +1227,6 @@ lemma similar_conj{T Q : Triangle}(h : Similar T Q): Similar (tri_conj T) (tri_c
 
 def Scale_factor{T Q : Triangle}(h : Similar T Q): Point :=
   if h': dSimilar T Q then dScale_factor h' else aScale_factor (similar_not_dsimilar h h')
+
+def Shift_factor{T Q : Triangle}(h : Similar T Q): Point :=
+  if h': dSimilar T Q then dShift_factor h' else aShift_factor (similar_not_dsimilar h h')
