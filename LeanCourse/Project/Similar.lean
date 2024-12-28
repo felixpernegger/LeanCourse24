@@ -257,11 +257,20 @@ lemma dsimilar_conj{T Q : Triangle}(h : dSimilar T Q): dSimilar (tri_conj T) (tr
   obtain ⟨u,v,uh,h⟩ := h
   use (pconj u)
   use (pconj v)
-  constructor
-  · contrapose uh
+  have uz: pconj u ≠ zero := by{
+    contrapose uh
     simp at *
-    rw[← pconj_twice u, uh]
-
+    rw[← pconj_twice u, uh, pconj_zero]
+  }
+  constructor
+  · exact uz
+  unfold tri_conj Linear_trans_tri
+  simp [*]
+  unfold Linear_trans_tri
+  simp [*]
+  constructor
+  · sorry
+  sorry
 
 }
 

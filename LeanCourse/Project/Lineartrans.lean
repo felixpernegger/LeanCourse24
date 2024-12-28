@@ -176,6 +176,12 @@ lemma linear_trans_point_point_abs(a b u v: Point): point_abs (Linear_trans_poin
       _= (Complex.abs a.x) * (Complex.abs (u.x-v.x)) := by{exact AbsoluteValue.map_mul Complex.abs a.x (u.x - v.x)}
 }
 
+/-if we pconj everything, it stays the same:-/
+lemma linear_trans_point_point_pconj(a b p : Point): pconj (Linear_trans_point a b p) = Linear_trans_point (pconj a) (pconj b) (pconj p) := by{
+  unfold Linear_trans_point padd pmul pconj
+  simp
+}
+
 def Linear_trans_set : Point → Point → Set Point → Set Point :=
   fun a b S ↦ {u | ∃ s ∈ S, u = Linear_trans_point a b s}
 
