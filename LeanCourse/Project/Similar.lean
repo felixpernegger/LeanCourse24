@@ -901,16 +901,31 @@ lemma asimilar_symm{T Q : Triangle}(h : aSimilar T Q): aSimilar Q T := by{
 }
 
 /-aSimilar twice means dsimilar:-/
-lemma asimilar_trans{T Q R : Triangle}(TQ: aSimilar T Q)(QR: aSimilar Q R): dSimilar T R := by{
+lemma asimilar_asimilar{T Q R : Triangle}(TQ: aSimilar T Q)(QR: aSimilar Q R): dSimilar T R := by{
   apply asimilar_symm at TQ
   unfold aSimilar at *
   apply dsimilar_symm at TQ
   exact dsimilar_trans TQ QR
 }
 
+lemma asimilar_dsimilar{T Q R : Triangle}(TQ : aSimilar T Q)(QR : dSimilar Q R): aSimilar T R := by{
+  unfold aSimilar at *
+  exact dsimilar_trans TQ QR
+}
+
+lemma dsimilar_asimilar{T Q R : Triangle}(TQ : dSimilar T Q)(QR : aSimilar Q R): aSimilar T R := by{
+  unfold aSimilar at *
+  exact dsimilar_trans (dsimilar_conj TQ) QR
+}
+
 lemma asimilar_imp_dsimilar_conj{T Q : Triangle}(h : aSimilar T Q): dSimilar (tri_conj T) Q := by{
   unfold aSimilar at h
   assumption
+}
+
+lemma asimilar_conj{T Q : Triangle}(h : aSimilar T Q): aSimilar (tri_conj T) (tri_conj Q) := by{
+  unfold aSimilar at *
+  exact dsimilar_conj h
 }
 
 def aScale_factor{T Q : Triangle}(h: aSimilar T Q): Point :=
@@ -939,8 +954,6 @@ lemma ascale_factor_neq_zero{T Q : Triangle}(h : aSimilar T Q): aScale_factor h 
   unfold aScale_factor
   exact dscale_factor_neq_zero (asimilar_imp_dsimilar_conj h)
 }
-
-#check dscale_factor_dshift_factor
 
 lemma ascale_factor_ashift_factor{T Q : Triangle}(h : aSimilar T Q): Linear_trans_tri (aScale_factor h) (aShift_factor h) (tri_conj T) = Q := by{
   unfold aSimilar aScale_factor aShift_factor at *
@@ -989,12 +1002,15 @@ lemma ashift_factor_refl(T : Triangle): aShift_factor (asimilar_refl T) = zero :
   exact dshift_factor_refl (tri_conj T)
 }
 
+
 lemma ascale_factor_symm{T Q : Triangle}(h : aSimilar T Q): aScale_factor (asimilar_symm h) = pconj (lt_inv1 (aScale_factor h) (aShift_factor h)) := by{
   sorry
 }
 
 
 --ashift_factor_symm
+
+--actually still do this stuff, i mean why not (and comp etc)
 
 /-Some props about tri_conj:-/
 
@@ -1063,28 +1079,151 @@ lemma asimilar_area_tri{T Q : Triangle}(h : aSimilar T Q): area_tri Q = - (pabs 
   ring_nf
 }
 
-/-
-theorem dsimilar_imp_same_angles{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q ∧ Angle_B T = Angle_B Q ∧ Angle_C T = Angle_C Q := by{
-  unfold dSimilar at h
-  obtain ⟨a,b,ah,h⟩ := h
-  rw[h]
-  simp [*, linear_trans_tri_angle_a, linear_trans_tri_angle_b, linear_trans_tri_angle_c]
-}
-
-lemma dsimilar_angle_a{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q := by{
-  exact (dsimilar_imp_same_angles h).1
-}
-
-lemma dsimilar_angle_b{T Q : Triangle}(h : dSimilar T Q): Angle_B T = Angle_B Q := by{
-  exact (dsimilar_imp_same_angles h).2.1
-}
-
-lemma dsimilar_angle_c{T Q : Triangle}(h : dSimilar T Q): Angle_C T = Angle_C Q := by{
-  exact (dsimilar_imp_same_angles h).2.2
-}-/
-
 theorem asimilar_imp_neg_angles{T Q : Triangle}(h : aSimilar T Q): Angle_A Q = - Angle_A T ∧ Angle_B Q = - Angle_B T ∧ Angle_C Q = - Angle_C T := by{
   unfold aSimilar at h
   rw[← dsimilar_angle_a h, ← dsimilar_angle_b h, ← dsimilar_angle_c h, tri_conj_angle_a, tri_conj_angle_b, tri_conj_angle_c]
   simp
 }
+
+lemma asimilar_angle_a{T Q : Triangle}(h : aSimilar T Q): Angle_A Q = - Angle_A T := by{
+  simp [asimilar_imp_neg_angles h]
+}
+
+lemma asimilar_angle_b{T Q : Triangle}(h : aSimilar T Q): Angle_B Q = - Angle_B T := by{
+  simp [asimilar_imp_neg_angles h]
+}
+
+lemma asimilar_angle_c{T Q : Triangle}(h : aSimilar T Q): Angle_C Q = - Angle_C T := by{
+  simp [asimilar_imp_neg_angles h]
+}
+
+/-So we get another aaa criterion, this time for asmiliarity:-/
+theorem aaa_asimilar{T Q : Triangle}(hA: Angle_A Q = - Angle_A T)(hB: Angle_B Q = - Angle_B T)(hC: Angle_C Q = - Angle_C T): aSimilar T Q := by{
+  unfold aSimilar
+  apply aaa_dsimilar
+  · rw[tri_conj_angle_a]
+    symm
+    assumption
+  · rw[tri_conj_angle_b]
+    symm
+    assumption
+  rw[tri_conj_angle_c]
+  symm
+  assumption
+}
+
+lemma aa_asimilar_ab{T Q : Triangle}(hA: Angle_A Q = - Angle_A T)(hB: Angle_B Q = - Angle_B T): aSimilar T Q := by{
+  unfold aSimilar
+  apply aa_dsimilar_ab
+  · rw[tri_conj_angle_a, hA]
+  rw[tri_conj_angle_b, hB]
+}
+
+lemma aa_asimilar_bc{T Q : Triangle}(hB: Angle_B Q = - Angle_B T)(hC: Angle_C Q = - Angle_C T): aSimilar T Q := by{
+  unfold aSimilar
+  apply aa_dsimilar_bc
+  · rw[tri_conj_angle_b, hB]
+  rw[tri_conj_angle_c, hC]
+}
+
+lemma aa_asimilar_ca{T Q : Triangle}(hC: Angle_C Q = - Angle_C T)(hA: Angle_A Q = - Angle_A T): aSimilar T Q := by{
+  unfold aSimilar
+  apply aa_dsimilar_ca
+  · rw[tri_conj_angle_c, hC]
+  rw[tri_conj_angle_a, hA]
+}
+
+/-And sas as well:-/
+theorem sas_asimilar_a{T Q : Triangle}(hA: Angle_A Q = - Angle_A T)(h : abs_tri_ab Q / abs_tri_ab T = abs_tri_ca Q / abs_tri_ca T): aSimilar T Q := by{
+  unfold aSimilar
+  apply sas_dsimilar_a
+  · rw[tri_conj_angle_a, hA]
+  rw[tri_conj_abs_ab, tri_conj_abs_ca, h]
+}
+
+theorem sas_asimilar_b{T Q : Triangle}(hB : Angle_B Q = - Angle_B T)(h : (abs_tri_bc Q)/(abs_tri_bc T) = (abs_tri_ab Q)/(abs_tri_ab T)): aSimilar T Q := by{
+  unfold aSimilar
+  apply sas_dsimilar_b
+  · rw[tri_conj_angle_b, hB]
+  rw[tri_conj_abs_ab, tri_conj_abs_bc, h]
+}
+
+theorem sas_asimilar_c{T Q : Triangle}(hC : Angle_C Q = - Angle_C T)(h: (abs_tri_ca Q)/(abs_tri_ca T) = (abs_tri_bc Q)/(abs_tri_bc T)): aSimilar T Q := by{
+  unfold aSimilar
+  apply sas_dsimilar_c
+  · rw[tri_conj_angle_c, hC]
+  rw[tri_conj_abs_bc, tri_conj_abs_ca, h]
+}
+
+/-After over a 1000 lines we can finally confidently define similar triangles:
+Triangles are similar if they are dSimilar ( = Similar with same orientation) or aSimilar ( = Similar with
+opposite orientation). Lol.-/
+
+def Similar(T Q : Triangle) : Prop :=
+  dSimilar T Q ∨ aSimilar T Q
+
+lemma dsimilar_imp_similar{T Q : Triangle}(h : dSimilar T Q): Similar T Q := by{
+  unfold Similar
+  tauto
+}
+
+lemma asimilar_imp_similar{T Q : Triangle}(h : aSimilar T Q): Similar T Q := by{
+  unfold Similar
+  tauto
+}
+
+lemma similar_not_dsimilar{T Q : Triangle}(h : Similar T Q)(h' : ¬dSimilar T Q): aSimilar T Q := by{
+  unfold Similar at h
+  tauto
+}
+
+lemma similar_not_asimilar{T Q : Triangle}(h : Similar T Q)(h' : ¬aSimilar T Q): dSimilar T Q := by{
+  unfold Similar at h
+  tauto
+}
+
+/-The "Similar" notion is not actually too interesting as in most contextes it
+is clear whether triangles are dSimilar or aSimilar. So we mostly just prove the
+very basic stuff, with the addition of a side-side-side criterion at the end.-/
+
+lemma similar_refl(T : Triangle): Similar T T := by{
+  unfold Similar
+  left
+  exact dsimilar_refl T
+}
+
+lemma similar_symm{T Q : Triangle}(h : Similar T Q): Similar Q T := by{
+  unfold Similar at *
+  obtain h|h := h
+  · left
+    exact dsimilar_symm h
+  right
+  exact asimilar_symm h
+}
+
+lemma similar_trans{T Q R : Triangle}(TQ: Similar T Q)(QR: Similar Q R): Similar T R := by{
+  unfold Similar at *
+  obtain TQ|TQ := TQ
+  obtain QR|QR := QR
+  · left
+    exact dsimilar_trans TQ QR
+  · right
+    exact dsimilar_asimilar TQ QR
+  obtain QR|QR := QR
+  · right
+    exact asimilar_dsimilar TQ QR
+  left
+  exact asimilar_asimilar TQ QR
+}
+
+lemma similar_conj{T Q : Triangle}(h : Similar T Q): Similar (tri_conj T) (tri_conj Q) := by{
+  unfold Similar at *
+  obtain h|h := h
+  · left
+    exact dsimilar_conj h
+  right
+  exact asimilar_conj h
+}
+
+def Scale_factor{T Q : Triangle}(h : Similar T Q): Point :=
+  if h': dSimilar T Q then dScale_factor h' else aScale_factor (similar_not_dsimilar h h')
