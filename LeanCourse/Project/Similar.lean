@@ -1012,9 +1012,73 @@ lemma tri_conj_abs_ca(T : Triangle): abs_tri_ca (tri_conj T) = abs_tri_ca T := b
   unfold tri_conj abs_tri_ca
   simp [pconj_point_abs]
 }
-#check area_tri
+
 lemma tri_conj_area_tri(T : Triangle): area_tri (tri_conj T)= - area_tri T := by{
   unfold area_tri tri_conj
   simp
-
+  exact area_point_pconj T.a T.b T.c
 }
+
+lemma tri_conj_angle_a(T : Triangle): Angle_A (tri_conj T) = - Angle_A T := by{
+  unfold Angle_A tri_conj
+  simp
+  rw[angle_symm, angle_pconj]
+}
+
+lemma tri_conj_angle_b(T : Triangle): Angle_B (tri_conj T) = - Angle_B T := by{
+  unfold Angle_B tri_conj
+  simp
+  rw[angle_symm, angle_pconj]
+}
+
+lemma tri_conj_angle_c(T : Triangle): Angle_C (tri_conj T) = - Angle_C T := by{
+  unfold Angle_C tri_conj
+  simp
+  rw[angle_symm, angle_pconj]
+}
+
+/-These results get u the follwing lemmas:-/
+
+lemma asimilar_abs_tri_ab{T Q : Triangle}(h: aSimilar T Q): abs_tri_ab Q = pabs (aScale_factor h) * abs_tri_ab T := by{
+  unfold aSimilar aScale_factor at *
+  rw[← tri_conj_abs_ab T]
+  exact dsimilar_abs_tri_ab (asimilar_imp_dsimilar_conj h)
+}
+
+lemma asimilar_abs_tri_bc{T Q : Triangle}(h: aSimilar T Q): abs_tri_bc Q = pabs (aScale_factor h) * abs_tri_bc T := by{
+  unfold aSimilar aScale_factor at *
+  rw[← tri_conj_abs_bc T]
+  exact dsimilar_abs_tri_bc (asimilar_imp_dsimilar_conj h)
+}
+
+lemma asimilar_abs_tri_ca{T Q : Triangle}(h: aSimilar T Q): abs_tri_ca Q = pabs (aScale_factor h) * abs_tri_ca T := by{
+  unfold aSimilar aScale_factor at *
+  rw[← tri_conj_abs_ca T]
+  exact dsimilar_abs_tri_ca (asimilar_imp_dsimilar_conj h)
+}
+
+lemma asimilar_area_tri{T Q : Triangle}(h : aSimilar T Q): area_tri Q = - (pabs (aScale_factor h))^2 * area_tri T := by{
+  unfold aSimilar aScale_factor at *
+  rw[dsimilar_area_tri h, tri_conj_area_tri]
+  ring_nf
+}
+
+/-
+theorem dsimilar_imp_same_angles{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q ∧ Angle_B T = Angle_B Q ∧ Angle_C T = Angle_C Q := by{
+  unfold dSimilar at h
+  obtain ⟨a,b,ah,h⟩ := h
+  rw[h]
+  simp [*, linear_trans_tri_angle_a, linear_trans_tri_angle_b, linear_trans_tri_angle_c]
+}
+
+lemma dsimilar_angle_a{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q := by{
+  exact (dsimilar_imp_same_angles h).1
+}
+
+lemma dsimilar_angle_b{T Q : Triangle}(h : dSimilar T Q): Angle_B T = Angle_B Q := by{
+  exact (dsimilar_imp_same_angles h).2.1
+}
+
+lemma dsimilar_angle_c{T Q : Triangle}(h : dSimilar T Q): Angle_C T = Angle_C Q := by{
+  exact (dsimilar_imp_same_angles h).2.2
+}-/
