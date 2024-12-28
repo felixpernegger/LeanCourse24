@@ -268,10 +268,9 @@ lemma dsimilar_conj{T Q : Triangle}(h : dSimilar T Q): dSimilar (tri_conj T) (tr
   simp [*]
   unfold Linear_trans_tri
   simp [*]
-  constructor
-  · rw[linear_trans_point_point]
-  sorry
-
+  repeat
+    rw[linear_trans_point_pconj]
+  tauto
 }
 
 def dScale_factor{T Q : Triangle}(h : dSimilar T Q): Point :=
@@ -882,6 +881,8 @@ There is obvously more to say, in the next section we will do exactly that, but 
 we introduce "anti-similar" or short asimilar triangles.
 These are triangles which are similar but have reverse orientation, or - more simply put -
 are dsimilar to the conjugated triangle:-/
+/-The vast mmajority of the work lies in dsimilar, so here we mostly just reformulate stuff-/
+
 
 def aSimilar(T Q : Triangle) : Prop :=
   dSimilar (tri_conj T) Q
@@ -894,5 +895,26 @@ lemma asimilar_refl(T : Triangle): aSimilar T (tri_conj T) := by{
 
 lemma asimilar_symm{T Q : Triangle}(h : aSimilar T Q): aSimilar Q T := by{
   unfold aSimilar at *
-  sorry
+  apply dsimilar_symm
+  rw[← tri_conj_twice T]
+  exact dsimilar_conj h
 }
+
+/-aSimilar twice means dsimilar:-/
+lemma asimilar_trans{T Q R : Triangle}(TQ: aSimilar T Q)(QR: aSimilar Q R): dSimilar T R := by{
+  apply asimilar_symm at TQ
+  unfold aSimilar at *
+  apply dsimilar_symm at TQ
+  exact dsimilar_trans TQ QR
+}
+
+lemma asimilar_imp_dsimilar_conj{T Q : Triangle}(h : aSimilar T Q): dSimilar (tri_conj T) Q := by{
+  unfold aSimilar at h
+  assumption
+}
+
+def aScale_factor{T Q : Triangle}(h: aSimilar T Q): Point :=
+  dScale_factor (asimilar_imp_dsimilar_conj h)
+
+def aShift_factor{T Q : Triangle}(h: aSimilar T Q): Point :=
+  dShift_factor (asimilar_imp_dsimilar_conj h)
