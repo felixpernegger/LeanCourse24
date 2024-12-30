@@ -262,3 +262,5 @@ def not_on_perimiter(p : Point)(T : Triangle): Prop :=
   theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): 0 = 0 := by{
     sorry
   }
+
+--ich muss noch eine sQuotL version einführen, die 1 ist wenn parallel!
