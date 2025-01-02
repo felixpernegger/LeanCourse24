@@ -259,8 +259,93 @@ which is not possible with the foundation of geometry being used here :(-/
 def not_on_perimiter(p : Point)(T : Triangle): Prop :=
   ¬Lies_on p (tri_ab T) ∧ ¬Lies_on p (tri_bc T) ∧ ¬Lies_on p (tri_ca T)
 
-  theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): 0 = 0 := by{
-    sorry
+/-TO further generale a tiny bit more, we introduce the following:-/
+
+def sQuotL : Line → Point → Point → ℝ :=
+  fun L a b ↦ if h: Parallel L (qLine_through a b) then -1 else sQuot a (Intersection h) b
+
+/-Using this Ceva theorem can be formulated as followed:-/
+
+theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
+  /-The interesting case is when nothing is parallel, we have to get the first though.-/
+  have ab: T.a ≠ T.b := by{exact tri_diff_ab T}
+  have bc: T.b ≠ T.c := by{exact tri_diff_bc T}
+  have ca: T.c ≠ T.a := by{exact tri_diff_ca T}
+  have ha: p ≠ T.a := by{
+    unfold not_on_perimiter tri_ab Lies_on Line_through at hp
+    simp at hp
+    contrapose hp
+    simp at hp
+    rw[hp]
+    have : colinear T.a T.b T.a := by{
+      apply colinear_self
+      tauto
+    }
+    tauto
   }
+  have hb: p ≠ T.b := by{
+    unfold not_on_perimiter tri_ab Lies_on Line_through at hp
+    simp at hp
+    contrapose hp
+    simp at hp
+    rw[hp]
+    have : colinear T.a T.b T.b := by{
+      apply colinear_self
+      tauto
+    }
+    tauto
+  }
+  have hc: p ≠ T.c := by{
+    unfold not_on_perimiter tri_bc Lies_on Line_through at hp
+    simp at hp
+    contrapose hp
+    simp at hp
+    rw[hp]
+    have : colinear T.b T.c T.c := by{
+      apply colinear_self
+      tauto
+    }
+    tauto
+  }
+  by_cases hbc: Parallel (qLine_through T.a p) (tri_bc T)
+  · unfold tri_bc at hbc
+    nth_rw 1[sQuotL]
+    simp [*]
+    by_cases hca: Parallel (qLine_through T.b p) (tri_ca T)
+    · unfold tri_ca at hca
+      nth_rw 1[sQuotL]
+      simp [*]
+      unfold sQuotL
+      have hhp: p = reflection_point_point T.c (pmidpoint T.a T.b) := by{
+        sorry
+      }
+      have g: ¬Parallel (qLine_through T.c p) (qLine_through T.a T.b) := by{
+        sorry
+      }
+      simp [g]
+      have q: Intersection g = pmidpoint T.a T.b := by{
+        symm
+        apply intersection_unique
+        simp [ab, Ne.symm hc]
+        constructor
+        · unfold Lies_on Line_through
+          simp
+          rw[hhp]
+          unfold reflection_point_point pmidpoint padd pneg p_scal_mul colinear det conj
+          simp
+          ring
+        unfold pmidpoint Line_through Lies_on colinear det conj
+        simp
+        ring
+      }
+      rw[q]
+      unfold sQuot
+      simp [pmidpoint_in_between]
+      rw[point_abs_pmidpoint, point_abs_symm (pmidpoint T.a T.b), pmidpoint_symm, point_abs_pmidpoint, point_abs_symm]
+      have : point_abs T.b T.a ≠ 0 := by{
+        exact point_abs_neq_zero (id (Ne.symm ab))
+      }
+      field_simp
+}
 
 --ich muss noch eine sQuotL version einführen, die 1 ist wenn parallel!
