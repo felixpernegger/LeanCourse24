@@ -320,7 +320,59 @@ theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_
         sorry
       }
       have g: ¬Parallel (qLine_through T.c p) (qLine_through T.a T.b) := by{
-        sorry
+        by_contra h0
+        obtain h'|h' := (parallel_def (qLine_through T.c p) (qLine_through T.a T.b)).1 h0
+        · suffices g: Lies_on (pmidpoint T.a T.b) (qLine_through T.c p) ∧ Lies_on (pmidpoint T.a T.b) (qLine_through T.a T.b)
+          have : (pmidpoint T.a T.b) ∈ ∅ := by{
+            rw[← h']
+            simp
+            unfold Lies_on at g
+            tauto
+          }
+          tauto
+
+          constructor
+          · simp [Ne.symm hc]
+            unfold Lies_on Line_through
+            simp
+            rw[hhp]
+            unfold pmidpoint reflection_point_point padd pneg p_scal_mul colinear det conj
+            simp
+            ring
+          simp [ab]
+          unfold Lies_on Line_through pmidpoint colinear det conj
+          simp
+          ring
+        have h'': qLine_through T.c p = qLine_through T.a T.b := by{
+          ext
+          rw[h']
+        }
+        simp [ab] at h''
+        have col: colinear T.a T.b p := by{
+          suffices: Lies_on p (Line_through ab)
+          · unfold Lies_on Line_through at this
+            simp at this
+            assumption
+          rw[← h'']
+          exact qline_through_mem_right T.c p
+        }
+        rw[hhp] at col
+        have col2 : colinear T.a T.b T.c := by{
+          unfold colinear at *
+          have : (0 : ℝ) = -0 := by{norm_num}
+          rw[this]
+          rw[← col]
+          unfold reflection_point_point pmidpoint padd pneg p_scal_mul det conj
+          simp
+          ring_nf
+          have : (starRingEnd ℂ) 2 = 2 := by{exact Complex.conj_eq_iff_re.mpr rfl}
+          rw[this]
+          field_simp
+          ring
+        }
+        have : noncolinear T.a T.b T.c := by{exact T.noncolinear}
+        unfold noncolinear at this
+        contradiction
       }
       simp [g]
       have q: Intersection g = pmidpoint T.a T.b := by{
@@ -346,6 +398,15 @@ theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_
         exact point_abs_neq_zero (id (Ne.symm ab))
       }
       field_simp
-}
+    sorry
+  by_cases hca: Parallel (qLine_through T.b p) (tri_ca T)
+  · sorry
+  by_cases hab: Parallel (qLine_through T.c p) (tri_ab T)
+  · sorry
 
---ich muss noch eine sQuotL version einführen, die 1 ist wenn parallel!
+  /-Now we finally get to the actually interesting part:-/
+
+  unfold sQuotL
+  simp [*]
+
+}
