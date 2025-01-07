@@ -8,7 +8,7 @@ noncomputable section
 set_option linter.unusedTactic false
 
 --thales
-
+#check Circle
 /-In this section we prove thales theorem, first though, some notation:-/
 
 def Thales_circle: Point → Point → CCircle :=

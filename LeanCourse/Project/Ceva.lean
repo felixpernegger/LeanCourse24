@@ -6,7 +6,7 @@ open Function Set Classical
 noncomputable section
 
 set_option linter.unusedTactic false
-set_option maxHeartbeats 1000000
+set_option maxHeartbeats 500000
 
 /-In this section we actually prove something interesting for once:
 Ceva's theorem. The main lemma behind it will be proven by computation, the main result however
@@ -21,7 +21,7 @@ we techincally dont require that.-/
 
 /-The central lemma (bc of its importance called theorem tho haha) is now, that the sQuot corresponds to the quotient of areas:-/
 /-We define it very carefully to be as exact and general as possible:-/
-theorem squot_areas{a b c p : Point}{L : Line}(ah: Lies_on a L)(bh: Lies_on b L)(ch: Lies_on c L)(ph: ¬Lies_on p L): sQuot a b c = (area_points a b p) / (area_points b c p) := by{
+theorem squot_areas{a b c : Point}(p : Point)(L : Line)(ah: Lies_on a L)(bh: Lies_on b L)(ch: Lies_on c L)(ph: ¬Lies_on p L): sQuot a b c = (area_points a b p) / (area_points b c p) := by{
   by_cases cb: c = b
   · rw[cb]
     unfold area_points det
@@ -264,6 +264,22 @@ def not_on_perimiter(p : Point)(T : Triangle): Prop :=
 def sQuotL : Line → Point → Point → ℝ :=
   fun L a b ↦ if h: Parallel L (qLine_through a b) then -1 else sQuot a (Intersection h) b
 
+/-A small numerical lemma:-/
+
+lemma same_quot_diff{a b c d q : ℝ}(bh : b ≠ 0)(dh : d ≠ 0)(ab: a / b = q)(cd: c / d = q)(bd: b ≠ d): (a-c)/(b-d) = q := by{
+  field_simp at *
+  have : b - d ≠ 0 := by{
+    contrapose bd
+    simp at *
+    calc
+      b = b - (b-d) := by{rw[bd, sub_zero]}
+        _= d := by{ring}
+  }
+  field_simp
+  ring_nf
+  rw[← ab, cd]
+}
+
 /-Using this Ceva theorem can be formulated as followed:-/
 
 theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
@@ -317,6 +333,88 @@ theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_
       simp [*]
       unfold sQuotL
       have hhp: p = reflection_point_point T.c (pmidpoint T.a T.b) := by{
+        symm at ha
+        symm at hb
+        simp [*] at *
+        have s0: ¬ Parallel (Line_through ha) (Line_through hb) := by{
+          by_contra h0
+          have par: Parallel (tri_bc T) (tri_ca T) := by{
+            unfold tri_bc tri_ca
+            have : Parallel (Line_through bc) (Line_through hb) := by{
+              apply parallel_symm at hbc
+              exact parallel_trans hbc h0
+            }
+            exact parallel_trans this hca
+          }
+          obtain u := tri_not_parallel_bc_ca T
+          contradiction
+        }
+        have s1: p = Intersection s0 := by{
+          apply intersection_unique
+          constructor
+          · exact line_through_mem_right ha
+          exact line_through_mem_right hb
+        }
+        rw[s1]
+        symm
+        apply intersection_unique
+        have t1: Line_through ha = parallel_through (tri_bc T) T.a := by{
+          apply parallel_through_unique
+          constructor
+          · exact line_through_mem_left ha
+          unfold tri_bc
+          apply parallel_symm
+          exact hbc
+        }
+        have t2: Line_through hb = parallel_through (tri_ca T) T.b := by{
+          apply parallel_through_unique
+          constructor
+          · exact line_through_mem_left hb
+          unfold tri_ca
+          apply parallel_symm
+          exact hca
+        }
+        rw[t1,t2]
+        clear t1 t2 s1 s0 hbc hca hp ha hb hc p
+        constructor
+        · have q1: reflection_point_point T.c (pmidpoint T.a T.b) ≠ T.a := by{
+            by_contra h0
+            unfold reflection_point_point pmidpoint pneg padd p_scal_mul at *
+            simp at h0
+            contrapose bc
+            obtain ⟨a,b,c,hh⟩ := T
+            simp at *
+            ext
+            have : ({ x := 2 * ((a.x + b.x) / 2) + -c.x } : Point).x = a.x := by{
+              rw[h0]
+            }
+            simp at this
+            field_simp at this
+            calc
+              b.x = -a.x + (a.x + b.x + -c.x) + c.x := by{ring}
+                _= -a.x + (a.x) + c.x := by{rw[this]}
+                _= c.x := by{ring}
+          }
+          suffices g : Parallel (Line_through q1) (tri_bc T)
+          · have : Line_through q1 = parallel_through (tri_bc T) T.a := by{
+            apply parallel_through_unique
+            constructor
+            · exact line_through_mem_right q1
+            apply parallel_symm
+            assumption
+            }
+            rw[← this]
+            apply line_through_mem_left
+          unfold tri_bc
+          refine (parallel_quot q1 (tri_bc.proof_1 T)).mpr ?g.a
+          unfold reflection_point_point pmidpoint p_scal_mul padd pneg
+          simp
+          suffices : ((2 * ((T.a.x + T.b.x) / 2) + -T.c.x - T.a.x) / (T.b.x - T.c.x)) = (1 : ℂ)
+          · rw[this]
+            simp
+          obtain u := sub_neq_zero bc
+          field_simp
+          ring
         sorry
       }
       have g: ¬Parallel (qLine_through T.c p) (qLine_through T.a T.b) := by{
@@ -407,6 +505,7 @@ theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_
   /-Now we finally get to the actually interesting part:-/
 
   unfold sQuotL
+  unfold tri_ca tri_ab tri_bc at *
   simp [*]
-
+  sorry
 }
