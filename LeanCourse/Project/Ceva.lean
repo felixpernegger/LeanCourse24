@@ -477,8 +477,17 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
   #check area_points
   #check same_quot_diff ?_ ?_ s1 s2
   #check qnot_on_perimiter_points_imp_area_not_zero np
-  obtain n1 := qnot_on_perimiter_points_not_parallel_imp_area_not_zero np h
-
+  have n1: area_points (Intersection h) c p ≠ 0 := by{
+    sorry
+  }
+  have n2: area_points (Intersection h) c a ≠ 0 := by{
+    sorry
+  }
+  have n3: area_points (Intersection h) c p ≠ area_points (Intersection h) c a := by{
+    sorry
+  }
+  rw[← same_quot_diff n1 n2 s1 s2 n3]
+  apply?
   sorry
 }
 
