@@ -474,7 +474,11 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
     exact intersection_mem_right h
   }
   symm at s1 s2
+  #check area_points
   #check same_quot_diff ?_ ?_ s1 s2
+  #check qnot_on_perimiter_points_imp_area_not_zero np
+  obtain n1 := qnot_on_perimiter_points_not_parallel_imp_area_not_zero np h
+
   sorry
 }
 

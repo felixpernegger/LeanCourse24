@@ -302,6 +302,26 @@ def tri_conj : Triangle → Triangle :=
 def area_points : Point → Point → Point → ℝ :=
   fun a b c ↦ -1/4  * det a b c
 
+/-Permutating 2 arguments changes the sign:-/
+
+lemma area_points_perm12(a b c : Point): area_points b a c = - area_points a b c := by{
+  unfold area_points det
+  simp
+  ring
+}
+
+lemma area_points_perm23(a b c : Point): area_points a c b = - area_points a b c := by{
+  unfold area_points det
+  simp
+  ring
+}
+
+lemma area_points_perm13(a b c : Point): area_points c b a = - area_points a b c := by{
+  unfold area_points det
+  simp
+  ring
+}
+
 def area_tri : Triangle → ℝ :=
   fun T ↦ area_points T.a T.b T.c
 
