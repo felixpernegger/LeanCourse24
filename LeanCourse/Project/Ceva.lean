@@ -439,6 +439,42 @@ lemma qnot_on_perimiter_points_not_parallel_imp_area_not_zero{p a b c : Point}(h
 /-The central lemma is the following (the main theorem will mostly just be special cases, albeit is is very ugly sadly)-/
 
 lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c)(h : ¬Parallel (qLine_through a p) (qLine_through b c)): sQuotL (qLine_through a p) b c = area_points b p a / area_points a p c := by{
+  unfold sQuotL
+  simp [h]
+  have s1: sQuot b (Intersection h) c = area_points b (Intersection h) p / area_points (Intersection h) c p := by{
+    rw[squot_areas p (qLine_through b c) (qline_through_mem_left b c) ?_ (qline_through_mem_right b c)]
+    · unfold qnot_on_perimiter_points not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at np
+      simp [h] at *
+      obtain ⟨h1,h2⟩ := np
+      repeat
+        rw[← qline_through_line_through] at h2
+      tauto
+    exact intersection_mem_right h
+  }
+  have s2: sQuot b (Intersection h) c = area_points b (Intersection h) a / area_points (Intersection h) c a := by{
+    rw[squot_areas a (qLine_through b c) (qline_through_mem_left b c) ?_ (qline_through_mem_right b c)]
+    · contrapose np
+      unfold qnot_on_perimiter_points
+      simp at *
+      intro u
+      have bc': b ≠ c := by{
+        contrapose u
+        unfold noncolinear colinear det
+        simp at *
+        rw[u]
+        ring
+      }
+      simp [bc'] at np
+      unfold Lies_on Line_through at np
+      simp at np
+      unfold noncolinear at u
+      apply colinear_perm13 at np
+      apply colinear_perm23 at np
+      contradiction
+    exact intersection_mem_right h
+  }
+  symm at s1 s2
+  #check same_quot_diff ?_ ?_ s1 s2
   sorry
 }
 
