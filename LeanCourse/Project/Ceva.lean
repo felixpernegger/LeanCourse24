@@ -346,6 +346,96 @@ lemma same_quot_diff{a b c d q : ℝ}(bh : b ≠ 0)(dh : d ≠ 0)(ab: a / b = q)
   rw[← ab, cd]
 }
 
+/-The areas of b p c etc are nonzero:-/
+
+lemma qnot_on_perimiter_points_imp_area_not_zero{p a b c : Point}(h : qnot_on_perimiter_points p a b c): area_points b c p ≠ 0 := by{
+  unfold qnot_on_perimiter_points at h
+  simp at h
+  obtain ⟨h,h'⟩ := h
+  unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h'
+  obtain ⟨ab,bc,ca⟩ := h'
+  unfold Lies_on Line_through at bc
+  simp at bc
+  contrapose bc
+  simp at *
+  exact (area_zero_iff b c p).mp bc
+}
+
+/-A slightly different version of the lemma above is the following:
+
+If bc isnt parallel to ap, the area a (Intersection ap bc) b isnt zero:-/
+/-(We will need this to apply same_quot_diff)-/
+
+lemma qnot_on_perimiter_points_not_parallel_imp_area_not_zero{p a b c : Point}(h : qnot_on_perimiter_points p a b c)(h' : ¬Parallel (qLine_through a p) (qLine_through b c)): area_points a (Intersection h') b ≠ 0 := by{
+  unfold qnot_on_perimiter_points at h
+  simp at h
+  obtain ⟨h,h'⟩ := h
+  unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h'
+  obtain ⟨ab,bc,ca⟩ := h'
+  have bc': b ≠ c := by{
+    have : pairwise_different_point3 a b c := by{exact noncolinear_imp_pairwise_different h}
+    unfold pairwise_different_point3 at this
+    tauto
+  }
+  have g: ¬Lies_on a (qLine_through b c) := by{
+    simp [bc']
+    by_contra p0
+    suffices : colinear a b c
+    · unfold noncolinear at h
+      tauto
+    unfold Lies_on Line_through at p0
+    simp at p0
+    apply colinear_perm12
+    apply colinear_perm23
+    assumption
+  }
+  have ap : a ≠ p := by{
+    contrapose ab
+    simp at *
+    rw[← ab, ← qline_through_line_through]
+    exact qline_through_mem_left a b
+  }
+  have ib: Intersection h' ≠ b := by{
+    by_contra p0
+    contrapose ab
+    simp at *
+    have hb: Lies_on b (Line_through ap) := by{
+      rw[← p0, ← qline_through_line_through]
+      exact intersection_mem_left h'
+    }
+    unfold Line_through Lies_on at hb
+    simp at hb
+    unfold Lies_on Line_through
+    simp
+    apply colinear_perm23
+    assumption
+  }
+  by_contra p0
+  obtain col := (area_zero_iff a (Intersection h') b).mp p0
+  have g1: Line_through ib = Line_through bc' := by{
+    symm
+    apply line_through_unique
+    constructor
+    · rw[← qline_through_line_through]
+      exact intersection_mem_right h'
+    exact line_through_mem_left bc'
+  }
+  have g2: Lies_on a (Line_through ib) := by{
+    unfold Lies_on Line_through
+    simp
+    apply colinear_perm13
+    apply colinear_perm23
+    assumption
+  }
+  rw[g1] at g2
+  unfold Lies_on Line_through at g2
+  simp at g2
+  unfold noncolinear at h
+  apply colinear_perm23 at g2
+  apply colinear_perm12 at g2
+  contradiction
+}
+
 /-The central lemma is the following (the main theorem will mostly just be special cases, albeit is is very ugly sadly)-/
 
 lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c)(h : ¬Parallel (qLine_through a p) (qLine_through b c)): sQuotL (qLine_through a p) b c = area_points b p a / area_points a p c := by{
