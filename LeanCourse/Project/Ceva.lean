@@ -259,6 +259,72 @@ which is not possible with the foundation of geometry being used here :(-/
 def not_on_perimiter(p : Point)(T : Triangle): Prop :=
   ¬Lies_on p (tri_ab T) ∧ ¬Lies_on p (tri_bc T) ∧ ¬Lies_on p (tri_ca T)
 
+def not_on_perimiter_points(p : Point){a b c : Point}(h : noncolinear a b c) :=
+  not_on_perimiter p (Triangle.mk a b c h)
+
+def qnot_on_perimiter_points(p a b c : Point): Prop :=
+  if h : noncolinear a b c then not_on_perimiter_points p h else False
+
+lemma not_on_perimiter_points_not_on_perimiter{p : Point}{T : Triangle}(h: not_on_perimiter p T): not_on_perimiter_points p T.noncolinear := by{
+  unfold not_on_perimiter_points
+  simp [*]
+}
+
+lemma qnot_on_perimiter_points_not_on_perimiter_points{p : Point}{a b c : Point}{h : noncolinear a b c}(h': not_on_perimiter_points p h): qnot_on_perimiter_points p a b c := by{
+  unfold qnot_on_perimiter_points
+  simp [*]
+}
+
+lemma qnot_on_perimiter_points_not_on_perimiter{p : Point}{T : Triangle}(h: not_on_perimiter p T): qnot_on_perimiter_points p T.a T.b T.c := by{
+  apply qnot_on_perimiter_points_not_on_perimiter_points
+  exact not_on_perimiter_points_not_on_perimiter h
+}
+
+
+/-We can permutate the latter:-/
+
+lemma qnot_on_perimiter_points_perm12{p a b c : Point}(h : qnot_on_perimiter_points p a b c): qnot_on_perimiter_points p b a c := by{
+  unfold qnot_on_perimiter_points at *
+  simp at *
+  obtain ⟨h1,h2⟩ := h
+  use noncolinear_perm12 h1
+  unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at *
+  simp at *
+  repeat
+    rw[← qline_through_line_through]
+    rw[← qline_through_line_through] at h2
+  rw[qline_through_symm b a, qline_through_symm a c, qline_through_symm c b]
+  tauto
+}
+
+lemma qnot_on_perimiter_points_perm13{p a b c : Point}(h : qnot_on_perimiter_points p a b c): qnot_on_perimiter_points p c b a := by{
+  unfold qnot_on_perimiter_points at *
+  simp at *
+  obtain ⟨h1,h2⟩ := h
+  use noncolinear_perm13 h1
+  unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at *
+  simp at *
+  repeat
+    rw[← qline_through_line_through]
+    rw[← qline_through_line_through] at h2
+  rw[qline_through_symm b a, qline_through_symm a c, qline_through_symm c b]
+  tauto
+}
+
+lemma qnot_on_perimiter_points_perm23{p a b c : Point}(h : qnot_on_perimiter_points p a b c): qnot_on_perimiter_points p a c b := by{
+  unfold qnot_on_perimiter_points at *
+  simp at *
+  obtain ⟨h1,h2⟩ := h
+  use noncolinear_perm23 h1
+  unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at *
+  simp at *
+  repeat
+    rw[← qline_through_line_through]
+    rw[← qline_through_line_through] at h2
+  rw[qline_through_symm b a, qline_through_symm a c, qline_through_symm c b]
+  tauto
+}
+
 /-TO further generale a tiny bit more, we introduce the following:-/
 
 def sQuotL : Line → Point → Point → ℝ :=
@@ -278,6 +344,12 @@ lemma same_quot_diff{a b c d q : ℝ}(bh : b ≠ 0)(dh : d ≠ 0)(ab: a / b = q)
   field_simp
   ring_nf
   rw[← ab, cd]
+}
+
+/-The central lemma is the following (the main theorem will mostly just be special cases, albeit is is very ugly sadly)-/
+
+lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c)(h : ¬Parallel (qLine_through a p) (qLine_through b c)): sQuotL (qLine_through a p) b c = area_points b p a / area_points a p c := by{
+  sorry
 }
 
 /-Using this Ceva theorem can be formulated as followed:-/
@@ -504,8 +576,6 @@ theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_
 
   /-Now we finally get to the actually interesting part:-/
 
-  unfold sQuotL
-  unfold tri_ca tri_ab tri_bc at *
-  simp [*]
+
   sorry
 }
