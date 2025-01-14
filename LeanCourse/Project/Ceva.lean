@@ -477,6 +477,64 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
   #check area_points
   #check same_quot_diff ?_ ?_ s1 s2
   #check qnot_on_perimiter_points_imp_area_not_zero np
+  have r1: (area_points b (Intersection h) p - area_points b (Intersection h) a) = area_points b p a := by{
+    have bc: b ≠ c := by{
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca Lies_on Line_through at h2
+      simp at *
+      contrapose h1
+      unfold noncolinear
+      simp at *
+      apply colinear_self
+      tauto
+    }
+    have ic: Intersection h ≠ c := by{
+      by_contra p0
+      have l: Lies_on c (qLine_through a p) := by{
+        rw[← p0]
+        exact intersection_mem_left h
+      }
+      have ap: a ≠ p := by{
+        unfold qnot_on_perimiter_points at np
+        simp at np
+        obtain ⟨h1,h2⟩ := np
+        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca Lies_on Line_through at h2
+        simp at *
+        by_contra p0
+        have col: colinear a b p := by{
+          apply colinear_self
+          tauto
+        }
+        tauto
+      }
+      simp [ap] at l
+      unfold Lies_on Line_through at l
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca Lies_on Line_through at h2
+      simp at *
+      apply colinear_perm13 at l
+      apply colinear_perm23 at l
+      tauto
+    }
+    have al: Lies_on a (Line_through ic) := by{
+      have : Line_through ic = Line_through bc := by{
+        symm
+        apply line_through_unique
+        constructor
+        · rw[← qline_through_line_through]
+          exact intersection_mem_right h
+        exact line_through_mem_right bc
+      }
+      sorry
+    }
+    #check area_add_side b (Intersection h) c a ic
+    #check area_add_side
+    sorry
+  }
   have n1: area_points (Intersection h) c p ≠ 0 := by{
     sorry
   }
@@ -487,7 +545,7 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
     sorry
   }
   rw[← same_quot_diff n1 n2 s1 s2 n3]
-  apply?
+
   sorry
 }
 
