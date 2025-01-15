@@ -799,7 +799,11 @@ lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c
   simp
 
   have bc: b ≠ c := by{
-    have : pairwise_different_point3 a b c := by{exact noncolinear_imp_pairwise_different h}
+    unfold qnot_on_perimiter_points at np
+    simp at np
+    obtain ⟨h1,h2⟩ := np
+    unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+    have : pairwise_different_point3 a b c := by{exact noncolinear_imp_pairwise_different h1}
     unfold pairwise_different_point3 at this
     tauto
   }
@@ -821,10 +825,13 @@ lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c
   }
   simp [bc, ap] at h0
   obtain ⟨t,ht⟩ := parallel_line_through ap bc h0
-  sorry
+  rw[ht]
+  unfold area_points det conj
+  simp
+  ring
 }
 
-/-Using this Ceva theorem can be formulated as followed:-/
+/-Using this (techincally one direction of) Ceva theorem can be formulated as followed:-/
 
 theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
   apply qnot_on_perimiter_points_not_on_perimiter at hp
