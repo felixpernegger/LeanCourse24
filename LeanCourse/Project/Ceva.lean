@@ -438,7 +438,7 @@ lemma qnot_on_perimiter_points_not_parallel_imp_area_not_zero{p a b c : Point}(h
 
 /-The central lemma is the following (the main theorem will mostly just be special cases, albeit is is very ugly sadly)-/
 
-lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c)(h : ¬Parallel (qLine_through a p) (qLine_through b c)): sQuotL (qLine_through a p) b c = area_points b p a / area_points a p c := by{
+lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c)(h : ¬Parallel (qLine_through a p) (qLine_through b c)): sQuotL (qLine_through a p) b c = area_points a p b / area_points c p a := by{
   unfold sQuotL
   simp [h]
   have s1: sQuot b (Intersection h) c = area_points b (Intersection h) p / area_points (Intersection h) c p := by{
@@ -474,10 +474,8 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
     exact intersection_mem_right h
   }
   symm at s1 s2
-  #check area_points
-  #check same_quot_diff ?_ ?_ s1 s2
-  #check qnot_on_perimiter_points_imp_area_not_zero np
-  have r1: (area_points b (Intersection h) p - area_points b (Intersection h) a) = area_points b p a := by{
+
+  have r1: (area_points b (Intersection h) p - area_points b (Intersection h) a) = area_points a p b := by{
     have bc: b ≠ c := by{
       unfold qnot_on_perimiter_points at np
       simp at np
@@ -490,62 +488,303 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
       apply colinear_self
       tauto
     }
-    have ic: Intersection h ≠ c := by{
-      by_contra p0
-      have l: Lies_on c (qLine_through a p) := by{
-        rw[← p0]
-        exact intersection_mem_left h
+    have ip: Intersection h ≠ p := by{
+      by_contra h0
+      have: Lies_on p (qLine_through b c) := by{
+        rw[← h0]
+        exact intersection_mem_right h
       }
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      simp at h2
+      simp [bc] at this
+      tauto
+    }
+    have al: Lies_on a (Line_through ip) := by{
       have ap: a ≠ p := by{
         unfold qnot_on_perimiter_points at np
         simp at np
         obtain ⟨h1,h2⟩ := np
-        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca Lies_on Line_through at h2
+        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+        contrapose h2
         simp at *
-        by_contra p0
-        have col: colinear a b p := by{
-          apply colinear_self
-          tauto
+        repeat
+          rw[← qline_through_line_through]
+        intro h0
+        have : Lies_on p (qLine_through a b) := by{
+          rw[← h2]
+          exact qline_through_mem_left a b
         }
-        tauto
+        contradiction
       }
-      simp [ap] at l
-      unfold Lies_on Line_through at l
+      suffices : Line_through ip = Line_through ap
+      · rw[this]
+        exact line_through_mem_left ap
+      symm
+      apply line_through_unique
+      constructor
+      · rw[← qline_through_line_through]
+        exact intersection_mem_left h
+      exact line_through_mem_right ap
+    }
+
+    rw[area_add_side b (Intersection h) p a ip al]
+    ring_nf
+    rw[area_points_perm12, area_points_perm23]
+    simp
+  }
+  have r2: (area_points (Intersection h) c p - area_points (Intersection h) c a) = area_points c p a := by{
+    have bc: b ≠ c := by{
       unfold qnot_on_perimiter_points at np
       simp at np
       obtain ⟨h1,h2⟩ := np
       unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca Lies_on Line_through at h2
       simp at *
-      apply colinear_perm13 at l
-      apply colinear_perm23 at l
+      contrapose h1
+      unfold noncolinear
+      simp at *
+      apply colinear_self
       tauto
     }
-    have al: Lies_on a (Line_through ic) := by{
-      have : Line_through ic = Line_through bc := by{
-        symm
-        apply line_through_unique
-        constructor
-        · rw[← qline_through_line_through]
-          exact intersection_mem_right h
-        exact line_through_mem_right bc
+    have ip: Intersection h ≠ p := by{
+      by_contra h0
+      have: Lies_on p (qLine_through b c) := by{
+        rw[← h0]
+        exact intersection_mem_right h
       }
-      sorry
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      simp at h2
+      simp [bc] at this
+      tauto
     }
-    #check area_add_side b (Intersection h) c a ic
-    #check area_add_side
-    sorry
+    have al: Lies_on a (Line_through ip) := by{
+      have ap: a ≠ p := by{
+        unfold qnot_on_perimiter_points at np
+        simp at np
+        obtain ⟨h1,h2⟩ := np
+        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+        contrapose h2
+        simp at *
+        repeat
+          rw[← qline_through_line_through]
+        intro h0
+        have : Lies_on p (qLine_through a b) := by{
+          rw[← h2]
+          exact qline_through_mem_left a b
+        }
+        contradiction
+      }
+      suffices : Line_through ip = Line_through ap
+      · rw[this]
+        exact line_through_mem_left ap
+      symm
+      apply line_through_unique
+      constructor
+      · rw[← qline_through_line_through]
+        exact intersection_mem_left h
+      exact line_through_mem_right ap
+    }
+    rw[area_points_perm12, area_add_side c (Intersection h) p a ip al, area_points_perm12]
+    ring_nf
+    rw[area_points_perm23]
+    simp
   }
   have n1: area_points (Intersection h) c p ≠ 0 := by{
-    sorry
+    by_contra h0
+    obtain col := (area_zero_iff (Intersection h) c p).mp h0
+    have ic: Intersection h ≠ c := by{
+      by_contra p0
+      have ap: a ≠ p := by{
+        unfold qnot_on_perimiter_points at np
+        simp at np
+        obtain ⟨h1,h2⟩ := np
+        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+        contrapose h2
+        simp at *
+        repeat
+          rw[← qline_through_line_through]
+        intro h0
+        have : Lies_on p (qLine_through a b) := by{
+          rw[← h2]
+          exact qline_through_mem_left a b
+        }
+        contradiction
+      }
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      simp at *
+      obtain ⟨ab,bc,ca⟩ := h2
+      contrapose ca
+      simp at *
+      have hc : Lies_on c (Line_through ap) := by{
+        rw[← p0, ← qline_through_line_through]
+        exact intersection_mem_left h
+      }
+      unfold Line_through Lies_on at hc
+      simp at hc
+      unfold Lies_on Line_through
+      simp
+      apply colinear_perm12
+      apply colinear_perm23
+      assumption
+    }
+    have bc : b ≠ c := by{
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      by_contra h0
+      have col: colinear a b c := by{
+        apply colinear_self
+        tauto
+      }
+      unfold noncolinear at h1
+      contradiction
+    }
+    have g: Line_through bc = Line_through ic := by{
+      apply line_through_unique
+      constructor
+      · rw[← qline_through_line_through]
+        exact intersection_mem_right h
+      exact line_through_mem_right bc
+    }
+    suffices : Lies_on p (Line_through bc)
+    · unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      tauto
+    rw[g]
+    unfold Lies_on Line_through
+    simp
+    assumption
   }
   have n2: area_points (Intersection h) c a ≠ 0 := by{
-    sorry
+    by_contra h0
+    obtain col := (area_zero_iff (Intersection h) c a).mp h0
+    have ic: Intersection h ≠ c := by{
+      by_contra p0
+      have ap: a ≠ p := by{
+        unfold qnot_on_perimiter_points at np
+        simp at np
+        obtain ⟨h1,h2⟩ := np
+        unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+        contrapose h2
+        simp at *
+        repeat
+          rw[← qline_through_line_through]
+        intro h0
+        have : Lies_on p (qLine_through a b) := by{
+          rw[← h2]
+          exact qline_through_mem_left a b
+        }
+        contradiction
+      }
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      simp at *
+      obtain ⟨ab,bc,ca⟩ := h2
+      contrapose ca
+      simp at *
+      have hc : Lies_on c (Line_through ap) := by{
+        rw[← p0, ← qline_through_line_through]
+        exact intersection_mem_left h
+      }
+      unfold Line_through Lies_on at hc
+      simp at hc
+      unfold Lies_on Line_through
+      simp
+      apply colinear_perm12
+      apply colinear_perm23
+      assumption
+    }
+    have bc : b ≠ c := by{
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      by_contra h0
+      have col: colinear a b c := by{
+        apply colinear_self
+        tauto
+      }
+      unfold noncolinear at h1
+      contradiction
+    }
+    have g: Line_through bc = Line_through ic := by{
+      apply line_through_unique
+      constructor
+      · rw[← qline_through_line_through]
+        exact intersection_mem_right h
+      exact line_through_mem_right bc
+    }
+    suffices: Lies_on a (Line_through bc)
+    · unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold Lies_on Line_through at this
+      unfold noncolinear at h1
+      simp at *
+      apply colinear_perm13 at this
+      apply colinear_perm23 at this
+      contradiction
+    rw[g]
+    unfold Lies_on Line_through
+    simp
+    assumption
   }
   have n3: area_points (Intersection h) c p ≠ area_points (Intersection h) c a := by{
-    sorry
+    suffices : area_points c p a ≠ 0
+    · contrapose this
+      simp at *
+      rw[← r2, this, sub_self]
+    by_contra h0
+    have col: colinear c p a := by{exact (area_zero_iff c p a).mp h0}
+    have ca : c ≠ a := by{
+      unfold qnot_on_perimiter_points at np
+      simp at np
+      obtain ⟨h1,h2⟩ := np
+      unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+      by_contra p0
+      have : colinear a b c := by{
+        apply colinear_self
+        tauto
+      }
+      unfold noncolinear at h1
+      contradiction
+    }
+    unfold qnot_on_perimiter_points at np
+    simp at np
+    obtain ⟨h1,h2⟩ := np
+    unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+    have : Lies_on p (Line_through ca) := by{
+      unfold Lies_on Line_through
+      simp
+      apply colinear_perm23
+      assumption
+    }
+    tauto
   }
-  rw[← same_quot_diff n1 n2 s1 s2 n3]
+  rw[← same_quot_diff n1 n2 s1 s2 n3, r1,r2]
+}
 
+/-We actually don't need parallelity!-/
+
+lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c): sQuotL (qLine_through a p) b c = area_points a p b / area_points c p a := by{
+  by_cases h0: ¬Parallel (qLine_through a p) (qLine_through b c)
+  · exact squotl_not_parallel np h0
+  simp at h0
+  unfold sQuotL
+  simp [h0]
   sorry
 }
 
