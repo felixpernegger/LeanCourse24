@@ -361,6 +361,15 @@ lemma qnot_on_perimiter_points_imp_area_not_zero{p a b c : Point}(h : qnot_on_pe
   exact (area_zero_iff b c p).mp bc
 }
 
+lemma qnot_on_perimiter_points_imp_area_not_zero'{p a b c : Point}(h: qnot_on_perimiter_points p a b c): area_points a p b ≠ 0 := by{
+  apply qnot_on_perimiter_points_perm13 at h
+  obtain u := qnot_on_perimiter_points_imp_area_not_zero h
+  contrapose u
+  simp at *
+  rw[area_points_perm12, area_points_perm23]
+  simp [*]
+}
+
 /-A slightly different version of the lemma above is the following:
 
 If bc isnt parallel to ap, the area a (Intersection ap bc) b isnt zero:-/
@@ -777,7 +786,7 @@ lemma squotl_not_parallel{p : Point}{a b c : Point}(np: qnot_on_perimiter_points
   rw[← same_quot_diff n1 n2 s1 s2 n3, r1,r2]
 }
 
-/-We actually don't need parallelity!-/
+/-We actually don't need parallelity! (The main case I didnt put this in one theorem all together is that I actually noticed this fact very very late lol)-/
 
 lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c): sQuotL (qLine_through a p) b c = area_points a p b / area_points c p a := by{
   by_cases h0: ¬Parallel (qLine_through a p) (qLine_through b c)
@@ -785,233 +794,43 @@ lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c
   simp at h0
   unfold sQuotL
   simp [h0]
+  field_simp [qnot_on_perimiter_points_imp_area_not_zero' (qnot_on_perimiter_points_perm12 (qnot_on_perimiter_points_perm23 np))]
+  rw[area_points_perm13]
+  simp
+
+  have bc: b ≠ c := by{
+    have : pairwise_different_point3 a b c := by{exact noncolinear_imp_pairwise_different h}
+    unfold pairwise_different_point3 at this
+    tauto
+  }
+  have ap: a ≠ p := by{
+    unfold qnot_on_perimiter_points at np
+    simp at np
+    obtain ⟨h1,h2⟩ := np
+    unfold not_on_perimiter_points not_on_perimiter tri_ab tri_bc tri_ca at h2
+    contrapose h2
+    simp at *
+    repeat
+      rw[← qline_through_line_through]
+      intro h0
+      have : Lies_on p (qLine_through a b) := by{
+        rw[← h2]
+        exact qline_through_mem_left a b
+      }
+      contradiction
+  }
+  simp [bc, ap] at h0
+  obtain ⟨t,ht⟩ := parallel_line_through ap bc h0
   sorry
 }
 
 /-Using this Ceva theorem can be formulated as followed:-/
 
 theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
-  /-The interesting case is when nothing is parallel, we have to get the first though.-/
-  have ab: T.a ≠ T.b := by{exact tri_diff_ab T}
-  have bc: T.b ≠ T.c := by{exact tri_diff_bc T}
-  have ca: T.c ≠ T.a := by{exact tri_diff_ca T}
-  have ha: p ≠ T.a := by{
-    unfold not_on_perimiter tri_ab Lies_on Line_through at hp
-    simp at hp
-    contrapose hp
-    simp at hp
-    rw[hp]
-    have : colinear T.a T.b T.a := by{
-      apply colinear_self
-      tauto
-    }
-    tauto
-  }
-  have hb: p ≠ T.b := by{
-    unfold not_on_perimiter tri_ab Lies_on Line_through at hp
-    simp at hp
-    contrapose hp
-    simp at hp
-    rw[hp]
-    have : colinear T.a T.b T.b := by{
-      apply colinear_self
-      tauto
-    }
-    tauto
-  }
-  have hc: p ≠ T.c := by{
-    unfold not_on_perimiter tri_bc Lies_on Line_through at hp
-    simp at hp
-    contrapose hp
-    simp at hp
-    rw[hp]
-    have : colinear T.b T.c T.c := by{
-      apply colinear_self
-      tauto
-    }
-    tauto
-  }
-  by_cases hbc: Parallel (qLine_through T.a p) (tri_bc T)
-  · unfold tri_bc at hbc
-    nth_rw 1[sQuotL]
-    simp [*]
-    by_cases hca: Parallel (qLine_through T.b p) (tri_ca T)
-    · unfold tri_ca at hca
-      nth_rw 1[sQuotL]
-      simp [*]
-      unfold sQuotL
-      have hhp: p = reflection_point_point T.c (pmidpoint T.a T.b) := by{
-        symm at ha
-        symm at hb
-        simp [*] at *
-        have s0: ¬ Parallel (Line_through ha) (Line_through hb) := by{
-          by_contra h0
-          have par: Parallel (tri_bc T) (tri_ca T) := by{
-            unfold tri_bc tri_ca
-            have : Parallel (Line_through bc) (Line_through hb) := by{
-              apply parallel_symm at hbc
-              exact parallel_trans hbc h0
-            }
-            exact parallel_trans this hca
-          }
-          obtain u := tri_not_parallel_bc_ca T
-          contradiction
-        }
-        have s1: p = Intersection s0 := by{
-          apply intersection_unique
-          constructor
-          · exact line_through_mem_right ha
-          exact line_through_mem_right hb
-        }
-        rw[s1]
-        symm
-        apply intersection_unique
-        have t1: Line_through ha = parallel_through (tri_bc T) T.a := by{
-          apply parallel_through_unique
-          constructor
-          · exact line_through_mem_left ha
-          unfold tri_bc
-          apply parallel_symm
-          exact hbc
-        }
-        have t2: Line_through hb = parallel_through (tri_ca T) T.b := by{
-          apply parallel_through_unique
-          constructor
-          · exact line_through_mem_left hb
-          unfold tri_ca
-          apply parallel_symm
-          exact hca
-        }
-        rw[t1,t2]
-        clear t1 t2 s1 s0 hbc hca hp ha hb hc p
-        constructor
-        · have q1: reflection_point_point T.c (pmidpoint T.a T.b) ≠ T.a := by{
-            by_contra h0
-            unfold reflection_point_point pmidpoint pneg padd p_scal_mul at *
-            simp at h0
-            contrapose bc
-            obtain ⟨a,b,c,hh⟩ := T
-            simp at *
-            ext
-            have : ({ x := 2 * ((a.x + b.x) / 2) + -c.x } : Point).x = a.x := by{
-              rw[h0]
-            }
-            simp at this
-            field_simp at this
-            calc
-              b.x = -a.x + (a.x + b.x + -c.x) + c.x := by{ring}
-                _= -a.x + (a.x) + c.x := by{rw[this]}
-                _= c.x := by{ring}
-          }
-          suffices g : Parallel (Line_through q1) (tri_bc T)
-          · have : Line_through q1 = parallel_through (tri_bc T) T.a := by{
-            apply parallel_through_unique
-            constructor
-            · exact line_through_mem_right q1
-            apply parallel_symm
-            assumption
-            }
-            rw[← this]
-            apply line_through_mem_left
-          unfold tri_bc
-          refine (parallel_quot q1 (tri_bc.proof_1 T)).mpr ?g.a
-          unfold reflection_point_point pmidpoint p_scal_mul padd pneg
-          simp
-          suffices : ((2 * ((T.a.x + T.b.x) / 2) + -T.c.x - T.a.x) / (T.b.x - T.c.x)) = (1 : ℂ)
-          · rw[this]
-            simp
-          obtain u := sub_neq_zero bc
-          field_simp
-          ring
-        sorry
-      }
-      have g: ¬Parallel (qLine_through T.c p) (qLine_through T.a T.b) := by{
-        by_contra h0
-        obtain h'|h' := (parallel_def (qLine_through T.c p) (qLine_through T.a T.b)).1 h0
-        · suffices g: Lies_on (pmidpoint T.a T.b) (qLine_through T.c p) ∧ Lies_on (pmidpoint T.a T.b) (qLine_through T.a T.b)
-          have : (pmidpoint T.a T.b) ∈ ∅ := by{
-            rw[← h']
-            simp
-            unfold Lies_on at g
-            tauto
-          }
-          tauto
-
-          constructor
-          · simp [Ne.symm hc]
-            unfold Lies_on Line_through
-            simp
-            rw[hhp]
-            unfold pmidpoint reflection_point_point padd pneg p_scal_mul colinear det conj
-            simp
-            ring
-          simp [ab]
-          unfold Lies_on Line_through pmidpoint colinear det conj
-          simp
-          ring
-        have h'': qLine_through T.c p = qLine_through T.a T.b := by{
-          ext
-          rw[h']
-        }
-        simp [ab] at h''
-        have col: colinear T.a T.b p := by{
-          suffices: Lies_on p (Line_through ab)
-          · unfold Lies_on Line_through at this
-            simp at this
-            assumption
-          rw[← h'']
-          exact qline_through_mem_right T.c p
-        }
-        rw[hhp] at col
-        have col2 : colinear T.a T.b T.c := by{
-          unfold colinear at *
-          have : (0 : ℝ) = -0 := by{norm_num}
-          rw[this]
-          rw[← col]
-          unfold reflection_point_point pmidpoint padd pneg p_scal_mul det conj
-          simp
-          ring_nf
-          have : (starRingEnd ℂ) 2 = 2 := by{exact Complex.conj_eq_iff_re.mpr rfl}
-          rw[this]
-          field_simp
-          ring
-        }
-        have : noncolinear T.a T.b T.c := by{exact T.noncolinear}
-        unfold noncolinear at this
-        contradiction
-      }
-      simp [g]
-      have q: Intersection g = pmidpoint T.a T.b := by{
-        symm
-        apply intersection_unique
-        simp [ab, Ne.symm hc]
-        constructor
-        · unfold Lies_on Line_through
-          simp
-          rw[hhp]
-          unfold reflection_point_point pmidpoint padd pneg p_scal_mul colinear det conj
-          simp
-          ring
-        unfold pmidpoint Line_through Lies_on colinear det conj
-        simp
-        ring
-      }
-      rw[q]
-      unfold sQuot
-      simp [pmidpoint_in_between]
-      rw[point_abs_pmidpoint, point_abs_symm (pmidpoint T.a T.b), pmidpoint_symm, point_abs_pmidpoint, point_abs_symm]
-      have : point_abs T.b T.a ≠ 0 := by{
-        exact point_abs_neq_zero (id (Ne.symm ab))
-      }
-      field_simp
-    sorry
-  by_cases hca: Parallel (qLine_through T.b p) (tri_ca T)
-  · sorry
-  by_cases hab: Parallel (qLine_through T.c p) (tri_ab T)
-  · sorry
-
-  /-Now we finally get to the actually interesting part:-/
-
-
-  sorry
+  apply qnot_on_perimiter_points_not_on_perimiter at hp
+  obtain hp' := (qnot_on_perimiter_points_perm13 (qnot_on_perimiter_points_perm12 hp))
+  obtain hp'' := (qnot_on_perimiter_points_perm13 (qnot_on_perimiter_points_perm12 hp'))
+  rw[squotl_quot hp, squotl_quot hp', squotl_quot hp'']
+  field_simp [qnot_on_perimiter_points_imp_area_not_zero' hp, qnot_on_perimiter_points_imp_area_not_zero' hp', qnot_on_perimiter_points_imp_area_not_zero' hp'']
+  ring
 }

@@ -1328,3 +1328,62 @@ theorem parallel_through_unique (L R : Line)(a : Point)(h : Lies_on a R ∧ Para
   }
   rw[RS,PTS]
 }
+
+/-One occassionally useful fact about parallel line_through's is the following result:-/
+
+lemma parallel_line_through{a b c d : Point}(ab : a ≠ b)(cd : c ≠ d)(h: Parallel (Line_through ab) (Line_through cd)): ∃(t : ℝ), d = Point.mk (c.x + t*(a.x-b.x)) := by{
+  set s := padd c (pneg a)
+  have u: Line_through cd = shift_line (Line_through ab) s := by{
+    apply lines_eq_parallel_point c
+    · constructor
+      · exact line_through_mem_left cd
+      have hc: c = padd a s := by{
+        unfold s padd pneg
+        ext
+        simp
+      }
+      rw[hc]
+      refine mem_line_shift a s (Line_through ab) ?hp.right.h
+      exact line_through_mem_left ab
+    apply parallel_symm at h
+    apply parallel_trans h
+    unfold Parallel
+    use s
+  }
+  have col1: colinear a b (padd d (pneg s)) := by{
+    suffices: Lies_on (padd d (pneg s)) (Line_through ab)
+    · unfold Lies_on Line_through at this
+      simp at this
+      assumption
+    have g: Line_through ab = shift_line (Line_through cd) (pneg s) := by{
+      rw[u, shift_line_trans]
+      unfold padd pneg
+      simp
+      rw[shift_line_zero]
+    }
+    rw[g]
+    refine mem_line_shift d (pneg s) (Line_through cd) ?this.h
+    exact line_through_mem_right cd
+  }
+  apply colinear_perm13 at col1
+  apply colinear_perm12 at col1
+  obtain u|⟨r,hr⟩ := (colinear_alt2 b (padd d (pneg s)) a).1 col1
+  · tauto
+  have hd: d = Point.mk (b.x -r * (b.x-a.x) + s.x) := by{
+    unfold padd pneg at hr
+    simp at hr
+    ext
+    simp
+    calc
+      d.x = d.x + -s.x + s.x := by{ring}
+        _= b.x - ↑r * (b.x - a.x) + s.x := by{rw[hr]}
+        _= b.x - ↑r * (b.x - a.x) + s.x := by{ring}
+  }
+  rw[hd]
+  unfold s padd pneg
+  simp
+  use (r-1)
+  ring_nf
+  simp
+  ring
+}

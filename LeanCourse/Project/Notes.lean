@@ -45,3 +45,6 @@ That would make much more sense for a variety of reasons.-/
 
 
 --MAYBE REWRITE THE PROOF OF THALES MEM; IT IS VERY SUS
+
+
+--RANDAPPROX HAB ICH MICH AM 30. ANGEMELDET!!!!
