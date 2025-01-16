@@ -11,9 +11,27 @@ The required predicate will be called "CTangent" for "circle tangent" or somethi
 def Concentric(C O : CCircle) : Prop :=
   Center C = Center O
 
+/-This obviously is an equivalence relation:-/
+
+lemma concentric_refl(C : CCircle): Concentric C C := by{
+  unfold Concentric
+  tauto
+}
+
 lemma concentric_symm{C O : CCircle}(h : Concentric C O): Concentric O C := by{
   unfold Concentric at *
   tauto
+}
+
+lemma concentric_trans{C O U : CCircle}(CO: Concentric C O)(OU: Concentric O U): Concentric C U := by{
+  unfold Concentric at *
+  rw[CO, OU]
+}
+
+instance : Equivalence Concentric :={
+  refl := concentric_refl
+  symm := concentric_symm
+  trans := concentric_trans
 }
 
 lemma not_concentric_symm{C O : CCircle}(h : ¬Concentric C O): ¬Concentric O C := by{
