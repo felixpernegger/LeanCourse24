@@ -152,6 +152,14 @@ lemma dsimilar_trans{T Q R : Triangle}(TQ: dSimilar T Q)(QR: dSimilar Q R): dSim
   assumption
 }
 
+/-Therefore we conclude:-/
+
+instance : Equivalence dSimilar :={
+  refl := dsimilar_refl
+  symm := dsimilar_symm
+  trans := dsimilar_trans
+}
+
 /-As proven beofre we have same angles:-/
 theorem dsimilar_imp_same_angles{T Q : Triangle}(h : dSimilar T Q): Angle_A T = Angle_A Q ∧ Angle_B T = Angle_B Q ∧ Angle_C T = Angle_C Q := by{
   unfold dSimilar at h
@@ -1215,6 +1223,14 @@ lemma similar_trans{T Q R : Triangle}(TQ: Similar T Q)(QR: Similar Q R): Similar
     exact asimilar_dsimilar TQ QR
   left
   exact asimilar_asimilar TQ QR
+}
+
+/-Thus:-/
+
+instance : Equivalence Similar :={
+  refl := similar_refl
+  symm := similar_symm
+  trans := similar_trans
 }
 
 lemma similar_conj{T Q : Triangle}(h : Similar T Q): Similar (tri_conj T) (tri_conj Q) := by{

@@ -1237,6 +1237,17 @@ lemma parallel_trans {L R S : Line}(LR : Parallel L R)(RS : Parallel R S) : Para
   assumption
 }
 
+/-Therefore in short:-/
+
+instance : Equivalence Parallel :={
+  refl := parallel_refl
+  symm := by{
+    intro L R LR
+    exact parallel_symm L R LR
+  }
+  trans := parallel_trans
+}
+
 /-Note: I should probably redo this section a bit, define parallel_through first and then use it
 for weak_parallel_postulate. Else everyhting is quite redundant-/
 
