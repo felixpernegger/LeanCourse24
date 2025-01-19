@@ -1202,6 +1202,47 @@ theorem angle_reflection_line(a b c : Point)(L : Line): Angle a b c = Angle (ref
       }
 }
 
+/-While this probably isn't the perfect place, the same method implies that reflection across lines leaves points colinear: -/
+lemma reflection_point_line_colinear{a b c : Point}(L : Line)(h: colinear a b c): colinear (reflection_point_line a L) (reflection_point_line b L) (reflection_point_line c L) := by{
+  have col1: colinear (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) real_line) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) real_line) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) real_line) := by{
+    repeat
+      rw[reflection_point_line_real_line]
+    apply colinear_conj
+    apply linear_trans_point_colinear
+    apply colinear_perm13
+    assumption
+  }
+  have col2: colinear (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) c) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) b) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) (reflection_point_line (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) a) (Linear_trans_line (lt_norm_line1 L) (lt_norm_line2 L) L)) := by{
+    repeat
+      rw[lt_norm_line_real_line L]
+    assumption
+  }
+  repeat
+    rw[← linear_trans_reflection_point_line] at col2
+  contrapose col2
+  suffices: noncolinear (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line c L))
+    (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line b L))
+    (Linear_trans_point (lt_norm_line1 L) (lt_norm_line2 L) (reflection_point_line a L))
+  · unfold noncolinear at this
+    assumption
+  apply linear_trans_point_noncolinear
+  · exact lt_norm_line1_neq_zero L
+  apply noncolinear_perm13
+  unfold noncolinear
+  assumption
+
+  repeat
+    exact lt_norm_line1_neq_zero L
+}
+
+lemma reflection_point_line_noncolinear{a b c : Point}(L : Line)(h : noncolinear a b c): noncolinear (reflection_point_line a L) (reflection_point_line b L) (reflection_point_line c L) := by{
+  contrapose h
+  unfold noncolinear at *
+  simp at *
+  rw[← reflection_point_line_twice a L, ← reflection_point_line_twice b L, ← reflection_point_line_twice c L]
+  exact reflection_point_line_colinear L h
+}
+
 /-With this we are now able to prove isocoloes triangle (i.e. triangles for which two sides have same length) have
 same angles at their base.
 First a (more general) point version:
@@ -1293,3 +1334,8 @@ lemma angle_perp_points(a b c : Point)(bh: b ≠ a)(ch: c ≠ a): perp_points a 
 
 /-this is pretty much all (or at least most of) the "basic" stuff about angles.
 Later, more properties will be shown.-/
+
+/-The noncolinear refleciton we showed earlier makes it possible to reflect triangles across lines:-/
+
+def reflection_triangle_line: Triangle → Line → Triangle :=
+  fun T L ↦ Triangle.mk (reflection_point_line T.a L) (reflection_point_line T.b L) (reflection_point_line T.c L) (reflection_point_line_noncolinear L T.noncolinear)

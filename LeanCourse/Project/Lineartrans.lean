@@ -653,10 +653,3 @@ lemma lt_norm_line_inv_inv_line_right(L : Line)(R : Line): Linear_trans_line (lt
   unfold lt_norm_line_inv1 lt_norm_line_inv2
   exact linear_trans_line_inv_right (lt_norm_line1 L) (lt_norm_line2 L) (lt_norm_line1_neq_zero L) R
 }
-
---TO DO: PERP LINES STAY PERP, THEREFORE PERP THROUGH STAY THE SAME THEREFORE FOOTS STAY THE SAME
---THEREFORE REFLECTION STAY THE SAME
-
---THEN : THEORE EXISTS A B WITH A NOT ZERO (IMPORTANT) FOR ANY LINE, SUCH THAT L GETS SENT TO THE REAL LINE
-
---IN THE ANGLES SECTION THEN SHOW THAT ANGLES ARE PRESERVED UNDER LINEAR TRANS
