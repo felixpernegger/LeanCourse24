@@ -63,7 +63,13 @@ lemma center_lies_on_rot_line(a b : Point)(α : ℝ): Lies_on b (rot_line a b α
   exact qline_through_mem_left b (rot_point a b α)
 }
 
+/-
+
 /-With that, we now define the Angle bisector:-/
 
 def Angle_bisector : Point → Point → Point → Line :=
   fun a b c ↦ rot_line a b ((Angle a b c)/2)
+
+-/
+
+/-This remains unfinished for now.-/
