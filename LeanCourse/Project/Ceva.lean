@@ -833,11 +833,134 @@ lemma squotl_quot{p : Point}{a b c : Point}(np: qnot_on_perimiter_points p a b c
 
 /-Using this (techincally one direction of) Ceva theorem can be formulated as followed:-/
 
-theorem Ceva(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
+theorem Ceva_spec(T : Triangle)(p : Point)(hp: not_on_perimiter p T): (sQuotL (qLine_through T.a p) T.b T.c) * (sQuotL (qLine_through T.b p) T.c T.a) * (sQuotL (qLine_through T.c p) T.a T.b) = 1 := by{
   apply qnot_on_perimiter_points_not_on_perimiter at hp
   obtain hp' := (qnot_on_perimiter_points_perm13 (qnot_on_perimiter_points_perm12 hp))
   obtain hp'' := (qnot_on_perimiter_points_perm13 (qnot_on_perimiter_points_perm12 hp'))
   rw[squotl_quot hp, squotl_quot hp', squotl_quot hp'']
   field_simp [qnot_on_perimiter_points_imp_area_not_zero' hp, qnot_on_perimiter_points_imp_area_not_zero' hp', qnot_on_perimiter_points_imp_area_not_zero' hp'']
   ring
+}
+
+/-The converse of this - sort of - holds modulo an edge case. Meaning: Given three lines through the vertices, such that the sQuotL's multiply to one,
+then the lines are copunctal (minus edge case in non-projective geometry like we have here...)-/
+
+/-For this we first need injectivity of sQuot:-/
+
+/-For this, first note the following, postivity of squot:-/
+lemma squot_pos{a b c : Point}: 0 < sQuot a b c ↔ b ≠ a ∧ b ≠ c ∧ in_between a c b := by{
+  constructor
+  · intro h
+    unfold sQuot at h
+    constructor
+    · by_contra h0
+      have : in_between a c b := by{
+        rw[h0]
+        exact in_between_self_left a c
+      }
+      simp [this] at h
+      rw[h0, point_abs_self] at h
+      simp at h
+    constructor
+    · by_contra h0
+      have : in_between a c b := by{
+        rw[h0]
+        exact in_between_self_right a c
+      }
+      simp [this] at h
+      rw[h0, point_abs_self] at h
+      simp at h
+    by_contra h0
+    simp [h0] at h
+    by_cases bc: b = c
+    rw[bc, point_abs_self] at h
+    simp at h
+
+    have bcpos: 0 < point_abs b c := by{exact point_abs_neq bc}
+    field_simp [bcpos] at h
+    have : 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+    linarith
+  intro ⟨ba,bc,h⟩
+  unfold sQuot
+  simp [h]
+  rw[point_abs_symm a b]
+  simp [point_abs_neq ba, point_abs_neq bc]
+}
+
+/-Similarly, we get a result for negative sQuot, though due to our (rather inprecise) definition, we also need colinearity:-/
+lemma squot_neg{a b c : Point}(h: colinear a b c): sQuot a b c < 0 ↔ b ≠ a ∧ b ≠ c ∧ (in_between b c a ∨ in_between a b c) := by{
+  constructor
+  · intro h'
+    have ba: b ≠ a := by{
+      by_contra h0
+      unfold sQuot at h'
+      rw[h0] at h'
+      simp [in_between_self_left, point_abs_self] at h'
+    }
+    have bc: b ≠ c := by{
+      by_contra h0
+      unfold sQuot at h'
+      rw[h0] at h'
+      simp [in_between_self_left, point_abs_self] at h'
+    }
+    simp [*]
+    obtain u|u|u := colinear_imp_in_between2 a b c h
+    swap
+    tauto
+    tauto
+
+    exfalso
+    suffices: 0 < sQuot a b c
+    · linarith
+    apply squot_pos.2
+    simp [*]
+    apply in_between_symm
+    assumption
+  intro ⟨ba,bc,h'⟩
+  unfold sQuot
+  suffices: ¬in_between a c b
+  · simp [this]
+    rw[point_abs_symm a b]
+    refine div_neg_of_neg_of_pos ?mpr.ha ?mpr.hb
+    · simp [point_abs_neq ba]
+    simp [point_abs_neq bc]
+  sorry
+}
+
+/-A purely analytical lemma will help us finishing off:-/
+lemma t_div_r_sub_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ r)(ht': t' ≠ r)(h: t / (r - t) = t' / (r-t')): t = t' := by{
+  sorry
+}
+
+lemma squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(h: sQuot a p b = sQuot a q b): p = q := by{
+  unfold Lies_on Line_through at *
+  simp at *
+  sorry
+}
+
+/-Next we deal with a very annoying but unfortunately very important edge case. For this let's quickly define
+Cevians (= line going through a vertice of a Triangle). We don't allow Cevians to be the same as a triangle side,
+else sQuotL breaks (same happens in ordinary definitions, so this is a natural choice I think).-/
+
+/-Furthermore (similar with Angle_A) I use one deifnition per vertice. This could technically be avoided, but I mean come on...-/
+
+def Cevian_A(T : Triangle)(L : Line): Prop :=
+  Lies_on T.a L ∧ L ≠ tri_ab T ∧ L ≠ tri_ca T
+
+def Cevian_B(T : Triangle)(L : Line): Prop :=
+  Lies_on T.b L ∧ L ≠ tri_bc T ∧ L ≠ tri_ab T
+
+def Cevian_C(T : Triangle)(L : Line): Prop :=
+  Lies_on T.c L ∧ L ≠ tri_ca T ∧ L ≠ tri_bc T
+
+--here somewhere make a squotl_inj lemma !!!!!!!!!!!
+
+theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: Parallel L U)(UR: Parallel U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  sorry
+}
+
+/-With this we can now state and prove Ceva's theorem in its whole glory:-/
+
+theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  sorry
 }

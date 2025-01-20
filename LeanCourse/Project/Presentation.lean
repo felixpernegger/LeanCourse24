@@ -13,10 +13,34 @@ set_option linter.unusedTactic false
 
 #check det
 
-#check Line
+#check colinear_alt2
 
+#check Line
 
 
 /-The geometry/framework introduced lets us prove statements "naturally".-/
 /-For example, a triangle reflection across a line is similar to the original triangle:-/
-example(T: Triangle)(L : Line):
+example(T: Triangle)(L : Line): Similar (reflection_triangle_line T L) T := by{
+  sorry
+}
+
+#check Ceva
+
+/-
+example(T: Triangle)(L : Line): Similar (reflection_triangle_line T L) T := by{
+  unfold Similar
+  right
+  apply aaa_asimilar
+  unfold Angle_A reflection_triangle_line
+  simp
+  rw[← angle_reflection_line, angle_symm]
+
+  unfold Angle_B reflection_triangle_line
+  simp
+  rw[← angle_reflection_line, angle_symm]
+
+  unfold Angle_C reflection_triangle_line
+  simp
+  rw[← angle_reflection_line, angle_symm]
+}
+-/
