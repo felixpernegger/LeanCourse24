@@ -1742,10 +1742,29 @@ theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cev
   }
   have pa: p ≠ T.a := by{
     by_contra h0
-    sorry
+    suffices: U = tri_ab T
+    · unfold Cevian_B at hU
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · rw[← h0]
+      exact intersection_mem_right LU
+    unfold Cevian_B at hU
+    tauto
   }
   have pb: p ≠ T.b := by{
-    sorry
+    by_contra h0
+    suffices: L = tri_ab T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    rw[← h0]
+    exact intersection_mem_left LU
   }
   have hp: not_on_perimiter p T := by{
     unfold not_on_perimiter
@@ -1776,8 +1795,41 @@ theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cev
     · exact qline_through_mem_right p T.c
     constructor
     · by_contra h0
-      sorry
-    sorry
+      have : R' = L := by{
+        have l: L = Line_through pa := by{
+          unfold Cevian_A at hL
+          apply line_through_unique
+          simp [*]
+          exact intersection_mem_left LU
+        }
+        rw[l]
+        apply line_through_unique
+        constructor
+        · exact qline_through_mem_left p T.c
+        rw[h0]
+        exact tri_a_on_ca T
+      }
+      unfold Cevian_A at hL
+      rw[this] at h0
+      tauto
+    by_contra h0
+    have : R' = U := by{
+      have r: U = Line_through pb := by{
+        unfold Cevian_B at hU
+        apply line_through_unique
+        simp [*]
+        exact intersection_mem_right LU
+      }
+      rw[r]
+      apply line_through_unique
+      constructor
+      · exact qline_through_mem_left p T.c
+      rw[h0]
+      exact tri_b_on_bc T
+    }
+    unfold Cevian_B at hU
+    rw[this] at h0
+    tauto
   }
   have hL': L = Line_through pa := by{
     apply line_through_unique
