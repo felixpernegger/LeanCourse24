@@ -887,6 +887,45 @@ lemma squot_pos{a b c : Point}: 0 < sQuot a b c ↔ b ≠ a ∧ b ≠ c ∧ in_b
   simp [point_abs_neq ba, point_abs_neq bc]
 }
 
+/-One lemma which probably should have been stated earlier, but which is needed here, that
+- basically- if in_between a b c then ¬in_between b c a and so on:-/
+lemma in_between_imp_not_left{a b c : Point}(ab : a ≠ b)(ca: c ≠ a)(h: in_between a b c): ¬in_between b c a := by{
+  obtain col := in_between_imp_colinear h
+  obtain ⟨R,hR⟩ := colinear_go_along ab col
+  rw[hR] at h
+  obtain ⟨R1,R2⟩ := in_between_go_along ab h
+  by_contra h0
+  rw[hR] at h0
+  obtain R3 := in_between_go_along' ab h0
+  have g : R = 0 := by{
+    linarith
+  }
+  have goal: c = a := by{
+    rw[hR, g, go_along_zero]
+  }
+  contradiction
+}
+
+lemma in_between_imp_not_right{a b c : Point}(ab : a ≠ b)(bc: b ≠ c)(h: in_between a b c): ¬in_between c a b := by{
+  obtain col := in_between_imp_colinear h
+  obtain ⟨R,hR⟩ := colinear_go_along ab col
+  rw[hR] at h
+  obtain ⟨R1,R2⟩ := in_between_go_along ab h
+  by_contra h0
+  rw[hR] at h0
+  apply in_between_symm at h0
+  rw[go_along_symm] at h0
+  obtain R3 := in_between_go_along' (Ne.symm ab) h0
+  rw[point_abs_symm] at R3
+  have g : R = point_abs a b := by{
+    linarith
+  }
+  have goal: c = b := by{
+    rw[hR, g, go_along_point_abs]
+  }
+  tauto
+}
+
 /-Similarly, we get a result for negative sQuot, though due to our (rather inprecise) definition, we also need colinearity:-/
 lemma squot_neg{a b c : Point}(h: colinear a b c): sQuot a b c < 0 ↔ b ≠ a ∧ b ≠ c ∧ (in_between b c a ∨ in_between a b c) := by{
   constructor
@@ -924,19 +963,225 @@ lemma squot_neg{a b c : Point}(h: colinear a b c): sQuot a b c < 0 ↔ b ≠ a �
     refine div_neg_of_neg_of_pos ?mpr.ha ?mpr.hb
     · simp [point_abs_neq ba]
     simp [point_abs_neq bc]
-  sorry
+  obtain h'|h' := h'
+  · exact in_between_imp_not_right (Ne.symm bc) ba (in_between_symm h')
+  exact in_between_imp_not_left ba (Ne.symm bc) (in_between_symm h')
+}
+
+/-And its zero iff its a or b or a = b:-/
+lemma squot_zero{a b p : Point}: sQuot a p b = 0 ↔ p = a ∨ p = b := by{
+  unfold sQuot
+  by_cases u: in_between a b p
+  · simp [u]
+    constructor
+    · intro v
+      obtain v|v := v
+      · left
+        symm
+        exact abs_zero_imp_same a p v
+      right
+      exact abs_zero_imp_same p b v
+    intro h
+    obtain h|h|h := h
+    · rw[h, point_abs_self]
+      tauto
+    · rw[point_abs_self]
+      tauto
+  simp [u]
+  constructor
+  · intro h
+    obtain h|h := h
+    · left
+      symm
+      exact abs_zero_imp_same a p h
+    right
+    exact abs_zero_imp_same p b h
+  intro h
+  obtain h|h := h
+  · rw[h, point_abs_self]
+    tauto
+  rw[h, point_abs_self]
+  tauto
+}
+
+/-sQuotL is -1 iff the lines are parallel. One direction is in the definition, other one simple calculation:-/
+lemma squotl_neg_one{a b : Point}{L : Line}(ab : a ≠ b): sQuotL L a b = -1 ↔ Parallel (Line_through ab) L := by{
+  constructor
+  intro h
+  apply parallel_symm
+  by_contra h0
+  unfold sQuotL at h
+  simp [*] at h
+  have col: colinear a (Intersection h0) b := by{
+    suffices: Lies_on (Intersection h0) (Line_through ab)
+    · unfold Lies_on Line_through at this
+      simp at this
+      apply colinear_perm23
+      assumption
+    exact intersection_mem_right h0
+  }
+  have q: sQuot a (Intersection h0) b < 0 := by{linarith}
+  obtain ⟨ia,ib,u⟩ := (squot_neg col).1 q
+  set I := Intersection h0
+  have inb: ¬in_between a b I := by{
+    obtain u|u := u
+    · exact in_between_imp_not_right (Ne.symm ib) ia (in_between_symm u)
+    exact in_between_imp_not_left ia (Ne.symm ib) (in_between_symm u)
+  }
+  unfold sQuot at h
+  simp [*] at h
+  obtain t := point_abs_neq ib --for some reason i cant put this in field_simp directly?
+  field_simp at h
+  obtain u|u := u
+  · unfold in_between at u
+    suffices : a = b
+    · tauto
+    rw[← h] at u
+    rw[point_abs_symm I a] at u
+    simp at u
+    exact abs_zero_imp_same a b u
+  unfold in_between at u
+  rw[h, point_abs_symm I b] at u
+  simp at u
+  obtain g := (abs_zero_imp_same a b u)
+  tauto
+
+  intro h
+  unfold sQuotL
+  apply parallel_symm at h
+  simp [ab, h]
 }
 
 /-A purely analytical lemma will help us finishing off:-/
-lemma t_div_r_sub_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ r)(ht': t' ≠ r)(h: t / (r - t) = t' / (r-t')): t = t' := by{
+/-This could probably done by just using some fun prop (although we have an annoyance at t = r), but it is simple enough to prove directly:-/
+lemma t_div_r_sub_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ r)(ht': t' ≠ r)(h: t / (r - t) = t' / (r - t')): t = t' := by{
+  have rt_sub: r-t ≠ 0 := by{
+    contrapose ht
+    simp at *
+    linarith
+  }
+  have rt'_sub: r-t' ≠ 0 := by{
+    contrapose ht'
+    simp at *
+    linarith
+  }
+  field_simp [*] at h
+  suffices: t*r = t'*r
+  · field_simp at this
+    tauto
+  calc
+    t*r = t'*(r-t) + t*t' := by{rw[← h]; ring}
+      _= t'*r := by{ring}
+}
+
+lemma squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(pa: p ≠ a)(pb: p ≠ b)(qa: q ≠ a)(qb: q ≠ b)(h: sQuot a p b = sQuot a q b): p = q := by{
+  unfold Lies_on Line_through at *
+  simp at *
+  by_cases e0: sQuot a p b = 0
+  · apply squot_zero.1 at e0
+    tauto
+  by_cases l0: sQuot a p b < 0
+  · have inp: in_between p b a ∨ in_between a p b := by{
+      apply colinear_perm23 at hp
+      obtain u := (squot_neg hp).1 l0
+      tauto
+    }
+    have inq: in_between q b a ∨ in_between a q b := by{
+      apply colinear_perm23 at hq
+      rw[h] at l0
+      obtain u := (squot_neg hq).1 l0
+      tauto
+    }
+    have ninp: ¬in_between a b p := by{
+      sorry
+    }
+    have ninq: ¬in_between a b q := by{
+      sorry
+    }
+    unfold sQuot at h
+    simp [*] at h
+    sorry
   sorry
 }
 
-lemma squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(h: sQuot a p b = sQuot a q b): p = q := by{
-  unfold Lies_on Line_through at *
-  simp at *
-  sorry
+/-Similarly, we want sQuotL to be injective as well. Compared with squot_inj, there isn't a relatively
+obvious formulation for this. However following version will suffice:-/
+
+lemma squotl_inj{a b p : Point}{L R : Line}(ab : a ≠ b)(hp: ¬Lies_on p (Line_through ab))(hL: Lies_on p L)(hR: Lies_on p R)(h: sQuotL L a b = sQuotL R a b)(sL: sQuotL L a b ≠ 0)(sR: sQuotL R a b ≠ 0): L = R := by{
+  by_cases par: Parallel L (Line_through ab)
+  · apply lines_eq_parallel_point p
+    · tauto
+    apply parallel_trans par
+    apply (squotl_neg_one ab).1
+    rw[← h]
+    apply parallel_symm at par
+    exact (squotl_neg_one ab).2 par
+  have npar: ¬Parallel (Line_through ab) R := by{
+    contrapose par
+    simp at *
+    apply parallel_symm
+    apply (squotl_neg_one ab).1
+    rw[h]
+    exact (squotl_neg_one ab).2 par
+  }
+  unfold sQuotL at h
+  apply not_parallel_symm at npar
+  simp [*] at h
+  suffices: Intersection par = Intersection npar
+  · set I := Intersection par
+    have Ip : I ≠ p := by{
+      contrapose hp
+      simp at *
+      rw[← hp]
+      unfold I
+      exact intersection_mem_right par
+    }
+    calc
+      L = Line_through Ip := by{
+        apply line_through_unique
+        constructor
+        · unfold I
+          exact intersection_mem_left par
+        assumption
+      }
+        _= R := by{
+          symm
+          apply line_through_unique
+          constructor
+          · rw[this]
+            exact intersection_mem_left npar
+          assumption
+        }
+  apply squot_inj ab
+  · exact intersection_mem_right par
+  · exact intersection_mem_right npar
+  · contrapose sL
+    simp at *
+    unfold sQuotL
+    simp [ab, par]
+    apply squot_zero.2
+    tauto
+  · contrapose sL
+    simp at *
+    unfold sQuotL
+    simp [ab, par]
+    apply squot_zero.2
+    tauto
+  · contrapose sR
+    simp at *
+    unfold sQuotL
+    simp [ab, npar]
+    apply squot_zero.2
+    tauto
+  · contrapose sR
+    simp at *
+    unfold sQuotL
+    simp [ab, npar]
+    apply squot_zero.2
+    tauto
+  assumption
 }
+--also they cant intersect on a or b help
 
 /-Next we deal with a very annoying but unfortunately very important edge case. For this let's quickly define
 Cevians (= line going through a vertice of a Triangle). We don't allow Cevians to be the same as a triangle side,
@@ -953,7 +1198,8 @@ def Cevian_B(T : Triangle)(L : Line): Prop :=
 def Cevian_C(T : Triangle)(L : Line): Prop :=
   Lies_on T.c L ∧ L ≠ tri_ca T ∧ L ≠ tri_bc T
 
---here somewhere make a squotl_inj lemma !!!!!!!!!!!
+--this could be proven by first showing a "weak" converse for non parallel lines. This also could be reused later
+--for the main proof, so i am not actually doing extra work
 
 theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: Parallel L U)(UR: Parallel U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
   sorry
@@ -962,5 +1208,11 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
 
 theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  constructor
+  intro h
+  obtain h|h|h := h
+
+  sorry
+  sorry
   sorry
 }
