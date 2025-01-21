@@ -1386,61 +1386,35 @@ theorem squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))
     }
     field_simp at h
     rw[hR,hR']
-    have RR': R = -R' := by{
-      suffices: R*r = -R'*r
-      · have r0: 0 < r := by{
-          unfold r
-          exact abpos
-        }
-        calc
-          R = 1/r * (-R'*r) := by{rw[← this]; field_simp}
-            _= -R' := by{field_simp}
+    suffices: R = R'
+    · rw[this]
+    suffices: R*r = R'*r
+    · have r0: 0 < r := by{
+      unfold r
+      exact abpos
+      }
       calc
-        R*r = -(-(R' * (R - r))) - R*R' := by{rw[← h]; ring}
-          _= -R'*r := by{ring}
-    }
-    sorry
-    /-
-    suffices goal: 0 < -|R| / |point_abs a b - R|
-    · exfalso
-      have : -|R| / |point_abs a b - R| ≤ 0 := by{
-        have mh: 0 ≤ abs R := by{exact abs_nonneg R}
-        have nh: 0 ≤ abs (point_abs a b - R) := by{exact abs_nonneg (point_abs a b - R)}
-        set m := abs R
-        set n := abs (point_abs a b - R)
-        have : 0 ≤ m / n := by{exact div_nonneg mh nh}
-        have : -m / n = - (m/n) := by{
-          by_cases n0: n=0
-          · rw[n0]
-            simp
-          field_simp
-        }
-        rw[this]
-        linarith
-      }
-      have : -|R| / |point_abs a b - R| < 0 := by{
-        suffices: -|R| / |point_abs a b - R| ≠ 0
-        · contrapose this
-          simp at *
-          linarith
-        by_contra h0
-        simp [*] at h0
-        obtain h0|h0 := h0
-        · contrapose qa
-          simp
-          rw[hR', h0, go_along_zero]
-        have paR: R' = point_abs a b := by{linarith}
-        contrapose qb
-        simp
-        rw[hR', paR, go_along_point_abs]
-      }
-      linarith
-    have abssub : |point_abs a b - R| = - (point_abs a b - R) := by{
-      exact abs_of_neg diffneg
-    }
-    rw[abssub]
-    -/
+        R = 1/r * (R'*r) := by{rw[← this]; field_simp}
+          _= R' := by{field_simp}
+    calc
+      R*r = (-(R' * (R - r))) + R*R' := by{rw[← h]; ring}
+        _= R'*r := by{ring}
+    repeat
+      tauto
 
+
+    unfold sQuot at h
+    simp [*] at h
+    obtain ⟨R, hR⟩ := colinear_go_along ab hp
+    obtain ⟨R', hR'⟩ := colinear_go_along ab hq
+    suffices : R = R'
+    · rw[hR,hR',this]
+    rw[point_abs_symm p b, point_abs_symm q b, hR, hR', go_along_abs1, go_along_abs1, go_along_abs2, go_along_abs2] at h
+    rw[hR, go_along_symm] at inp
+    rw[hR', go_along_symm] at inq
+    obtain u :=  in_between_go_along' (Ne.symm ab) inq
+    obtain o :=  in_between_go_along' (Ne.symm ab) inp
+    rw[point_abs_symm b a] at u o
   sorry
 }
 
