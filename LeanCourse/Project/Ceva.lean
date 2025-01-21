@@ -1085,6 +1085,9 @@ lemma t_ad_r_dis_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ 0)(ht': t' ≠ 0)(h:
       _= r*t := by{ring}
 }
 
+
+/-Very importantly, sQuot is (sort of) injective:
+(Note: I got lost a bit in this proof, its rather ugly. So best to not look at the details...)-/
 theorem squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(pa: p ≠ a)(pb: p ≠ b)(qa: q ≠ a)(qb: q ≠ b)(h: sQuot a p b = sQuot a q b): p = q := by{
   unfold Lies_on Line_through at *
   simp at *
@@ -1294,9 +1297,149 @@ theorem squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))
       }
       exfalso
       linarith
-    suffices: -t' / (t' - r) < -1
-    · exfalso
+    by_cases t'r: 0 < t'-r
+    · suffices: -t' / (t' - r) < -1
+      exfalso
       linarith
+      set s := t'-r
+      suffices: -t' < -s
+      · have this': -1 = -s / s := by{field_simp}
+        rw[this']
+        simp
+        exact div_lt_div_of_pos_right this t'r
+      unfold s
+      simp
+      unfold r
+      exact point_abs_neq ab
+    have tr: 0 < t +r := by{
+        unfold t r
+        have hht: 0 < point_abs a p := by{
+          exact point_abs_neq fun a_1 ↦ pa (id (Eq.symm a_1))
+        }
+        have hhr: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+        linarith
+    }
+    field_simp at h
+    have tt': t' = -t := by{
+      have r0: r ≠ 0 := by{
+        unfold r
+        contrapose ab
+        simp at *
+        exact abs_zero_imp_same a b ab
+      }
+      suffices : t* -r = t' * r
+      · calc
+          t' = 1/r * (t'*r) := by{field_simp}
+            _= 1/r * (t * -r) := by{rw[← this]}
+            _= -t := by{field_simp}
+      calc
+        t* -r = t' * (t + r) - t*t' := by{rw[← h]; ring}
+          _= t'*r := by{ring}
+    }
+    unfold t t' at tt'
+    have t1: 0 < point_abs a q := by{exact point_abs_neq fun a_1 ↦ qa (id (Eq.symm a_1))}
+    have t2: 0 ≤ point_abs a p := by{exact point_abs_pos a p}
+    exfalso
+    linarith
+
+    obtain inq|inq := inq
+    unfold sQuot at h
+    simp [*] at h
+    obtain ⟨R, hR⟩ := colinear_go_along ab hp
+    obtain ⟨R', hR'⟩ := colinear_go_along ab hq
+    rw[point_abs_symm p b, point_abs_symm q b, hR, hR', go_along_abs1, go_along_abs1, go_along_abs2, go_along_abs2] at h
+    rw[hR] at inp
+    rw[hR'] at inq
+    apply in_between_symm at inq
+    obtain u :=  in_between_go_along' ab inq
+    rw[go_along_symm] at inp
+    obtain o := in_between_go_along' (Ne.symm ab) inp
+    rw[point_abs_symm] at o
+    have abpos: 0 < point_abs a b := by{
+      exact point_abs_neq ab
+    }
+    have Rpos: 0 < R := by{linarith}
+    have diffpos: 0 < point_abs a b - R' := by{linarith}
+    have diffneg: point_abs a b - R < 0 := by{
+      suffices: point_abs a b - R ≠ 0
+      · contrapose o
+        simp at *
+        contrapose this
+        simp at *
+        linarith
+      contrapose pb
+      simp at *
+      have : R = point_abs a b := by{linarith}
+      rw[hR, this, go_along_point_abs]
+    }
+    set r := point_abs a b
+    have aR: abs R = R := by{exact abs_of_pos Rpos}
+    have aR': abs R' = -R' := by{exact abs_of_nonpos u}
+    have arR: abs (r - R) = - (r-R) := by{exact abs_of_neg diffneg}
+    have arR': abs (r-R') = r-R' := by{exact abs_of_pos diffpos}
+    rw[aR, aR', arR, arR'] at h
+    field_simp at h
+    have Rrsub : R-r ≠ 0 := by{
+      contrapose diffneg
+      simp at *
+      linarith
+    }
+    field_simp at h
+    rw[hR,hR']
+    have RR': R = -R' := by{
+      suffices: R*r = -R'*r
+      · have r0: 0 < r := by{
+          unfold r
+          exact abpos
+        }
+        calc
+          R = 1/r * (-R'*r) := by{rw[← this]; field_simp}
+            _= -R' := by{field_simp}
+      calc
+        R*r = -(-(R' * (R - r))) - R*R' := by{rw[← h]; ring}
+          _= -R'*r := by{ring}
+    }
+    sorry
+    /-
+    suffices goal: 0 < -|R| / |point_abs a b - R|
+    · exfalso
+      have : -|R| / |point_abs a b - R| ≤ 0 := by{
+        have mh: 0 ≤ abs R := by{exact abs_nonneg R}
+        have nh: 0 ≤ abs (point_abs a b - R) := by{exact abs_nonneg (point_abs a b - R)}
+        set m := abs R
+        set n := abs (point_abs a b - R)
+        have : 0 ≤ m / n := by{exact div_nonneg mh nh}
+        have : -m / n = - (m/n) := by{
+          by_cases n0: n=0
+          · rw[n0]
+            simp
+          field_simp
+        }
+        rw[this]
+        linarith
+      }
+      have : -|R| / |point_abs a b - R| < 0 := by{
+        suffices: -|R| / |point_abs a b - R| ≠ 0
+        · contrapose this
+          simp at *
+          linarith
+        by_contra h0
+        simp [*] at h0
+        obtain h0|h0 := h0
+        · contrapose qa
+          simp
+          rw[hR', h0, go_along_zero]
+        have paR: R' = point_abs a b := by{linarith}
+        contrapose qb
+        simp
+        rw[hR', paR, go_along_point_abs]
+      }
+      linarith
+    have abssub : |point_abs a b - R| = - (point_abs a b - R) := by{
+      exact abs_of_neg diffneg
+    }
+    rw[abssub]
+    -/
 
   sorry
 }
