@@ -1415,6 +1415,67 @@ theorem squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))
     obtain u :=  in_between_go_along' (Ne.symm ab) inq
     obtain o :=  in_between_go_along' (Ne.symm ab) inp
     rw[point_abs_symm b a] at u o
+    set r := point_abs a b
+    have : 0 < r := by{
+      unfold r
+      exact point_abs_neq ab
+    }
+    have aR: abs R = R := by{
+      simp
+      linarith
+    }
+    have aR': abs R' = R' := by{
+      simp
+      linarith
+    }
+    have arR: abs (r - R) = -(r - R) := by{exact abs_of_nonpos o}
+    have arR': abs (r - R') = -(r - R') := by{exact abs_of_nonpos u}
+    have rR: R ≠ r := by{
+      contrapose pb
+      simp at *
+      rw[hR, pb]
+      unfold r
+      rw[go_along_point_abs]
+    }
+    have rR': R' ≠ r := by{
+      contrapose qb
+      simp at *
+      rw[hR', qb]
+      unfold r
+      rw[go_along_point_abs]
+    }
+    rw[aR,aR', arR, arR'] at h
+    have r0: r ≠ 0 := by{
+      exact point_abs_neq_zero ab
+    }
+    apply t_div_r_sub_t_inj r0 rR rR'
+    calc
+      R / (r - R) = -R' / -(r - R') := by{
+        rw[← h]
+        set s := r - R
+        by_cases s0: s=0
+        · rw[s0]
+          simp
+        field_simp
+      }
+            _= R' / (r-R') := by{
+              set s := r - R'
+              by_cases s0: s=0
+              · rw[s0]
+                simp
+              simp
+              }
+    repeat
+      tauto
+  have snn: 0 < sQuot a p b := by{
+    contrapose l0
+    simp at *
+    exact lt_of_le_of_ne l0 e0
+  }
+  have snn': 0 < sQuot a q b := by{rw[← h]; assumption}
+  obtain ⟨l, ll, hhp⟩ := squot_pos.1 snn
+  obtain ⟨lll, llll, hhq⟩ := squot_pos.1 snn'
+  clear l ll lll llll
   sorry
 }
 
