@@ -1074,7 +1074,18 @@ lemma t_div_r_sub_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ r)(ht': t' ≠ r)(h
       _= t'*r := by{ring}
 }
 
-lemma squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(pa: p ≠ a)(pb: p ≠ b)(qa: q ≠ a)(qb: q ≠ b)(h: sQuot a p b = sQuot a q b): p = q := by{
+/-And similarly:-/
+lemma t_ad_r_dis_t_inj{t t' r : ℝ}(hr: r ≠ 0)(ht: t ≠ 0)(ht': t' ≠ 0)(h: (t+r)/t = (t'+r)/t'): t = t' := by{
+  field_simp at h
+  suffices: r*t' = r*t
+  · field_simp at this
+    tauto
+  calc
+    r*t' = (t' + r) * t - t*t' := by{rw[← h];ring}
+      _= r*t := by{ring}
+}
+
+theorem squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(hq : Lies_on q (Line_through ab))(pa: p ≠ a)(pb: p ≠ b)(qa: q ≠ a)(qb: q ≠ b)(h: sQuot a p b = sQuot a q b): p = q := by{
   unfold Lies_on Line_through at *
   simp at *
   by_cases e0: sQuot a p b = 0
@@ -1093,14 +1104,200 @@ lemma squot_inj{a b p q: Point}(ab : a ≠ b)(hp: Lies_on p (Line_through ab))(h
       tauto
     }
     have ninp: ¬in_between a b p := by{
-      sorry
+      obtain inp|inp := inp
+      apply in_between_symm at inp
+      apply in_between_imp_not_right
+      · tauto
+      · assumption
+      assumption
+
+      apply in_between_imp_not_left
+      · assumption
+      · tauto
+      apply in_between_symm at inp
+      assumption
     }
     have ninq: ¬in_between a b q := by{
-      sorry
+      obtain inq|inq := inq
+      apply in_between_imp_not_right
+      tauto
+      tauto
+      apply in_between_symm at inq
+      assumption
+
+      apply in_between_imp_not_left
+      tauto
+      tauto
+      apply in_between_symm at inq
+      assumption
     }
+    obtain inp|inp := inp
+    obtain inq|inq := inq
+    have inp' := inp
+    have inq' := inq
     unfold sQuot at h
     simp [*] at h
-    sorry
+    unfold in_between at inq inp
+    rw[← inp, ← inq] at h
+    rw[point_abs_symm p a, point_abs_symm q a] at h
+    set t := point_abs a p
+    set t' := point_abs a q
+    set r' := point_abs a b
+    set r := - r'
+    have tr: t ≠ r := by{
+      suffices: r < t
+      · linarith
+      suffices : r < 0 ∧ 0 ≤ t
+      · linarith
+      constructor
+      · unfold r r'
+        simp
+        exact point_abs_neq ab
+      unfold t
+      exact point_abs_pos a p
+    }
+    have t'r: t' ≠ r := by{
+      suffices: r < t'
+      · linarith
+      suffices : r < 0 ∧ 0 ≤ t'
+      · linarith
+      constructor
+      · unfold r r'
+        simp
+        exact point_abs_neq ab
+      unfold t'
+      exact point_abs_pos a q
+    }
+    have hr: r ≠ 0 := by{
+      unfold r r'
+      simp
+      contrapose ab
+      simp at *
+      exact abs_zero_imp_same a b ab
+    }
+    have tt': t = t' := by{
+      apply t_div_r_sub_t_inj hr tr t'r
+      unfold r
+      calc
+        t / (-r' - t) =  -t' / (t' + r') := by{
+          rw[← h]
+          by_cases h0: r' = -t
+          · rw[h0]
+            simp
+          have s1: -r' - t ≠ 0 := by{
+            contrapose h0
+            simp at *
+            linarith
+          }
+          have s2: t + r' ≠ 0 := by{
+            contrapose h0
+            simp at *
+            linarith
+          }
+          field_simp
+          ring
+        }
+          _= t' / (-r' -t') := by{
+            by_cases h0: r' = -t'
+            · rw[h0]
+              simp
+            have s1: -r' - t' ≠ 0 := by{
+              contrapose h0
+              simp at *
+              linarith
+            }
+            have s2: t' + r' ≠ 0 := by{
+              contrapose h0
+              simp at *
+              linarith
+            }
+            field_simp
+            ring
+          }
+    }
+    clear h tr t'r hr
+    unfold t t' at tt'
+    clear t t'
+    unfold r' at inp inq
+    clear r r'
+    obtain ⟨R, hR⟩ := colinear_go_along ab hp
+    obtain ⟨R', hR'⟩ := colinear_go_along ab hq
+    suffices : R = R'
+    · rw[hR,hR',this]
+    rw[hR,hR', go_along_abs1, go_along_abs1] at tt'
+    have RR': R = R' ∨ R = -R' := by{
+      exact abs_eq_abs.mp tt'
+    }
+    obtain RR'|RR' := RR'
+    · tauto
+    rw[hR] at inp'
+    apply in_between_symm at inp'
+    obtain Rz := in_between_go_along' ab inp'
+    rw[hR'] at inq'
+    apply in_between_symm at inq'
+    obtain R'z := in_between_go_along' ab inq'
+    rw[RR'] at Rz
+    have : R' = 0 := by{
+      linarith
+    }
+    rw[this]
+    rw[this] at RR'
+    simp at RR'
+    rw[RR']
+    repeat
+      tauto
+
+
+    unfold sQuot at h
+    simp [*] at h
+    unfold in_between at inp inq
+    have hbq: point_abs b q = point_abs a q - point_abs a b := by{
+      linarith
+    }
+    rw[point_abs_symm b q] at hbq
+    rw[hbq, ← inp, point_abs_symm p a] at h
+    set t := point_abs a p
+    set t' := point_abs a q
+    set r := point_abs a b
+    have ht: -1 < -t / (t + r) := by{
+      have tr: 0 < t +r := by{
+        unfold t r
+        have hht: 0 < point_abs a p := by{
+          exact point_abs_neq fun a_1 ↦ pa (id (Eq.symm a_1))
+        }
+        have hhr: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+        linarith
+      }
+      suffices : -(t+r) < -t
+      · set s := t+r
+        have this': -1 = -s / s := by{field_simp}
+        rw[this']
+        exact div_lt_div_of_pos_right this tr
+      simp
+      unfold r
+      exact point_abs_neq ab
+    }
+    by_cases p0: t'-r = 0
+    · rw[p0] at h
+      simp at h
+      obtain h|h := h
+      · unfold t at h
+        have : a = p := by{exact abs_zero_imp_same a p h}
+        tauto
+      have tr: 0 < t +r := by{
+        unfold t r
+        have hht: 0 < point_abs a p := by{
+          exact point_abs_neq fun a_1 ↦ pa (id (Eq.symm a_1))
+        }
+        have hhr: 0 ≤ point_abs a b := by{exact point_abs_pos a b}
+        linarith
+      }
+      exfalso
+      linarith
+    suffices: -t' / (t' - r) < -1
+    · exfalso
+      linarith
+
   sorry
 }
 
