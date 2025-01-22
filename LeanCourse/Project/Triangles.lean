@@ -779,6 +779,22 @@ lemma in_between_go_along{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between a b
   tauto
 }
 
+/-Converse holds:-/
+lemma in_between_go_along_conv{a b : Point}{R : ℝ}(h: 0 ≤ R)(h': R ≤ point_abs a b): in_between a b (go_along a b R) := by{
+  unfold in_between
+  by_cases ab: a = b
+  · rw[ab, point_abs_self, go_along_self, point_abs_self, add_zero]
+  rw[go_along_abs1 ab, point_abs_symm, go_along_abs2 ab]
+  have aR: abs R = R := by{
+    simp [*]
+  }
+  have aRsub: abs (point_abs a b - R) = point_abs a b - R := by{
+    simp [*]
+  }
+  rw[aR, aRsub]
+  ring
+}
+
 lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b (go_along a b r) a) : r ≤ 0 := by{
   unfold in_between at h
   rw[go_along_abs1 ab, go_along_abs2 ab, point_abs_symm b a] at h
@@ -799,4 +815,22 @@ lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b 
     linarith
   }
   linarith
+}
+
+lemma in_between_go_along'_converse(a b : Point){r : ℝ}(h: r ≤ 0): in_between b (go_along a b r) a := by{
+  by_cases ab: a = b
+  · rw[ab]
+    apply in_between_self_left
+  unfold in_between
+  rw[point_abs_symm b a, go_along_abs1 ab, go_along_abs2 ab]
+  have ar: abs r = -r := by{simp [*]}
+  have arsub: abs (point_abs a b - r) = (point_abs a b - r) := by{
+    apply abs_of_nonneg
+    simp
+    calc
+      r ≤ 0 := by{assumption}
+        _≤ point_abs a b := by{exact point_abs_pos a b}
+  }
+  rw[ar, arsub]
+  ring
 }

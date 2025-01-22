@@ -1982,6 +1982,7 @@ lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Poi
     constructor
     · exact go_along_colinear a b (((t*(point_abs a b)))/(t+1))
     have s1: in_between a b (go_along a b (((t*(point_abs a b)))/(t+1))) := by{
+      #check in_between_go_along
       sorry
     }
     unfold sQuot
