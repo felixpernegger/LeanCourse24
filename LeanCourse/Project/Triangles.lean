@@ -817,7 +817,7 @@ lemma in_between_go_along'{a b : Point}{r : ℝ}(ab : a ≠ b)(h : in_between b 
   linarith
 }
 
-lemma in_between_go_along'_converse(a b : Point){r : ℝ}(h: r ≤ 0): in_between b (go_along a b r) a := by{
+lemma in_between_go_along'_conv(a b : Point){r : ℝ}(h: r ≤ 0): in_between b (go_along a b r) a := by{
   by_cases ab: a = b
   · rw[ab]
     apply in_between_self_left

@@ -2297,7 +2297,18 @@ lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Poi
     field_simp
     repeat
       tauto
-  sorry
+  by_cases ts: -1 < t
+  use go_along a b (t* (point_abs a b) / (t+1))
+  · constructor
+    · exact go_along_colinear a b (t * point_abs a b / (t + 1))
+    set d := point_abs a b
+    set r := (t * point_abs a b / (t + 1))
+    set p := (go_along a b r)
+    have inb: in_between b p a := by{
+      unfold p
+      #check in_between_go_along'_converse
+    }
+
 }
 
 /-Similarly, sQuotL is surjective for Cevians. We will only need the version for "C", so we don't bother
@@ -2471,7 +2482,7 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
 
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
 
-/-We have have more or less proved 3 out of 4 cases for this theorem, so the actualy proof doesn't become too compilcated now:-/
+/-We have have more or less proved 3 out of 4 cases for this theorem (and 4th case is basically free), so the actualy proof doesn't become too compilcated now:-/
 
 theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
   constructor
