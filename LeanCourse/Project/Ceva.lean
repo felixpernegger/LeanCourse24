@@ -1623,6 +1623,20 @@ lemma cevians_not_same_ab{T : Triangle}{L U : Line}(hL: Cevian_A T L)(hU: Cevian
   tauto
 }
 
+lemma cevians_not_same_ca{T : Triangle}{L R : Line}(hL: Cevian_A T L)(hR: Cevian_C T R): R ≠ L := by{
+  by_contra h0
+  rw[h0] at hR
+  unfold Cevian_A Cevian_C at *
+  obtain ⟨aL,abL,caL⟩ := hL
+  obtain ⟨cL, caL, bcL⟩ := hR
+  clear caL
+  contrapose caL
+  unfold tri_ca
+  simp
+  apply line_through_unique
+  tauto
+}
+
 /-Their respective sQuotL's are not zero:-/
 @[simp] lemma squotl_cevian_a_neq_zero{T : Triangle}{L : Line}(hL: Cevian_A T L): sQuotL L T.b T.c ≠ 0 := by{
   unfold sQuotL
@@ -1820,6 +1834,107 @@ lemma cevian_intersection_not_on_perimiter{T : Triangle}{L R : Line}(hL: Cevian_
     assumption
 }
 
+lemma cevian_intersection_not_on_perimiter'{T : Triangle}{L U : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(h: ¬Parallel L U): not_on_perimiter (Intersection h) T := by{
+  set p := Intersection h
+  have pa: p ≠ T.a := by{
+    by_contra h0
+    suffices: U = tri_ab T
+    · unfold Cevian_B at hU
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · rw[← h0]
+      exact intersection_mem_right h
+    unfold Cevian_B at hU
+    tauto
+  }
+  have pb: p ≠ T.b := by{
+    by_contra h0
+    suffices: L = tri_ab T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    rw[← h0]
+    exact intersection_mem_left h
+  }
+  unfold not_on_perimiter
+  by_contra h0
+  have h0': Lies_on p (tri_ab T) ∨ Lies_on p (tri_bc T) ∨ Lies_on p (tri_ca T) := by{tauto}
+  clear h0
+  obtain h0|h0|h0 := h0'
+  · suffices: L = tri_ab T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    have hL': L = Line_through pa := by{
+      apply line_through_unique
+      constructor
+      · exact intersection_mem_left h
+      unfold Cevian_A at hL
+      tauto
+    }
+    rw[hL']
+    unfold Lies_on Line_through
+    unfold Lies_on tri_ab Line_through at h0
+    simp at *
+    apply colinear_perm13
+    apply colinear_perm12
+    assumption
+  · suffices : U = tri_bc T
+    · unfold Cevian_B at hU
+      tauto
+    unfold tri_bc
+    apply line_through_unique
+    constructor
+    · unfold Cevian_B at hU
+      tauto
+    have hU': U = Line_through pb := by{
+      apply line_through_unique
+      constructor
+      · exact intersection_mem_right h
+      unfold Cevian_B at hU
+      tauto
+    }
+    rw[hU']
+    unfold Lies_on Line_through
+    unfold Lies_on tri_bc Line_through at h0
+    simp at *
+    apply colinear_perm13
+    apply colinear_perm12
+    assumption
+  · suffices : L = tri_ca T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ca
+    apply line_through_unique
+    constructor
+    swap
+    · unfold Cevian_A at hL
+      tauto
+    have hL': L = Line_through pa := by{
+      apply line_through_unique
+      constructor
+      · exact intersection_mem_left h
+      unfold Cevian_A at hL
+      tauto
+    }
+    rw[hL']
+    unfold Lies_on Line_through
+    unfold Lies_on tri_ca Line_through at h0
+    simp at *
+    apply colinear_perm13
+    assumption
+}
+
 theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LR: ¬Parallel L R)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): Copunctal L U R := by{
   apply copunctal_simp
   · unfold lines_not_same
@@ -1886,6 +2001,159 @@ theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cev
     exact T.noncolinear
   }
   set U' := qLine_through p T.b--t
+  have CU': Cevian_B T U' := by{
+    unfold Cevian_B
+    constructor
+    · exact qline_through_mem_right p T.b
+    constructor
+    swap
+    · by_contra h0
+      have : U' = L := by{
+        have l: L = Line_through pa := by{
+          unfold Cevian_A at hL
+          apply line_through_unique
+          simp [*]
+          exact intersection_mem_left LR
+        }
+        rw[l]
+        apply line_through_unique
+        constructor
+        · exact qline_through_mem_left p T.b
+        rw[h0]
+        exact tri_a_on_ab T
+      }
+      unfold Cevian_A at hL
+      rw[this] at h0
+      tauto
+    by_contra h0
+    have : U' = R := by{
+      have r: R = Line_through pc := by{
+        unfold Cevian_C at hR
+        apply line_through_unique
+        simp [*]
+        exact intersection_mem_right LR
+      }
+      rw[r]
+      apply line_through_unique
+      constructor
+      swap
+      · rw[h0]
+        exact tri_c_on_bc T
+      exact qline_through_mem_left p T.b
+    }
+    unfold Cevian_C at hR
+    rw[this] at h0
+    tauto
+  }
+  have hL': L = Line_through pa := by{
+    apply line_through_unique
+    constructor
+    · exact intersection_mem_left LR
+    unfold Cevian_A at hL
+    tauto
+  }
+  have hR': R = Line_through pc := by{
+    apply line_through_unique
+    constructor
+    · exact intersection_mem_right LR
+    unfold Cevian_C at hR
+    tauto
+  }
+  have hU': sQuotL L T.b T.c * sQuotL U' T.c T.a * sQuotL R T.a T.b = 1 := by{
+    rw[← ceva_spec T p hp, qline_through_symm T.c p, qline_through_symm T.a p]
+    simp [*]
+    rw[← hL', ← hR']
+    field_simp
+    unfold U'
+    rw[qline_through_symm]
+  }
+  apply squotl_inj (tri_diff_ca T) p1
+  · unfold Cevian_B at hU
+    tauto
+  · exact qline_through_mem_right p T.b
+  swap
+  · exact squotl_cevian_b_neq_zero hU
+  swap
+  · exact squotl_cevian_b_neq_zero CU'
+  calc
+    sQuotL U T.c T.a = 1/ (sQuotL L T.b T.c * sQuotL R T.a T.b) := by{
+      field_simp [squotl_cevian_a_neq_zero, squotl_cevian_b_neq_zero]
+      rw[← h]
+      ring
+    }
+      _= sQuotL (qLine_through p T.b) T.c T.a := by{
+        field_simp
+        rw[← hU']
+        unfold U'
+        rw[← qline_through_line_through]
+        ring
+      }
+}
+
+theorem ceva_spec_converse'{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: ¬Parallel L U)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): Copunctal L U R := by{
+  apply copunctal_simp
+  · unfold lines_not_same
+    left
+    exact cevians_not_same_ab hL hU
+  use Intersection LU
+  simp [*, intersection_mem_left, intersection_mem_right]
+  set p := Intersection LU
+  have pc : p ≠ T.c := by{
+    by_contra h0
+    suffices: L = tri_ca T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ca
+    apply line_through_unique
+    constructor
+    · rw[← h0]
+      unfold p
+      exact intersection_mem_left LU
+    unfold Cevian_A at hL
+    tauto
+  }
+  have pa: p ≠ T.a := by{
+    by_contra h0
+    suffices: U = tri_ab T
+    · unfold Cevian_B at hU
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · rw[← h0]
+      exact intersection_mem_right LU
+    unfold Cevian_B at hU
+    tauto
+  }
+  have pb: p ≠ T.b := by{
+    by_contra h0
+    suffices: L = tri_ab T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    rw[← h0]
+    exact intersection_mem_left LU
+  }
+  have hp: not_on_perimiter p T := by{
+    exact cevian_intersection_not_on_perimiter' hL hU LU
+  }
+  suffices: R = Line_through pc
+  · rw[this]
+    exact line_through_mem_left pc
+  rw[← qline_through_line_through]
+  have p1: ¬Lies_on T.c (Line_through (tri_diff_ab T)) := by{
+    unfold Lies_on Line_through
+    simp
+    suffices: noncolinear T.a T.b T.c
+    · unfold noncolinear at this
+      tauto
+    exact T.noncolinear
+  }
+  set R' := qLine_through p T.c
   have CR': Cevian_C T R' := by{
     unfold Cevian_C
     constructor
@@ -2167,26 +2435,6 @@ lemma squotl_surj_cevian_c(T : Triangle){t : ℝ}(ht: t ≠ 0): ∃(L : Line), C
 }
 
 theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: Parallel L U)(UR: Parallel U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
-  /-
-  have npR: ¬Parallel R (qLine_through T.a T.b) := by{
-    by_contra h0
-    suffices goal: Parallel U (tri_ab T)
-    · have : U = tri_ab T := by{
-        apply lines_eq_parallel_point_ex
-        · assumption
-        use T.b
-        constructor
-        · unfold Cevian_B at hU
-          tauto
-        exact tri_b_on_ab T
-      }
-      unfold Cevian_B at hU
-      tauto
-    unfold tri_ab
-    rw[← qline_through_line_through]
-    exact parallel_trans UR h0
-  }
-  -/
   have nezero: 1 / (sQuotL L T.b T.c * sQuotL U T.c T.a) ≠ 0 := by{
     simp [squotl_cevian_a_neq_zero hL, squotl_cevian_b_neq_zero hU]
   }
@@ -2205,8 +2453,20 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
     unfold Cevian_C at *
     tauto
   by_contra h0
-
-
+  have cop: Copunctal L U R' := by{
+    apply ceva_spec_converse hL hU hR' h0
+    rw[qhR']
+    field_simp
+  }
+  have LU': L = U := by{
+    apply lines_eq_parallel_point_ex LU
+    use Line_center cop
+    constructor
+    · exact line_center_on_line1 cop
+    exact line_center_on_line2 cop
+  }
+  contrapose LU'
+  exact cevians_not_same_ab hL hU
 }
 
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
@@ -2217,7 +2477,115 @@ theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR:
   constructor
   intro h
   obtain h|h := h
-  sorry
-  sorry
-  sorry
+  · set i := Line_center h
+    have ai: T.a ≠ i:= by{
+      by_contra h0
+      suffices: R = tri_ca T
+      · unfold Cevian_C at hR
+        tauto
+      unfold tri_ca
+      apply line_through_unique
+      constructor
+      · unfold Cevian_C at hR
+        tauto
+      unfold Cevian_C at hR
+      rw[h0]
+      exact line_center_on_line3 h
+    }
+    have bi: T.b ≠ i := by{
+      by_contra h0
+      suffices: L = tri_ab T
+      · unfold Cevian_A at hL
+        tauto
+      unfold tri_ab
+      apply line_through_unique
+      constructor
+      · unfold Cevian_A at hL
+        tauto
+      unfold Cevian_A at hL
+      rw[h0]
+      exact line_center_on_line1 h
+    }
+    have ci: T.c ≠ i := by{
+      by_contra h0
+      suffices: U = tri_bc T
+      · unfold Cevian_B at hU
+        tauto
+      unfold tri_bc
+      apply line_through_unique
+      constructor
+      · unfold Cevian_B at hU
+        tauto
+      unfold Cevian_B at hU
+      rw[h0]
+      exact line_center_on_line2 h
+    }
+    have hL': L =qLine_through T.a i := by{
+      simp [ai]
+      apply line_through_unique
+      constructor
+      · unfold Cevian_A at hL
+        tauto
+      exact line_center_on_line1 h
+    }
+    have hU': U = qLine_through T.b i := by{
+      simp [bi]
+      apply line_through_unique
+      constructor
+      · unfold Cevian_B at hU
+        tauto
+      exact line_center_on_line2 h
+    }
+    have hR': R = qLine_through T.c i := by{
+      simp [ci]
+      apply line_through_unique
+      constructor
+      · unfold Cevian_C at hR
+        tauto
+      exact line_center_on_line3 h
+    }
+    rw[hL', hU', hR']
+    apply ceva_spec T i
+    have LR: ¬ Parallel L R := by{
+      by_contra h0
+      suffices: L = R
+      · symm at this
+        contrapose this
+        exact cevians_not_same_ca hL hR
+      refine lines_eq_parallel_point_ex h0 ?this.a
+      use i
+      constructor
+      · exact line_center_on_line1 h
+      exact line_center_on_line3 h
+    }
+    have iLR: i = Intersection LR := by{
+      apply intersection_unique
+      constructor
+      · exact line_center_on_line1 h
+      exact line_center_on_line3 h
+    }
+    rw[iLR]
+    exact cevian_intersection_not_on_perimiter hL hR LR
+  · exact squotl_parallel hL hU hR h.1 h.2
+  intro h
+  by_cases LR: Parallel L R
+  swap
+  · left
+    exact ceva_spec_converse hL hU hR LR h
+  right
+  suffices: Parallel L U
+  · simp [*]
+    apply parallel_symm at this
+    exact parallel_trans this LR
+  by_contra LU
+  obtain cop := ceva_spec_converse' hL hU hR LU h
+  suffices : L = R
+  · symm at this
+    contrapose this
+    exact cevians_not_same_ca hL hR
+  apply lines_eq_parallel_point_ex LR
+  use (Line_center cop)
+  constructor
+  · exact line_center_on_line1 cop
+  exact line_center_on_line3 cop
 }
