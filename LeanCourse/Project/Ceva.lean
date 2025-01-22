@@ -1718,29 +1718,30 @@ lemma cevians_not_same_ab{T : Triangle}{L U : Line}(hL: Cevian_A T L)(hU: Cevian
 First we show (basically) the converse of ceva_spec, the we show that sQuot is surjective for fixed a, b with a ≠ b.-/
 
 /-Note that:-/
-lemma cevian_intersection_not_on_perimiter{T : Triangle}{L U : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(h: ¬Parallel L U): not_on_perimiter (Intersection h) T := by{
+lemma cevian_intersection_not_on_perimiter{T : Triangle}{L R : Line}(hL: Cevian_A T L)(hR: Cevian_C T R)(h: ¬Parallel L R): not_on_perimiter (Intersection h) T := by{
   set p := Intersection h
   have pa: p ≠ T.a := by{
     by_contra h0
-    suffices: U = tri_ab T
-    · unfold Cevian_B at hU
+    suffices: R = tri_ca T
+    · unfold Cevian_C at hR
       tauto
-    unfold tri_ab
+    unfold tri_ca
     apply line_through_unique
     constructor
-    · rw[← h0]
-      exact intersection_mem_right h
-    unfold Cevian_B at hU
-    tauto
+    · unfold Cevian_C at hR
+      tauto
+    rw[← h0]
+    exact intersection_mem_right h
   }
-  have pb: p ≠ T.b := by{
+  have pc: p ≠ T.c := by{
     by_contra h0
-    suffices: L = tri_ab T
+    suffices: L = tri_ca T
     · unfold Cevian_A at hL
       tauto
-    unfold tri_ab
+    unfold tri_ca
     apply line_through_unique
     constructor
+    swap
     · unfold Cevian_A at hL
       tauto
     rw[← h0]
@@ -1773,19 +1774,20 @@ lemma cevian_intersection_not_on_perimiter{T : Triangle}{L U : Line}(hL: Cevian_
     apply colinear_perm13
     apply colinear_perm12
     assumption
-  · suffices : U = tri_bc T
-    · unfold Cevian_B at hU
+  · suffices : R = tri_bc T
+    · unfold Cevian_C at hR
       tauto
     unfold tri_bc
     apply line_through_unique
     constructor
-    · unfold Cevian_B at hU
+    swap
+    · unfold Cevian_C at hR
       tauto
-    have hU': U = Line_through pb := by{
+    have hU': R = Line_through pc := by{
       apply line_through_unique
       constructor
       · exact intersection_mem_right h
-      unfold Cevian_B at hU
+      unfold Cevian_C at hR
       tauto
     }
     rw[hU']
@@ -1793,7 +1795,6 @@ lemma cevian_intersection_not_on_perimiter{T : Triangle}{L U : Line}(hL: Cevian_
     unfold Lies_on tri_bc Line_through at h0
     simp at *
     apply colinear_perm13
-    apply colinear_perm12
     assumption
   · suffices : L = tri_ca T
     · unfold Cevian_A at hL
@@ -1819,14 +1820,14 @@ lemma cevian_intersection_not_on_perimiter{T : Triangle}{L U : Line}(hL: Cevian_
     assumption
 }
 
-theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: ¬Parallel L U)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): Copunctal L U R := by{
+theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LR: ¬Parallel L R)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): Copunctal L U R := by{
   apply copunctal_simp
   · unfold lines_not_same
     left
     exact cevians_not_same_ab hL hU
-  use Intersection LU
+  use Intersection LR
   simp [*, intersection_mem_left, intersection_mem_right]
-  set p := Intersection LU
+  set p := Intersection LR
   have pc : p ≠ T.c := by{
     by_contra h0
     suffices: L = tri_ca T
@@ -1837,22 +1838,22 @@ theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cev
     constructor
     · rw[← h0]
       unfold p
-      exact intersection_mem_left LU
+      exact intersection_mem_left LR
     unfold Cevian_A at hL
     tauto
   }
   have pa: p ≠ T.a := by{
     by_contra h0
-    suffices: U = tri_ab T
-    · unfold Cevian_B at hU
+    suffices: R = tri_ca T
+    · unfold Cevian_C at hR
       tauto
-    unfold tri_ab
+    unfold tri_ca
     apply line_through_unique
     constructor
-    · rw[← h0]
-      exact intersection_mem_right LU
-    unfold Cevian_B at hU
-    tauto
+    · unfold Cevian_C at hR
+      tauto
+    rw[← h0]
+    exact intersection_mem_right LR
   }
   have pb: p ≠ T.b := by{
     by_contra h0
@@ -1865,24 +1866,26 @@ theorem ceva_spec_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cev
     · unfold Cevian_A at hL
       tauto
     rw[← h0]
-    exact intersection_mem_left LU
+    exact intersection_mem_left LR
   }
   have hp: not_on_perimiter p T := by{
-    exact cevian_intersection_not_on_perimiter hL hU LU
+    exact cevian_intersection_not_on_perimiter hL hR LR
   }
-  suffices: R = Line_through pc
+  suffices: U = Line_through pb
   · rw[this]
-    exact line_through_mem_left pc
+    exact line_through_mem_left pb
   rw[← qline_through_line_through]
-  have p1: ¬Lies_on T.c (Line_through (tri_diff_ab T)) := by{
+  have p1: ¬Lies_on T.b (Line_through (tri_diff_ca T)) := by{
     unfold Lies_on Line_through
     simp
     suffices: noncolinear T.a T.b T.c
-    · unfold noncolinear at this
-      tauto
+    · apply noncolinear_perm13 at this
+      apply noncolinear_perm23 at this
+      unfold noncolinear at this
+      assumption
     exact T.noncolinear
   }
-  set R' := qLine_through p T.c
+  set U' := qLine_through p T.b--t
   have CR': Cevian_C T R' := by{
     unfold Cevian_C
     constructor
@@ -2031,7 +2034,7 @@ lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Poi
 
 /-Similarly, sQuotL is surjective for Cevians. We will only need the version for "C", so we don't bother
 doing anything further:-/
-lemma squotl_surj_cevian_c{T : Triangle}{t : ℝ}(ht: t ≠ 0): ∃(L : Line), Cevian_C T L ∧ sQuotL L T.a T.b = t := by{
+lemma squotl_surj_cevian_c(T : Triangle){t : ℝ}(ht: t ≠ 0): ∃(L : Line), Cevian_C T L ∧ sQuotL L T.a T.b = t := by{
   by_cases negone: t = -1
   · use parallel_through (tri_ab T) T.c
     constructor
@@ -2164,6 +2167,7 @@ lemma squotl_surj_cevian_c{T : Triangle}{t : ℝ}(ht: t ≠ 0): ∃(L : Line), C
 }
 
 theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: Parallel L U)(UR: Parallel U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  /-
   have npR: ¬Parallel R (qLine_through T.a T.b) := by{
     by_contra h0
     suffices goal: Parallel U (tri_ab T)
@@ -2182,8 +2186,27 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
     rw[← qline_through_line_through]
     exact parallel_trans UR h0
   }
+  -/
+  have nezero: 1 / (sQuotL L T.b T.c * sQuotL U T.c T.a) ≠ 0 := by{
+    simp [squotl_cevian_a_neq_zero hL, squotl_cevian_b_neq_zero hU]
+  }
+  obtain ⟨R',hR', qhR'⟩ := squotl_surj_cevian_c T nezero
+  suffices goal: R = R'
+  · rw[← goal] at qhR'
+    rw[qhR']
+    field_simp
+  suffices goal': Parallel L R'
+  · have par: Parallel R R' := by{
+      have par': Parallel L R := by{exact parallel_trans LU UR}
+      apply parallel_symm at par'
+      exact parallel_trans par' goal'
+    }
+    refine lines_eq_parallel_point T.c ?goal.hp par
+    unfold Cevian_C at *
+    tauto
+  by_contra h0
 
-  sorry
+
 }
 
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
@@ -2194,7 +2217,6 @@ theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR:
   constructor
   intro h
   obtain h|h := h
-
   sorry
   sorry
   sorry
