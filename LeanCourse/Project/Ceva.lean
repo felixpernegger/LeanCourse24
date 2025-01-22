@@ -2302,13 +2302,173 @@ lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Poi
   · constructor
     · exact go_along_colinear a b (t * point_abs a b / (t + 1))
     set d := point_abs a b
-    set r := (t * point_abs a b / (t + 1))
+    have dpos: 0 < d := by{exact point_abs_neq ab}
+    set r := (t * d / (t + 1))
+    have hr : r < 0 := by{
+      have tm: t < 0 := by{
+        simp at tpos
+        contrapose t0
+        simp at *
+        linarith
+      }
+      unfold r
+      have t1pos: 0 < t+1 := by{linarith}
+      refine div_neg_of_neg_of_pos ?ha t1pos
+      nlinarith
+    }
+    have rd : r < d := by{
+      exact gt_trans dpos hr
+    }
     set p := (go_along a b r)
     have inb: in_between b p a := by{
       unfold p
-      #check in_between_go_along'_converse
+      apply in_between_go_along'_conv
+      linarith
     }
-
+    have ap: a ≠ p := by{
+      by_contra ap
+      suffices: r = 0
+      · linarith
+      obtain as := point_abs_self a
+      rw[← point_abs_self a] at as
+      nth_rw 2[ap] at as
+      unfold p at as
+      rw[go_along_abs1 ab] at as
+      rw[point_abs_self] at as
+      simp at as
+      assumption
+    }
+    have bp: b ≠ p := by{
+      by_contra bp
+      suffices: r = d
+      · linarith
+      obtain bs := point_abs_self b
+      rw[← point_abs_self a] at bs
+      nth_rw 2[bp] at bs
+      unfold p at bs
+      rw[go_along_abs2 ab] at bs
+      rw[point_abs_self] at bs
+      simp at bs
+      unfold d
+      linarith
+    }
+    unfold sQuot
+    have ni: ¬in_between a b p := by{
+      exact in_between_imp_not_right bp (Ne.symm ap) inb
+    }
+    simp [ni]
+    have abs_pb : 0 < point_abs p b := by{
+      exact point_abs_neq (id (Ne.symm bp))
+    }
+    field_simp
+    rw[point_abs_symm p b]
+    unfold p
+    rw[go_along_abs1 ab, go_along_abs2 ab]
+    have ar: abs r = -r := by{
+      simp [*]
+      linarith
+    }
+    have aabsr: abs (point_abs a b - r) = (point_abs a b - r) := by{
+      set s := point_abs a b - r
+      simp
+      unfold s
+      linarith
+    }
+    rw[ar, aabsr]
+    simp
+    unfold r
+    have t1pos: 0 < t+1 := by{linarith}
+    field_simp
+    left
+    unfold d
+    ring
+  use go_along a b (((t*(point_abs a b)))/(t+1))
+  constructor
+  · exact go_along_colinear a b (((t*(point_abs a b)))/(t+1))
+  have t1neg : t + 1 < 0 := by{
+    contrapose ht
+    simp at *
+    linarith
+  }
+  have tneg: t < 0 := by{linarith}
+  set d := point_abs a b
+  have dpos: 0 < d := by{exact point_abs_neq ab}
+  set r := (t*d)/(t+1)
+  have rd: d < r := by{
+    unfold r
+    suffices: (t+1)*(t * d / (t + 1)) <(t+1)* d
+    · exact (mul_lt_mul_left_of_neg t1neg).mp this
+    field_simp
+    have : (t + 1) * (t * d) / (t + 1) = t*d := by{
+      set u := t+1
+      have un: u ≠ 0 := by{linarith}
+      field_simp
+    }
+    rw[this]
+    nlinarith
+  }
+  have rpos : 0 < r := by{linarith}
+  set p := go_along a b r
+  have ap: a ≠ p := by{
+    by_contra ap
+    suffices: r = 0
+    · linarith
+    obtain as := point_abs_self a
+    rw[← point_abs_self a] at as
+    nth_rw 2[ap] at as
+    unfold p at as
+    rw[go_along_abs1 ab] at as
+    rw[point_abs_self] at as
+    simp at as
+    assumption
+  }
+  have bp: b ≠ p := by{
+    by_contra bp
+    suffices: r = d
+    · linarith
+    obtain bs := point_abs_self b
+    rw[← point_abs_self a] at bs
+    nth_rw 2[bp] at bs
+    unfold p at bs
+    rw[go_along_abs2 ab] at bs
+    rw[point_abs_self] at bs
+    simp at bs
+    unfold d
+    linarith
+  }
+  have inb: in_between a p b := by{
+    unfold p
+    rw[go_along_symm]
+    apply in_between_go_along'_conv
+    rw[point_abs_symm]
+    unfold d at rd
+    linarith
+  }
+  unfold sQuot
+  apply in_between_symm at inb
+  have ninb : ¬in_between a b p := by{exact in_between_imp_not_left (Ne.symm ap) bp inb}
+  simp [ninb]
+  rw[point_abs_symm p b]
+  have bp_abs: 0 < point_abs b p := by{exact point_abs_neq bp}
+  field_simp
+  unfold p
+  rw[go_along_abs1 ab, go_along_abs2 ab]
+  have ar: abs r = r := by{
+    simp [*]
+    linarith
+  }
+  have aabsr: abs (point_abs a b - r) = -(point_abs a b - r) := by{
+    set s := point_abs a b - r
+    simp
+    unfold s
+    linarith
+  }
+  rw[ar, aabsr]
+  unfold r
+  have nt1: t+1 ≠ 0 := by{linarith}
+  field_simp
+  unfold d
+  ring
 }
 
 /-Similarly, sQuotL is surjective for Cevians. We will only need the version for "C", so we don't bother
