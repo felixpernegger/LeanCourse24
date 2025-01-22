@@ -2023,14 +2023,75 @@ lemma squotl_surj_cevian_c{T : Triangle}{t : ℝ}(ht: t ≠ 0): ∃(L : Line), C
     simp [*]
   obtain ab := tri_diff_ab T
   obtain ⟨p, hp,hpt⟩ := squot_surj negone ab
+  have pa: p ≠ T.a := by{
+    contrapose ht
+    simp at *
+    rw[← hpt]
+    refine squot_zero.mpr ?_
+    tauto
+  }
+  have pb: p ≠ T.b := by{
+    contrapose ht
+    simp at *
+    rw[← hpt]
+    refine squot_zero.mpr ?_
+    tauto
+  }
+  have pc: p ≠ T.c := by{
+    by_contra h0
+    have : noncolinear T.a T.b p := by{
+      rw[h0]
+      exact T.noncolinear
+    }
+    unfold noncolinear at this
+    tauto
+  }
+  have lp: Lies_on p (tri_ab T) := by{
+    unfold tri_ab Line_through Lies_on
+    assumption
+  }
   use qLine_through p T.c
   constructor
   · unfold Cevian_C
     constructor
     · exact qline_through_mem_right p T.c
     constructor
-    · sorry
-    sorry
+    · by_contra h0
+      suffices : p = T.a
+      · contradiction
+      calc
+        p = Intersection (tri_not_parallel_ab_ca T) := by{
+          apply intersection_unique
+          constructor
+          · assumption
+          rw[← h0]
+          exact qline_through_mem_left p T.c
+        }
+          _= T.a := by{
+            symm
+            apply intersection_unique
+            constructor
+            · exact tri_a_on_ab T
+            exact tri_a_on_ca T
+          }
+    by_contra h0
+    suffices : p = T.b
+    · contradiction
+    calc
+        p = Intersection (tri_not_parallel_ab_bc T) := by{
+          apply intersection_unique
+          constructor
+          · assumption
+          rw[← h0]
+          exact qline_through_mem_left p T.c
+        }
+          _= T.b := by{
+            symm
+            apply intersection_unique
+            constructor
+            · exact tri_b_on_ab T
+            exact tri_b_on_bc T
+          }
   unfold sQuotL
   have g: ¬Parallel (qLine_through p T.c) (qLine_through T.a T.b) := by{
     by_contra h0
@@ -2094,7 +2155,7 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
 theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
   constructor
   intro h
-  obtain h|h|h := h
+  obtain h|h := h
 
   sorry
   sorry
