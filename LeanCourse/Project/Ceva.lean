@@ -2002,8 +2002,19 @@ lemma squotl_surj_cevian_c{T : Triangle}{t : ℝ}(ht: t ≠ 0): ∃(L : Line), C
       · exact point_lies_on_parallel_through (tri_ab T) T.c
       constructor
       · by_contra h0
-        sorry
-      sorry
+        have par: Parallel (tri_ab T) (tri_ca T) := by{
+          rw[← h0]
+          exact parallel_through_is_parallel (tri_ab T) T.c
+        }
+        obtain := tri_not_parallel_ab_ca T
+        contradiction
+      by_contra h0
+      have par: Parallel (tri_ab T) (tri_bc T) := by{
+        rw[← h0]
+        exact parallel_through_is_parallel (tri_ab T) T.c
+      }
+      obtain := tri_not_parallel_ab_bc T
+      contradiction
     unfold sQuotL
     obtain u := parallel_through_is_parallel (tri_ab T) T.c
     apply parallel_symm at u
@@ -2013,7 +2024,44 @@ lemma squotl_surj_cevian_c{T : Triangle}{t : ℝ}(ht: t ≠ 0): ∃(L : Line), C
   obtain ab := tri_diff_ab T
   obtain ⟨p, hp,hpt⟩ := squot_surj negone ab
   use qLine_through p T.c
-  sorry
+  constructor
+  · unfold Cevian_C
+    constructor
+    · exact qline_through_mem_right p T.c
+    constructor
+    · sorry
+    sorry
+  unfold sQuotL
+  have g: ¬Parallel (qLine_through p T.c) (qLine_through T.a T.b) := by{
+    by_contra h0
+    suffices goal : (qLine_through p T.c) = (qLine_through T.a T.b)
+    · have : Lies_on T.c (tri_ab T) := by{
+        unfold tri_ab
+        rw[← qline_through_line_through, ← goal]
+        exact qline_through_mem_right p T.c
+      }
+      contrapose this
+      exact tri_c_not_on_ab T
+    refine lines_eq_parallel_point_ex h0 ?goal.a
+    use p
+    constructor
+    · exact qline_through_mem_left p T.c
+    simp [ab]
+    unfold Lies_on Line_through
+    simp
+    assumption
+  }
+  simp [g]
+  have hp' : p = Intersection g := by{
+    apply intersection_unique
+    constructor
+    · exact qline_through_mem_left p T.c
+    simp [ab]
+    unfold Lies_on Line_through
+    simp
+    assumption
+  }
+  rw[← hp', hpt]
 }
 
 theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LU: Parallel L U)(UR: Parallel U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
