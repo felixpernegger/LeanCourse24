@@ -1982,8 +1982,20 @@ lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Poi
     constructor
     · exact go_along_colinear a b (((t*(point_abs a b)))/(t+1))
     have s1: in_between a b (go_along a b (((t*(point_abs a b)))/(t+1))) := by{
-      #check in_between_go_along
-      sorry
+      apply in_between_go_along_conv
+      · have : 0 ≤ t+1 := by{linarith}
+        have this': 0 ≤ t * point_abs a b := by{
+          field_simp
+          exact point_abs_pos a b
+        }
+        exact div_nonneg this' this
+      have : 0 ≤ t+1 := by{linarith}
+      obtain hd := point_abs_neq ab
+      set d := point_abs a b
+      refine (div_le_comm₀ ?h'.hb ?h'.hc).mp ?h'.a
+      · assumption
+      · linarith
+      field_simp
     }
     unfold sQuot
     rw[go_along_abs1, point_abs_symm (go_along a b (t * point_abs a b / (t + 1))), go_along_abs2]
