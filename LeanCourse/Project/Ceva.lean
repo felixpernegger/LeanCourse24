@@ -2733,6 +2733,8 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
   exact cevians_not_same_ab hL hU
 }
 
+/-The only missing case for final theorem is the converse of the special case: The proof is quite nice I think--/
+
 theorem squotl_parallel_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LR: Parallel L R)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): (Parallel L U) ∧ (Parallel U R) := by{
   suffices: Parallel L U
   · simp [*]
@@ -2752,8 +2754,6 @@ theorem squotl_parallel_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(h
 }
 
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
-
-/-We have have more or less proved 3 out of 4 cases for this theorem (and 4th case is basically free), so the actualy proof doesn't become too compilcated now:-/
 
 theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
   constructor
