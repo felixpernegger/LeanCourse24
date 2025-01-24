@@ -2755,7 +2755,7 @@ theorem squotl_parallel_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(h
 
 /-With this we can now state and prove Ceva's theorem in its whole glory:-/
 
-theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+theorem ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
   constructor
   intro h
   obtain h|h := h
