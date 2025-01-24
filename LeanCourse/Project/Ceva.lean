@@ -2241,6 +2241,99 @@ theorem ceva_spec_converse'{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Ce
       }
 }
 
+/-Also a version of ceva_spec relying more on lines then points (should pretty obviously equivalent to ceva_spec for a human though):-/
+theorem ceva_spec'{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(h: Copunctal L U R): sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  set i := Line_center h
+  have ai: T.a ≠ i:= by{
+    by_contra h0
+    suffices: R = tri_ca T
+    · unfold Cevian_C at hR
+      tauto
+    unfold tri_ca
+    apply line_through_unique
+    constructor
+    · unfold Cevian_C at hR
+      tauto
+    unfold Cevian_C at hR
+    rw[h0]
+    exact line_center_on_line3 h
+  }
+  have bi: T.b ≠ i := by{
+    by_contra h0
+    suffices: L = tri_ab T
+    · unfold Cevian_A at hL
+      tauto
+    unfold tri_ab
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    unfold Cevian_A at hL
+    rw[h0]
+    exact line_center_on_line1 h
+  }
+  have ci: T.c ≠ i := by{
+    by_contra h0
+    suffices: U = tri_bc T
+    · unfold Cevian_B at hU
+      tauto
+    unfold tri_bc
+    apply line_through_unique
+    constructor
+    · unfold Cevian_B at hU
+      tauto
+    unfold Cevian_B at hU
+    rw[h0]
+    exact line_center_on_line2 h
+  }
+  have hL': L = qLine_through T.a i := by{
+    simp [ai]
+    apply line_through_unique
+    constructor
+    · unfold Cevian_A at hL
+      tauto
+    exact line_center_on_line1 h
+  }
+  have hU': U = qLine_through T.b i := by{
+    simp [bi]
+    apply line_through_unique
+    constructor
+    · unfold Cevian_B at hU
+      tauto
+    exact line_center_on_line2 h
+  }
+  have hR': R = qLine_through T.c i := by{
+    simp [ci]
+    apply line_through_unique
+    constructor
+    · unfold Cevian_C at hR
+      tauto
+    exact line_center_on_line3 h
+  }
+  rw[hL', hU', hR']
+  apply ceva_spec T i
+  have LR: ¬ Parallel L R := by{
+    by_contra h0
+    suffices: L = R
+    · symm at this
+      contrapose this
+      exact cevians_not_same_ca hL hR
+    refine lines_eq_parallel_point_ex h0 ?this.a
+    use i
+    constructor
+    · exact line_center_on_line1 h
+    exact line_center_on_line3 h
+  }
+  have iLR: i = Intersection LR := by{
+    apply intersection_unique
+    constructor
+    · exact line_center_on_line1 h
+    exact line_center_on_line3 h
+  }
+  rw[iLR]
+  exact cevian_intersection_not_on_perimiter hL hR LR
+}
+
 /-Now the proof that squot is surjective (except for -1):-/
 lemma squot_surj{a b : Point}{t : ℝ}(ht : t ≠ -1)(ab : a ≠ b): ∃(p : Point), colinear a b p ∧ sQuot a p b = t := by{
   by_cases t0: t = 0
@@ -2640,110 +2733,7 @@ theorem squotl_parallel{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian
   exact cevians_not_same_ab hL hU
 }
 
-/-With this we can now state and prove Ceva's theorem in its whole glory:-/
-
-/-We have have more or less proved 3 out of 4 cases for this theorem (and 4th case is basically free), so the actualy proof doesn't become too compilcated now:-/
-
-theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
-  constructor
-  intro h
-  obtain h|h := h
-  · set i := Line_center h
-    have ai: T.a ≠ i:= by{
-      by_contra h0
-      suffices: R = tri_ca T
-      · unfold Cevian_C at hR
-        tauto
-      unfold tri_ca
-      apply line_through_unique
-      constructor
-      · unfold Cevian_C at hR
-        tauto
-      unfold Cevian_C at hR
-      rw[h0]
-      exact line_center_on_line3 h
-    }
-    have bi: T.b ≠ i := by{
-      by_contra h0
-      suffices: L = tri_ab T
-      · unfold Cevian_A at hL
-        tauto
-      unfold tri_ab
-      apply line_through_unique
-      constructor
-      · unfold Cevian_A at hL
-        tauto
-      unfold Cevian_A at hL
-      rw[h0]
-      exact line_center_on_line1 h
-    }
-    have ci: T.c ≠ i := by{
-      by_contra h0
-      suffices: U = tri_bc T
-      · unfold Cevian_B at hU
-        tauto
-      unfold tri_bc
-      apply line_through_unique
-      constructor
-      · unfold Cevian_B at hU
-        tauto
-      unfold Cevian_B at hU
-      rw[h0]
-      exact line_center_on_line2 h
-    }
-    have hL': L =qLine_through T.a i := by{
-      simp [ai]
-      apply line_through_unique
-      constructor
-      · unfold Cevian_A at hL
-        tauto
-      exact line_center_on_line1 h
-    }
-    have hU': U = qLine_through T.b i := by{
-      simp [bi]
-      apply line_through_unique
-      constructor
-      · unfold Cevian_B at hU
-        tauto
-      exact line_center_on_line2 h
-    }
-    have hR': R = qLine_through T.c i := by{
-      simp [ci]
-      apply line_through_unique
-      constructor
-      · unfold Cevian_C at hR
-        tauto
-      exact line_center_on_line3 h
-    }
-    rw[hL', hU', hR']
-    apply ceva_spec T i
-    have LR: ¬ Parallel L R := by{
-      by_contra h0
-      suffices: L = R
-      · symm at this
-        contrapose this
-        exact cevians_not_same_ca hL hR
-      refine lines_eq_parallel_point_ex h0 ?this.a
-      use i
-      constructor
-      · exact line_center_on_line1 h
-      exact line_center_on_line3 h
-    }
-    have iLR: i = Intersection LR := by{
-      apply intersection_unique
-      constructor
-      · exact line_center_on_line1 h
-      exact line_center_on_line3 h
-    }
-    rw[iLR]
-    exact cevian_intersection_not_on_perimiter hL hR LR
-  · exact squotl_parallel hL hU hR h.1 h.2
-  intro h
-  by_cases LR: Parallel L R
-  swap
-  · left
-    exact ceva_spec_converse hL hU hR LR h
-  right
+theorem squotl_parallel_converse{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R)(LR: Parallel L R)(h: sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1): (Parallel L U) ∧ (Parallel U R) := by{
   suffices: Parallel L U
   · simp [*]
     apply parallel_symm at this
@@ -2759,4 +2749,22 @@ theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR:
   constructor
   · exact line_center_on_line1 cop
   exact line_center_on_line3 cop
+}
+
+/-With this we can now state and prove Ceva's theorem in its whole glory:-/
+
+/-We have have more or less proved 3 out of 4 cases for this theorem (and 4th case is basically free), so the actualy proof doesn't become too compilcated now:-/
+
+theorem Ceva{T : Triangle}{L U R : Line}(hL: Cevian_A T L)(hU: Cevian_B T U)(hR: Cevian_C T R): Copunctal L U R ∨ ((Parallel L U) ∧ (Parallel U R)) ↔ sQuotL L T.b T.c * sQuotL U T.c T.a * sQuotL R T.a T.b = 1 := by{
+  constructor
+  intro h
+  obtain h|h := h
+  · exact ceva_spec' hL hU hR h
+  · exact squotl_parallel hL hU hR h.1 h.2
+  intro h
+  by_cases LR: Parallel L R
+  · right
+    exact squotl_parallel_converse hL hU hR LR h
+  left
+  exact ceva_spec_converse hL hU hR LR h
 }
