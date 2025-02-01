@@ -1,4 +1,4 @@
-/- This serves as a note to the project.
+/- This serves as a note to the project. (for me personally...)
 
 
 
@@ -30,6 +30,7 @@ That would make much more sense for a variety of reasons.-/
 --Alma 1Klaur 13.2 Fr 14.2 Korrektur evtl aufisch am 13.
 --2klausur 18.3 korrektur 20.3
 --test
+--24.3, 2. einsicht
 
 
 --USE set INSTEAD OF let !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -48,3 +49,7 @@ That would make much more sense for a variety of reasons.-/
 
 
 --RANDAPPROX HAB ICH MICH AM 30. ANGEMELDET!!!!
+
+--korrektur 2. klausur, gespräch...
+
+--bis 13.3 portfolio schicken an brenner und truab per email, "man kann sinnvoller bericht auf 2 seiten schreiben"
