@@ -534,3 +534,21 @@ lemma go_along_inj{a b : Point}(ab : a ≠ b){r r' : ℝ}(h: go_along a b r = go
   rw[go_along_symm, point_abs_symm]
   simp
 }
+
+/-Three points on a given line are colinear:-/
+
+lemma three_point_line_colinear{L : Line}{a b c : Point}(ha: Lies_on a L)(hb: Lies_on b L)(hc: Lies_on c L): colinear a b c := by{
+  by_cases bc : b = c
+  · apply colinear_self
+    tauto
+  have hL: L = Line_through bc := by{
+    apply line_through_unique
+    tauto
+  }
+  rw[hL] at ha
+  unfold Lies_on Line_through at ha
+  simp at ha
+  apply colinear_perm13
+  apply colinear_perm12
+  assumption
+}
