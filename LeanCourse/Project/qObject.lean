@@ -353,3 +353,17 @@ lemma go_along_lies_on_qline_through(a b : Point)(r : ℝ): Lies_on (go_along a 
   simp [*]
   exact go_along_lies_on_line_through ab r
 }
+
+
+lemma colinear_imp_ex_line{a b c : Point}(h: colinear a b c): ∃(L : Line), Lies_on a L ∧ Lies_on b L ∧ Lies_on c L := by{
+  by_cases ab: a = b
+  · by_cases bc: b = c
+    · use qLine_through a b
+      simp [qline_through_mem_left, qline_through_mem_right, *]
+    use Line_through bc
+    simp [*, line_through_mem_left, line_through_mem_right]
+  use Line_through ab
+  simp [*, line_through_mem_left, line_through_mem_right]
+  unfold Lies_on Line_through
+  simp [*]
+}

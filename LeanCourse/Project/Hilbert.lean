@@ -9,7 +9,7 @@ set_option linter.unusedTactic false
 
 /-Here we prove the Hilbert axioms. Unfortunately many of the Hilbert axioms are actually *three dimensional*, so we do not provide those for obvious reasons.-/
 
-/-Axioms of Incidence:-/
+/-I. Axioms of Incidence:-/
 
 /-For every two points, there is a line containing both of them:-/
 
@@ -57,5 +57,15 @@ theorem hilbert_i3': ∃(a b c : Point), pairwise_different_point3 a b c ∧ ¬�
         _= (0:ℂ) := by{simp}
   by_contra h0
   obtain ⟨L, hL⟩ := h0
-  sorry
+  obtain col := three_point_line_colinear hL.1 hL.2.1 hL.2.2
+  unfold colinear det conj zero one at col
+  simp at col
+  linarith
 }
+
+/-Axioms of Incidence 4-8 are all three dimensional.-/
+
+/-II. Axioms of Order:-/
+
+
+theorem hilbert_ii1:
