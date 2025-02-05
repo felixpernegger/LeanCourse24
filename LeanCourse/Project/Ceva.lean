@@ -1,4 +1,5 @@
 import LeanCourse.Project.Similar
+import LeanCourse.Project.Orthocenter
 import Mathlib
 
 open Function Set Classical

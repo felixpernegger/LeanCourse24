@@ -57,4 +57,10 @@ are a few redundancies and so on.-/
 #check tangent_is_perp -- A tangent to a circle is perpendicular to the center
 #check tangent_through_unique --Therefore (use parallels) there is a unique tangent on which a point on a circle lies on
 #check coutside_ctangent --Two circles are tangent from the outside iff there radii add up the the distance of their centers.
-#check
+#check PowLine -- Existence of the power of point line.
+#check powline_perp -- Which is perpendicular to the line going through the centers of the circles
+#check anglesum_points --Angles sum up to Pi in a triangle
+#check angle_zero_imp_colinear --The title says it all (theres various version of this)
+#check thales_theorem --Thales theorem, first direction
+#check thales_inverse -- And the converse
+#check altitudes_copunctal
