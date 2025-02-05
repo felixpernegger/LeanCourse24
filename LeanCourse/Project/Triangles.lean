@@ -528,21 +528,7 @@ lemma in_between_symm {a b x : Point}(h : in_between a b x) : in_between b a x :
   rw[point_abs_symm b a, ← h, add_comm, point_abs_symm x a, point_abs_symm b x]
 }
 
-/-
-/-A sweet consequence is that this can only happen when x already lies on the line between a b-/
---Proving this directly is horrible.
---However prove in between is equivalent to saying there is a t ∈ [0,1] s.t. x = t*a + (1-t)*b.
---This is sort of equivalent to colinear_alt2, which should be able to do the rest!
-lemma in_between_imp_colinear {a b z : Point} (h: in_between a b z) : colinear a b z := by{
-  apply (in_between_alt a b z) at h
-  obtain ⟨t,t0,t1,ht⟩ := h
-  rw[ht]
-  unfold colinear det conj padd p_scal_mul
-  simp
-  ring_nf
-}
---BIG TODO: Also do the reverse here: if a b c are colinear, one of them is between the other two
--/
+
 /-The reverse (kind of) holds as well:-/
 lemma colinear_imp_in_between1 {a b z : Point} (h : colinear a b z)(ha: point_abs a z ≤ point_abs a b)(hb: point_abs z b ≤ point_abs a b): in_between a b z := by{
   apply colinear_perm23 at h

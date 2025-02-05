@@ -3,7 +3,7 @@
 Please fill out the following. Fill in the project topic once you have decided.
 ```
 First & last name: Felix Pernegger
-Project topic: Feuerbach's Theorem
+Project topic: Euclidean Geometry via Complex Numbers
 Partner (optional):
 ```
 

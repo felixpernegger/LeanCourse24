@@ -67,5 +67,30 @@ theorem hilbert_i3': ∃(a b c : Point), pairwise_different_point3 a b c ∧ ¬�
 
 /-II. Axioms of Order:-/
 
+/-If a point B lies between points A and C, B is also between C and A, and there exists a line containing the distinct points A, B, C.-/
+theorem hilbert_ii1{a b c : Point}(h: in_between a c b): ∃(L : Line), Lies_on a L ∧ Lies_on b L ∧ Lies_on c L := by{
+  apply colinear_imp_ex_line
+  apply colinear_perm23
+  exact in_between_imp_colinear h
+}
 
-theorem hilbert_ii1:
+/-If a and c are points, there is a point lying in between them, on the joint line of a and c.-/
+theorem hilbert_ii2{a c : Point}(ac: a ≠ c): ∃(b : Point), Lies_on b (Line_through ac) ∧ b ≠ a ∧ b ≠ c ∧ in_between a c b := by{
+  use pmidpoint a c
+  constructor
+  · unfold Lies_on Line_through pmidpoint colinear det conj
+    simp
+    ring
+  constructor
+  · exact pmidpoint_diff_left ac
+  constructor
+  · exact pmidpoint_diff_right ac
+  exact pmidpoint_in_between a c
+}
+
+/-Of any three points situated on a line, there is no more than one which lies between the other two.-/
+/-(I very slightly simplified this, so the statement doesnt get too ugly)-/
+theorem hilbert_ii3{a b c : Point}(abc : pairwise_different_point3 a b c)(h : in_between a b c): ¬in_between b c a ∧ ¬in_between c a b := by{
+  unfold pairwise_different_point3 at abc
+  simp [in_between_imp_not_left, in_between_imp_not_right, *]
+}

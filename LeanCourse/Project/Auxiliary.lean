@@ -50,82 +50,11 @@ lemma same_side_symm{L : Line}{a b : Point}(h : same_side L a b): same_side L b 
   rwa[padd_comm (p_scal_mul (↑t) b) (p_scal_mul (1 - ↑t) a)]
 }
 
-lemma same_side_trans{L : Line}{a b c : Point}(ab : same_side L a b)(bc : same_side L b c): same_side L a c := by{
-  unfold same_side
-  by_contra h
-  simp at h
-  obtain ⟨t,ht1,ht2,r⟩ := h
-  sorry -- note this is equivalent to this triangle axiom thing, therefore quite complicated (axiom von pasch)
-}
+/-Proving same_side_trans is more or less the same as proving Pasch's axiom, which is surprisingly difficult and not done here (or anywhere else in this project...).-/
 
-/-If a doesnt lie on the same side as b and c, b and c lie on the same side:
-For this a cannot lie on the line.-/
-lemma not_same_side_not_same_side{L : Line}{a b c : Point}(ha: ¬Lies_on a L)(ab : ¬same_side L a b)(ac: ¬ same_side L a c): same_side L b c := by{
-  have abh: a ≠ b := by{
-    contrapose ab
-    simp at *
-    rw[← ab]
-    exact same_side_refl ha
-  }
-  have ach: a ≠ c := by{
-    contrapose ac
-    simp at *
-    rw[← ac]
-    exact same_side_refl ha
-  }
-  unfold same_side at *
-  simp at *
-  obtain ⟨x,xh0,xh1,xh⟩ := ab
-  obtain ⟨y,yh0,yh1,yh⟩ := ac
-  intro t ht hht
-  by_contra p0
-  have coll: colinear b c (padd (p_scal_mul (↑t) b) (p_scal_mul (1 - ↑t) c)) := by{
-    unfold padd p_scal_mul colinear det conj
-    simp
-    ring
-  }
 
-  by_cases h0: (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) = (padd (p_scal_mul (↑y) a) (p_scal_mul (1 - ↑y) c))
-  have abcol: colinear a b (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) := by{
-    unfold padd p_scal_mul colinear det conj
-    simp
-    ring
-  }
-  have accol: colinear a c (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) := by{
-    rw[h0]
-    unfold padd p_scal_mul colinear det conj
-    simp
-    ring
-  }
-  apply colinear_perm13 at abcol
-  apply colinear_perm13 at accol
-  apply colinear_perm23 at abcol
-  apply colinear_perm23 at accol
-  have tt: (padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b)) ≠ a := by{
-    contrapose ha
-    simp at *
-    rwa[← ha]
-  }
-  have col: colinear a b c := by{
-    sorry
-  }
-  have gg: (padd (p_scal_mul (↑t) b) (p_scal_mul (1 - ↑t) c)) = padd (p_scal_mul (↑x) a) (p_scal_mul (1 - ↑x) b) := by{
-    by_contra p1
-    sorry--this cannot be because of in between stuff but its annoying
-  }
-  sorry
 
-  have hL: L = Line_through h0 := by{
-    apply line_through_unique
-    constructor
-    assumption
-    assumption
-  }
-  sorry
-}
---actually make this prove a lot nicer please, this is horrible.
---maybe give following characterization:
---b c not on the same side, is the same as that in_between b c (Intersection L (Line_through bc))
+
 
 /-With this we get a relatively nice notion for the inside of the Triangle:-/
 
