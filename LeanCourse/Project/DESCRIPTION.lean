@@ -16,7 +16,7 @@ which often seem quite trivial. Nonetheless, more advanced stuff was proved as w
 /-I originally set out to prove Feurbach's theorem (Incircle and Nine-Point-circle of a triangle are tangent) within this framweork,
 however this turned out too be much too difficult for now, mainly because defining the incircle is quite problematic.-/
 
-/-The entire project spans over 14.000 lines of code. I suspect much of this could be saved with more efficient code though, as there
+/-The entire project spans over 14.000 lines of code. Though, I suspect much of this could be saved with more efficient code, as there
 are a few redundancies and so on.-/
 
 /-Now a brief description of what every file does in the order of their dependancies:-/
@@ -41,7 +41,7 @@ are a few redundancies and so on.-/
 /- # Similar.lean-/ --Introducing similar triangles in several ways (orientation or not matters!) via functions described in Lineartrans.lean. Some characterizations, like angles being the same implying the triangles to be similar.
 /- # Ceva.lean -/ --By far the coolest thing I proved: Ceva's theorem, both directions in what is probably the most general form for the planar form. Proof was mainly the standard argument with areas, which while simples, is a bit annoying to set up. 2.7k lines (by far the largest file)
 
-/- # Incircle.lean, Hilbert.lean-/ -- are (very!) unfinished and do not contain anything relevant.
+/- # Incircle.lean, Hilbert.lean-/ -- are (very!) unfinished and do not contain anything relevant (and nothing depends on them).
 
 /- Sometimes theorems are not at the place they logically should be located due to various reasons, but this is not very frequent.-/
 
@@ -63,4 +63,28 @@ are a few redundancies and so on.-/
 #check angle_zero_imp_colinear --The title says it all (theres various version of this)
 #check thales_theorem --Thales theorem, first direction
 #check thales_inverse -- And the converse
-#check altitudes_copunctal
+#check altitudes_copunctal --The altutudes of a triangle are copunctal, implying the existence of the orthocenter
+#check aaa_dsimilar --Same angles imply being similar (theres 2 version for this, depending on orientation)
+#check sas_dsimilar_a -- side-angle-side similarity (also multiple versions)
+
+/-And once again, the by far most interesting result, which is also technically on the Freek 100 page, Ceva's theorem:-/
+
+#check ceva
+
+/-Above is the most general version. One direction / special case with another formulation that might be woth checking out is-/
+#check ceva_spec
+
+
+/-In general, I used "lemma" for the majority of results I proved and "theorem" only for those, which seemed significant.-/
+
+
+
+/-Except for the two (unused) files I mentioned earlier, there should not be any sorry's or unfinished stuff.
+Pasch' Axiom would have been nice to have in Auxiliary.lean (and maybe needed for the incircle), but oh well...-/
+
+
+/-As the math behind all of this is quite simple, I did not really use any outside references/sources, although
+for a small amount of formulas / definitions (maybe about 3 in total), I relied on the chapter about Complex Numbers of the
+famous "Euclidean Geometry in Mathematical Olympiads" book by Evan Chen.-/
+
+/-The powerpoint slides of my presentation are found in the Powerpoint.pdf file!-/
