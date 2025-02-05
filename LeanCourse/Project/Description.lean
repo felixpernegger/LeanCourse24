@@ -48,5 +48,13 @@ are a few redundancies and so on.-/
 /-A small collection of some of the main/most interesting results I obtained:-/
 
 #check colinear_trans --Basically: being colinear is transitive. This was the most central and hardest piece setting up the geometry.
+#check line_through_unique --Very useful: Given two points not equal, the line through them is unique
 #check parallel_def -- Being parallel is equivalent to being the same or not sharing a point (to appreciate this, one might want to check out my definition of Parallel)
-#check parallel_postul
+#check parallel_postulate --The parallel postulate!
+#check circle_unique -- Uniqueness of center and radius of a circle.
+#check perp_bisectors_copunctal -- Perpendicular bisectors of noncolinear points are copunctal
+#check circle_around_unique -- Therefore, there is a unique circle on this these three point lie
+#check tangent_is_perp -- A tangent to a circle is perpendicular to the center
+#check tangent_through_unique --Therefore (use parallels) there is a unique tangent on which a point on a circle lies on
+#check coutside_ctangent --Two circles are tangent from the outside iff there radii add up the the distance of their centers.
+#check

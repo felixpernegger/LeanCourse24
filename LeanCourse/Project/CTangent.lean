@@ -775,7 +775,7 @@ lemma coutside_ctangent_in_between{C O : CCircle}(h : COutside C O)(h' : CTangen
   exact point_abs_self (Center C)
 }
 
-theorem coutisde_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Radius C + Radius O = point_abs (Center C) (Center O) := by{
+theorem coutside_ctangent{C O : CCircle}(h : COutside C O): CTangent C O ↔ Radius C + Radius O = point_abs (Center C) (Center O) := by{
   constructor
   · intro h'
     have : in_between (Center C) (Center O) (CTangent_point h') := by{
