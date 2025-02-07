@@ -192,6 +192,7 @@ lemma parallel_quot {a b c d : Point}(ab : a ≠ b)(cd : c ≠ d): Parallel (Lin
  The cool thing about this, that we have defined enough for this to be proven (almost) purely geometrically-/
  /-It still is quite a bummer though, unfortunately-/
 
+/-Proving this was quite a challenge.-/
 theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ ∨ L.range = R.range := by{
   unfold Parallel
   constructor
@@ -441,7 +442,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
       contradiction
     }
     obtain ce|cf := this
-    /-ab hier-/
     have hR : R = Line_through ce := by{
       apply line_through_unique
       constructor
@@ -455,7 +455,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     clear f ef rf
     by_contra h0
     let m := ((conj a.x) - (conj b.x))*(c.x-e.x)-(a.x-b.x)*(conj c.x - conj e.x)
-    --n IST FALSCH DEFINIERT OJE
     let n := (((conj a.x)*b.x-a.x*(conj b.x))*(c.x-e.x)-(a.x-b.x)*((conj c.x)*e.x-c.x*(conj e.x)))
     have t1: m ≠ 0 := by{
       by_contra h1
@@ -511,13 +510,9 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
         field_simp
         assumption
       }
-      --focus on h0
       have imzero: ( (a.x - b.x) / (c.x - e.x)).im = 0 := by{
         exact Complex.conj_eq_iff_im.mp abce
       }
-      /-Aus dem könnte man mit colinear_alt folgern:
-      ab parallel zu ce
-      und dann wird h0 halt zum problem-/
       have LR_parallel: Parallel L R := by{
         rw[this,hR]
         exact (parallel_quot ab ce).mpr imzero
@@ -678,8 +673,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
     rw[h] at qbad
     contradiction
 
-    --letzte 200 zeilen nohcmal bruhhh
-
     have hR : R = Line_through cf := by{
       apply line_through_unique
       constructor
@@ -748,7 +741,6 @@ theorem parallel_def (L R : Line) : Parallel L R ↔ L.range ∩ R.range = ∅ �
         field_simp
         assumption
       }
-      --focus on h0
       have imzero: ( (a.x - b.x) / (c.x - f.x)).im = 0 := by{
         exact Complex.conj_eq_iff_im.mp abcf
       }

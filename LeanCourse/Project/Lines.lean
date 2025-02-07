@@ -18,7 +18,6 @@ def Lies_on (a : Point)(L : Line) : Prop :=
 
 lemma ex_unique_line_mem {a b : Point}(h: a ≠ b) : ∃! L : Line, Lies_on a L ∧ Lies_on b L := by{
   unfold Lies_on at *
-  --Note: Maybe redo this prove properly with Line_through
   let C := {c : Point| colinear a b c}
   have : ∃ x y : Point, x ≠ y ∧ C = {c : Point| colinear x y c} := by{
     use a

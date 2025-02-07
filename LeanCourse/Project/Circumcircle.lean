@@ -966,5 +966,3 @@ lemma lies_on_circumcircle_iff(T : Triangle)(p : Point): Lies_on_circle p (Circu
 
 def Nine_point_circle: Triangle → CCircle :=
   fun T ↦ Circumcircle (Midtriangle T)
-
---STATE THE MOST IMPORTANT AND BASIC STUFF; FINISH WITH FEUERBACH CIRCLE

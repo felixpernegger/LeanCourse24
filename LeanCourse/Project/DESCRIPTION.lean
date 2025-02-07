@@ -7,13 +7,17 @@ noncomputable section
 
 set_option linter.unusedTactic false
 
+
+/-A PDF version is this file can be found in Description.pdf, however I don't recommend it, as obviously the references
+to lemmas stated dont work.-/
+
 /-This project is about planar Euclidean Geometry defined via complex numbers.
 Pretty much everything I did, I proved from scratch, i.e. did not use mathlib (only sometimes rarely for small numerical lemmas).
 
-Therefore, a big part of the project is defining geomtric structures and proving elementary propositions about them,
+Therefore, a big part of the project is defining geometric structures and proving elementary propositions about them,
 which often seem quite trivial. Nonetheless, more advanced stuff was proved as well.-/
 
-/-I originally set out to prove Feurbach's theorem (Incircle and Nine-Point-circle of a triangle are tangent) within this framweork,
+/-I originally set out to prove Feuerbach's theorem (Incircle and Nine-Point-circle of a triangle are tangent) within this framweork,
 however this turned out too be much too difficult for now, mainly because defining the incircle is quite problematic.-/
 
 /-The entire project spans over 14.000 lines of code. Though, I suspect much of this could be saved with more efficient code, as there

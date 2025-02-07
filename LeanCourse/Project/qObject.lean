@@ -321,23 +321,6 @@ lemma qqintersection_symm(L R : Line): qqIntersection L R = qqIntersection R L :
   simp [*]
 }
 
-/-For Copunctal we also have simplified version:-/
-/-
-
-def qCopunctal(L R S : Line) : Prop :=
-  qqIntersection L R = qqIntersection R S ∧ qqIntersection R S = qqIntersection S L
-
-/-With this  we can define perspective triangles and STATE desargue theorem-/
-
-def Perspective(T Q : Triangle): Prop :=
-  qCopunctal (qLine_through T.a Q.a) (qLine_through T.b Q.b) (qLine_through T.c Q.c)
-
-example(T Q : Triangle)(h: Perspective T Q): colinear (qqIntersection (tri_ab T) (tri_ab Q)) (qqIntersection (tri_bc T) (tri_bc Q)) (qqIntersection (tri_ca T) (tri_ca Q)) := by{
-  sorry
-}
-
---this is still wrong fuck
--/
 
 lemma go_along_lies_on_line_through{a b : Point}(ab : a ≠ b)(r : ℝ): Lies_on (go_along a b r) (Line_through ab) := by{
   apply go_along_lies_on

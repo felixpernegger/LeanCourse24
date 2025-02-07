@@ -7,6 +7,8 @@ Project topic: Euclidean Geometry via Complex Numbers
 Partner (optional):
 ```
 
+## SEE DESCRIPTION.lean FILE FOR INFO / OVERVIEW ABOUT PROJECT!
+
 ## Your own project
 
 During the second half of the course you will work on a project in any area of mathematics of your choice. You can put your project files in this folder.

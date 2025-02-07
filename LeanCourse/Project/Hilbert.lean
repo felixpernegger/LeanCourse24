@@ -94,3 +94,5 @@ theorem hilbert_ii3{a b c : Point}(abc : pairwise_different_point3 a b c)(h : in
   unfold pairwise_different_point3 at abc
   simp [in_between_imp_not_left, in_between_imp_not_right, *]
 }
+
+/-This remains unfinished for now.-/
