@@ -87,7 +87,7 @@ are a few redundancies and so on.-/
 Pasch' Axiom would have been nice to have in Auxiliary.lean (and maybe needed for the incircle), but oh well...-/
 
 
-/-As the math behind all of this is quite simple, I did not really use any outside references/sources, although
+/-As the math behind all of this is quite simple, I did not really use any outside references/sources (except something like Wikipedia I guess), although
 for a small amount of formulas / definitions (maybe about 3 in total), I relied on the chapter about Complex Numbers of the
 famous "Euclidean Geometry in Mathematical Olympiads" book by Evan Chen.-/
 
