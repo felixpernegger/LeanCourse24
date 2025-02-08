@@ -83,7 +83,7 @@ are a few redundancies and so on.-/
 
 
 
-/-Except for the two (unused) files I mentioned earlier, there should not be any sorry's or unfinished stuff.
+/-Except for the two (unused and nearly empty) files Hilbert.lean and Incircle.lean (which are meant to prove Hilbert axioms and incenter respectively) I mentioned earlier, there should not be any sorry's or unfinished stuff.
 Pasch' Axiom would have been nice to have in Auxiliary.lean (and maybe needed for the incircle), but oh well...-/
 
 
